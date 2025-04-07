@@ -1,15 +1,32 @@
-import { Text, View, TextInput } from "react-native";
-import { UserIcon } from "react-native-heroicons/solid";
+import { TextInput, View, StyleSheet } from "react-native";
 
 export default function Input() {
   return (
-    <View className="w-[250px] gap-[10px] bg-white rounded-full flex flex-row py-3 px-4 items-center justify-start border border-[#808080]">
-      <UserIcon color={"#808080"} className="h-6 w-6" />
+    <View style={styles.container}>
       <TextInput
-        className="w-full"
-        placeholderTextColor={"#808080"}
+        style={styles.input}
+        placeholderTextColor="#808080"
         placeholder="Username"
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: 250,
+    backgroundColor: "#fff",
+    borderRadius: 999,
+    flexDirection: "row",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    borderWidth: 1,
+    borderColor: "#808080",
+  },
+  input: {
+    flex: 1,
+    color: "#000",
+  },
+});
