@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Link } from "expo-router";
 import { primary } from "@/utils/colors";
-import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import { SmallText } from "@/components/ui/SmallText";
 
@@ -19,7 +18,7 @@ export default function Index() {
 
       <Image
         source={require("@/assets/illustrations/avatar.svg")}
-        style={styles.image}
+        style={{ height: 135, width: 135 }}
       />
 
       <Column style={{ gap: 20 }}>
@@ -45,10 +44,3 @@ export default function Index() {
     </Column>
   );
 }
-
-const styles = StyleSheet.create({
-  image: {
-    height: 135,
-    width: 135,
-  },
-});

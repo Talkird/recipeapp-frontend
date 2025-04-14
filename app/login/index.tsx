@@ -1,15 +1,17 @@
+import { useRouter } from "expo-router";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { Link } from "expo-router";
 import { primary } from "@/utils/colors";
-import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import { SmallText } from "@/components/ui/SmallText";
+import { Link } from "expo-router";
 
 export default function Index() {
+  const router = useRouter();
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -35,12 +37,15 @@ export default function Index() {
 
       <Image
         source={require("@/assets/illustrations/login.svg")}
-        style={styles.image}
+        style={{ height: 135, width: 135 }}
       />
       <Column>
-        <Link style={{ marginBottom: 10 }} href="/home">
-          <Button>Iniciar sesión</Button>
-        </Link>
+        <Button
+          style={{ marginBottom: 10 }}
+          onPress={() => router.push("/home")}
+        >
+          Iniciar sesión
+        </Button>
         <SmallText>¿No tenés cuenta?</SmallText>
         <Link href="/register">
           <SmallText
@@ -53,10 +58,3 @@ export default function Index() {
     </Column>
   );
 }
-
-const styles = StyleSheet.create({
-  image: {
-    height: 135,
-    width: 135,
-  },
-});

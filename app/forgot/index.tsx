@@ -5,7 +5,7 @@ import { SmallText } from "@/components/ui/SmallText";
 import Input from "@/components/ui/Input";
 import { Link } from "expo-router";
 import { Button } from "@/components/ui/Button";
-import { StyleSheet, Image } from "react-native";
+import { Image } from "react-native";
 import { primary } from "@/utils/colors";
 
 export default function Index() {
@@ -33,16 +33,9 @@ export default function Index() {
 
       <Image
         source={require("@/assets/illustrations/forgot-password.svg")}
-        style={styles.image}
+        style={{ width: 205, height: 135 }}
       />
       <Button>Enviar enlace</Button>
     </Column>
   );
 }
-
-const styles = StyleSheet.create({
-  image: {
-    width: 205,
-    height: 135,
-  },
-});
