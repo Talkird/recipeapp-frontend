@@ -1,11 +1,10 @@
-import { Text, View, StyleSheet } from "react-native";
 import { Button } from "@/components/ui/Button";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { Recipe } from "@/components/Recipe";
 import { Column } from "@/components/ui/Column";
+import { SmallText } from "@/components/ui/SmallText";
 
-import { useRouter } from "expo-router";
 import { Link } from "expo-router";
 import { primary } from "@/utils/colors";
 
@@ -24,16 +23,18 @@ export default function Index() {
       </Column>
 
       <Column>
-        <Button style={{ marginBottom: 10 }}>Crear cuenta</Button>
-        <SubTitle>¿Ya tenés cuenta?</SubTitle>
+        <Link style={{ marginBottom: 10 }} href="/register">
+          <Button>Crear cuenta</Button>
+        </Link>
+        <SmallText>¿Ya tenés cuenta?</SmallText>
         <Link href="/login">
-          <SubTitle style={{ color: primary, textDecorationLine: "underline" }}>
+          <SmallText
+            style={{ color: primary, textDecorationLine: "underline" }}
+          >
             Iniciar sesión
-          </SubTitle>
+          </SmallText>
         </Link>
       </Column>
     </Column>
   );
 }
-
-const styles = StyleSheet.create({});

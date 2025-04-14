@@ -13,8 +13,9 @@ export function Title({ children, style }: TitleProps) {
 const styles = StyleSheet.create({
   title: {
     fontSize: 36,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#000000",
     opacity: 0.8,
+    textAlign: "center",
   },
 });

@@ -1,12 +1,18 @@
 import { TextInput, View, StyleSheet } from "react-native";
 
-export default function Input() {
+interface InputProps {
+  placeholder?: string;
+  value?: string;
+  onChangeText?: (text: string) => void;
+}
+
+export default function Input(props: InputProps) {
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
         placeholderTextColor="#808080"
-        placeholder="Username"
+        placeholder={props.placeholder}
       />
     </View>
   );
