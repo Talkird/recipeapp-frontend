@@ -1,27 +1,39 @@
 import { Text, View, StyleSheet } from "react-native";
-import Input from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Title } from "@/components/ui/Title";
+import { SubTitle } from "@/components/ui/SubTitle";
+import { Recipe } from "@/components/Recipe";
+import { Column } from "@/components/ui/Column";
+
+import { useRouter } from "expo-router";
+import { Link } from "expo-router";
+import { primary } from "@/utils/colors";
 
 export default function Index() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Pollo</Text>
-      <Input />
-      <Button>Hola!</Button>
-    </View>
+    <Column style={{ flex: 1, gap: 32 }}>
+      <Column>
+        <Title>Recipedia</Title>
+        <SubTitle>Descubrí, cociná y compartí</SubTitle>
+      </Column>
+
+      <Column style={{ gap: 36 }}>
+        <Recipe />
+        <Recipe />
+        <Recipe />
+      </Column>
+
+      <Column>
+        <Button style={{ marginBottom: 10 }}>Crear cuenta</Button>
+        <SubTitle>¿Ya tenés cuenta?</SubTitle>
+        <Link href="/login">
+          <SubTitle style={{ color: primary, textDecorationLine: "underline" }}>
+            Iniciar sesión
+          </SubTitle>
+        </Link>
+      </Column>
+    </Column>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 1,
-  },
-  title: {
-    fontWeight: "bold",
-    fontSize: 24,
-    color: "#6C63FF",
-  },
-});
+const styles = StyleSheet.create({});
