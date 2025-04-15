@@ -1,10 +1,7 @@
 import { Row } from "./ui/Row";
 
 function SearchBar() {
-  return <Row>
-
-  </Row>;
+  return <Row>Hola</Row>;
 }
 
 export default SearchBar;
-x
