@@ -29,7 +29,7 @@ export default function Index() {
       </Column>
 
       <Column>
-        <Link style={{ marginBottom: 10 }} href="/register">
+        <Link style={{ marginBottom: 10 }} href="/register/verify">
           <Button>Crear cuenta</Button>
         </Link>
         <SmallText>¿Ya tenés cuenta?</SmallText>

@@ -35,7 +35,9 @@ export default function Index() {
         source={require("@/assets/illustrations/forgot-password.svg")}
         style={{ width: 205, height: 135 }}
       />
-      <Button>Enviar enlace</Button>
+      <Link href="/forgot/verify">
+        <Button>Enviar enlace</Button>
+      </Link>
     </Column>
   );
 }
