@@ -5,11 +5,11 @@ import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import { Image } from "react-native";
-import { useRouter } from "expo-router";
 import { View, Text } from "react-native";
+import { router } from "expo-router";
+import AvatarIllustration from "@/assets/illustrations/avatar.svg";
 
 const numbers = [1, 2, 3, 4, 5, 6];
-const router = useRouter();
 
 export default function Index() {
   return (
@@ -19,10 +19,8 @@ export default function Index() {
         <SubTitle>Y empezá a cocinar</SubTitle>
       </Column>
 
-      <Image
-        source={require("@/assets/illustrations/avatar.svg")}
-        style={{ height: 135, width: 135 }}
-      />
+      <AvatarIllustration height={135} width={135} />
+
       <SubTitle style={{ width: "75%", textAlign: "center" }}>
         Se envió un código de verificación a example@mail.com. Por favor,
         ingresalo a continuación para finalizar la registración:

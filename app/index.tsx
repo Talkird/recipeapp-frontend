@@ -5,7 +5,7 @@ import { Recipe } from "@/components/Recipe";
 import { Column } from "@/components/ui/Column";
 import { SmallText } from "@/components/ui/SmallText";
 
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";
 
 export default function Index() {
@@ -23,9 +23,13 @@ export default function Index() {
       </Column>
 
       <Column>
-        <Link style={{ marginBottom: 10 }} href="/register">
-          <Button>Crear cuenta</Button>
-        </Link>
+        <Button
+          onPress={() => router.push("/register")}
+          style={{ marginBottom: 10 }}
+        >
+          Crear cuenta
+        </Button>
+
         <SmallText>¿Ya tenés cuenta?</SmallText>
         <Link href="/login">
           <SmallText

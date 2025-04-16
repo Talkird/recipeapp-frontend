@@ -3,10 +3,11 @@ import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";
 import { Image } from "react-native";
 import { SmallText } from "@/components/ui/SmallText";
+import AvatarIllustration from "@/assets/illustrations/avatar.svg";
 
 export default function Index() {
   return (
@@ -16,10 +17,7 @@ export default function Index() {
         <SubTitle>Y empezá a cocinar</SubTitle>
       </Column>
 
-      <Image
-        source={require("@/assets/illustrations/avatar.svg")}
-        style={{ height: 135, width: 135 }}
-      />
+      <AvatarIllustration height={135} width={135} />
 
       <Column style={{ gap: 20 }}>
         <Input placeholder="Nombre de usuario" />
@@ -29,9 +27,12 @@ export default function Index() {
       </Column>
 
       <Column>
-        <Link style={{ marginBottom: 10 }} href="/register/verify">
-          <Button>Crear cuenta</Button>
-        </Link>
+        <Button
+          onPress={() => router.push("/register/verify")}
+          style={{ marginBottom: 10 }}
+        >
+          Crear cuenta
+        </Button>
         <SmallText>¿Ya tenés cuenta?</SmallText>
         <Link href="/login">
           <SmallText

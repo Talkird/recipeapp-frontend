@@ -3,17 +3,18 @@ import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import Input from "@/components/ui/Input";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { Button } from "@/components/ui/Button";
 import { Image } from "react-native";
 import { primary } from "@/utils/colors";
+import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
 
 export default function Index() {
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
-        <Title style={{ width: "80%" }}>¿Olvidaste tu contraseña?</Title>
-        <SubTitle style={{ width: "50%" }}>
+        <Title>¿Olvidaste tu contraseña?</Title>
+        <SubTitle>
           Ingresá tu correo electrónico y te enviaremos un enlace para
           restablecer tu clave.
         </SubTitle>
@@ -22,7 +23,7 @@ export default function Index() {
 
       <Column>
         <SmallText>¿Recordaste tu clave?</SmallText>
-        <Link href="/forgot">
+        <Link href="/login">
           <SmallText
             style={{ color: primary, textDecorationLine: "underline" }}
           >
@@ -31,13 +32,10 @@ export default function Index() {
         </Link>
       </Column>
 
-      <Image
-        source={require("@/assets/illustrations/forgot-password.svg")}
-        style={{ width: 205, height: 135 }}
-      />
-      <Link href="/forgot/verify">
-        <Button>Enviar enlace</Button>
-      </Link>
+      <ForgotPasswordIllustration width={205} height={135} />
+      <Button onPress={() => router.push("/forgot/verify")}>
+        Enviar enlace
+      </Button>
     </Column>
   );
 }

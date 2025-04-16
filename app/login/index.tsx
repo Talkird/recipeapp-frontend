@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
@@ -7,11 +6,10 @@ import Input from "@/components/ui/Input";
 import { primary } from "@/utils/colors";
 import { Image } from "react-native";
 import { SmallText } from "@/components/ui/SmallText";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
+import LoginIllustration from "@/assets/illustrations/login.svg";
 
 export default function Index() {
-  const router = useRouter();
-
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -35,10 +33,7 @@ export default function Index() {
         </Link>
       </Column>
 
-      <Image
-        source={require("@/assets/illustrations/login.svg")}
-        style={{ height: 135, width: 135 }}
-      />
+      <LoginIllustration height={135} width={135} />
       <Column>
         <Button
           style={{ marginBottom: 10 }}

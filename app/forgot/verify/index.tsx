@@ -5,20 +5,18 @@ import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import { Image } from "react-native";
-import { useRouter } from "expo-router";
 import { View, Text } from "react-native";
+import { router } from "expo-router";
+import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
 
 const numbers = [1, 2, 3, 4, 5, 6];
 
 export default function Index() {
   return (
     <Column style={{ flex: 1, gap: 32 }}>
-      <Title style={{ width: "50%" }}>Restablecer contraseña</Title>
+      <Title style={{ width: "80%" }}>Restablecer contraseña</Title>
 
-      <Image
-        source={require("@/assets/illustrations/forgot-password.svg")}
-        style={{ height: 135, width: 135 }}
-      />
+      <ForgotPasswordIllustration width={205} height={135} />
       <SubTitle style={{ width: "75%", textAlign: "center" }}>
         Se envió un código de verificación a example@mail.com. Por favor,
         ingresalo a continuación para restablecer tu contraseña:
