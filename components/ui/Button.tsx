@@ -29,7 +29,7 @@ export function Button({ children, onPress, style, textStyle }: ButtonProps) {
   }));
 
   const handlePressIn = () => {
-    scale.value = withTiming(0.95, { duration: 150 });
+    scale.value = withTiming(0.97, { duration: 150 });
   };
 
   const handlePressOut = () => {
