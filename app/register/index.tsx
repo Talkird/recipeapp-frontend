@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";
-import { Image } from "react-native";
 import { SmallText } from "@/components/ui/SmallText";
 import AvatarIllustration from "@/assets/illustrations/avatar.svg";
 

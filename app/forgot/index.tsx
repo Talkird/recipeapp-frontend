@@ -5,7 +5,6 @@ import { SmallText } from "@/components/ui/SmallText";
 import Input from "@/components/ui/Input";
 import { Link, router } from "expo-router";
 import { Button } from "@/components/ui/Button";
-import { Image } from "react-native";
 import { primary } from "@/utils/colors";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
 

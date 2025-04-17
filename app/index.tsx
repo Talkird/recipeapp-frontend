@@ -4,7 +4,6 @@ import { SubTitle } from "@/components/ui/SubTitle";
 import { Recipe } from "@/components/Recipe";
 import { Column } from "@/components/ui/Column";
 import { SmallText } from "@/components/ui/SmallText";
-
 import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";
 

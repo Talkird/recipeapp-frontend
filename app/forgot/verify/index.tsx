@@ -3,8 +3,6 @@ import { Row } from "@/components/ui/Row";
 import { Button } from "@/components/ui/Button";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
-import { SmallText } from "@/components/ui/SmallText";
-import { Image } from "react-native";
 import { View, Text } from "react-native";
 import { router } from "expo-router";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";

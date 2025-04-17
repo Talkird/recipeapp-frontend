@@ -4,7 +4,6 @@ import { SubTitle } from "@/components/ui/SubTitle";
 import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { primary } from "@/utils/colors";
-import { Image } from "react-native";
 import { SmallText } from "@/components/ui/SmallText";
 import { Link, router } from "expo-router";
 import LoginIllustration from "@/assets/illustrations/login.svg";
