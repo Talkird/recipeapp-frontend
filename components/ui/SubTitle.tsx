@@ -14,6 +14,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontWeight: "500",
+    fontFamily: "DMSans_500Medium",
     color: "#000000",
     opacity: 0.8,
     textAlign: "center",

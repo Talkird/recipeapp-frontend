@@ -7,6 +7,7 @@ import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";
 import { SmallText } from "@/components/ui/SmallText";
 import AvatarIllustration from "@/assets/illustrations/avatar.svg";
+import { User, Mail, Lock, RefreshCcw } from "lucide-react-native";
 
 export default function Index() {
   return (
@@ -19,10 +20,14 @@ export default function Index() {
       <AvatarIllustration height={135} width={135} />
 
       <Column style={{ gap: 20 }}>
-        <Input placeholder="Nombre de usuario" />
-        <Input placeholder="Dirección de correo" />
-        <Input placeholder="Contraseña" />
-        <Input placeholder="Confirmar contraseña" />
+        <Input Icon={User} placeholder="Nombre de usuario" />
+        <Input Icon={Mail} placeholder="Dirección de correo" />
+        <Input Icon={Lock} type="password" placeholder="Contraseña" />
+        <Input
+          Icon={RefreshCcw}
+          type="password"
+          placeholder="Confirmar contraseña"
+        />
       </Column>
 
       <Column>

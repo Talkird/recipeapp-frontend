@@ -7,6 +7,7 @@ import { Link, router } from "expo-router";
 import { Button } from "@/components/ui/Button";
 import { primary } from "@/utils/colors";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
+import { Mail } from "lucide-react-native";
 
 export default function Index() {
   return (
@@ -18,7 +19,7 @@ export default function Index() {
           restablecer tu clave.
         </SubTitle>
       </Column>
-      <Input placeholder="Dirección de correo" />
+      <Input Icon={Mail} placeholder="Dirección de correo" />
 
       <Column>
         <SmallText>¿Recordaste tu clave?</SmallText>

@@ -14,6 +14,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: "400",
+    fontFamily: "DMSans_400Regular",
     color: "#000000",
     opacity: 0.8,
     textAlign: "center",

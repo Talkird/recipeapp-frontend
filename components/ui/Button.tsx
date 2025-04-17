@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     fontWeight: "500",
+    fontFamily: "DMSans_500Medium",
     color: "#000000",
     opacity: 0.8,
   },

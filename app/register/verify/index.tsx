@@ -38,11 +38,7 @@ export default function Index() {
               }}
               key={number}
             >
-              <Text
-                style={{ fontSize: 24, fontWeight: 500, textAlign: "center" }}
-              >
-                {number}
-              </Text>
+              <SubTitle style={{ fontSize: 24 }}>{number}</SubTitle>
             </View>
           ))}
         </Row>

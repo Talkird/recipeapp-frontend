@@ -7,6 +7,7 @@ import { primary } from "@/utils/colors";
 import { SmallText } from "@/components/ui/SmallText";
 import { Link, router } from "expo-router";
 import LoginIllustration from "@/assets/illustrations/login.svg";
+import { Mail, Lock } from "lucide-react-native";
 
 export default function Index() {
   return (
@@ -17,8 +18,8 @@ export default function Index() {
       </Column>
 
       <Column style={{ gap: 20 }}>
-        <Input placeholder="Dirección de correo" />
-        <Input placeholder="Contraseña" />
+        <Input Icon={Mail} placeholder="Dirección de correo" />
+        <Input Icon={Lock} type="password" placeholder="Contraseña" />
       </Column>
 
       <Column>
