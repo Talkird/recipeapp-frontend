@@ -22,12 +22,6 @@ export default function Index() {
       <Column style={{ gap: 20 }}>
         <Input Icon={User} placeholder="Nombre de usuario" />
         <Input Icon={Mail} placeholder="Dirección de correo" />
-        <Input Icon={Lock} type="password" placeholder="Contraseña" />
-        <Input
-          Icon={RefreshCcw}
-          type="password"
-          placeholder="Confirmar contraseña"
-        />
       </Column>
 
       <Column>
@@ -35,7 +29,7 @@ export default function Index() {
           onPress={() => router.push("/register/verify")}
           style={{ marginBottom: 10 }}
         >
-          Crear cuenta
+          Continuar Registración
         </Button>
         <SmallText>¿Ya tenés cuenta?</SmallText>
         <Link href="/login">

@@ -8,6 +8,7 @@ import { SmallText } from "@/components/ui/SmallText";
 import { Link, router } from "expo-router";
 import LoginIllustration from "@/assets/illustrations/login.svg";
 import { Mail, Lock } from "lucide-react-native";
+import CheckBox from "@/components/ui/CheckBox";
 
 export default function Index() {
   return (
@@ -20,6 +21,10 @@ export default function Index() {
       <Column style={{ gap: 20 }}>
         <Input Icon={Mail} placeholder="Dirección de correo" />
         <Input Icon={Lock} type="password" placeholder="Contraseña" />
+        <CheckBox
+          label="¿Recordar contraseña?"
+          onChange={(checked) => console.log("Checkbox checked:", checked)}
+        />
       </Column>
 
       <Column>
