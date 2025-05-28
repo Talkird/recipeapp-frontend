@@ -6,7 +6,7 @@ import { Row } from "./Row";
 import { SmallText } from "./SmallText";
 
 interface CheckBoxProps {
-  label: string;
+  label?: string;
   checked?: boolean;
   onChange?: (checked: boolean) => void;
 }
