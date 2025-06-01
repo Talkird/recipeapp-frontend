@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
-import { Recipe } from "@/components/Recipe";
+import { WelcomeRecipe } from "@/components/WelcomeRecipe";
 import { Column } from "@/components/ui/Column";
 import { SmallText } from "@/components/ui/SmallText";
 import { Link, router } from "expo-router";
@@ -16,8 +16,8 @@ export default function Index() {
       </Column>
 
       <Column style={{ gap: 36 }}>
-        <Recipe />
-        <Recipe />
+        <WelcomeRecipe />
+        <WelcomeRecipe />
       </Column>
 
       <Column>
