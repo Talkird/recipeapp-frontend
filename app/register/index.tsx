@@ -7,9 +7,20 @@ import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";
 import { SmallText } from "@/components/ui/SmallText";
 import AvatarIllustration from "@/assets/illustrations/avatar.svg";
-import { User, Mail, Lock, RefreshCcw } from "lucide-react-native";
+import { User, Mail } from "lucide-react-native";
+import useUserStore from "@/stores/user";
 
 export default function Index() {
+  const isAlumno = useUserStore((state) => state.isAlumno);
+
+  const handleRegister = () => {
+    if (isAlumno) {
+      router.push("/register/alumno");
+    } else {
+      router.push("/register/verify");
+    }
+  };
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -25,10 +36,7 @@ export default function Index() {
       </Column>
 
       <Column>
-        <Button
-          onPress={() => router.push("/register/verify")}
-          style={{ marginBottom: 10 }}
-        >
+        <Button onPress={handleRegister} style={{ marginBottom: 10 }}>
           Continuar Registración
         </Button>
         <SmallText>¿Ya tenés cuenta?</SmallText>

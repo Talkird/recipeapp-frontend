@@ -25,7 +25,13 @@ const index = () => {
       </Column>
 
       <Input Icon={Hash} placeholder="Número de trámite" />
-      <Button>Finalizar</Button>
+      <Button
+        onPress={() => {
+          router.push("/register/verify");
+        }}
+      >
+        Finalizar
+      </Button>
     </Column>
   );
 };

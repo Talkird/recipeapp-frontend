@@ -1,13 +1,25 @@
-import { View, Text } from "react-native";
 import React from "react";
 import { Title } from "@/components/ui/Title";
 import { Button } from "@/components/ui/Button";
-import { Router } from "expo-router";
+import { router } from "expo-router";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import { Column } from "@/components/ui/Column";
+import useUserStore from "@/stores/user";
 
 const index = () => {
+  const setIsAlumno = useUserStore((state) => state.setIsAlumno);
+
+  const handleChoiceAlumno = () => {
+    setIsAlumno(true);
+    router.push("/register");
+  };
+
+  const handleChoiceUsuario = () => {
+    setIsAlumno(false);
+    router.push("/register");
+  };
+
   return (
     <Column style={{ flex: 1, gap: 64, padding: 16 }}>
       <Column>
@@ -16,17 +28,17 @@ const index = () => {
       </Column>
 
       <Column style={{ gap: 16 }}>
-        <Button>Usuario</Button>
-        <SmallText style={{ width: "75%" }}>
-          Podrás acceder al catálogo de recetas creadas por otros usuarios,
-          guardar tus favoritas y crear recetas propias
-        </SmallText>
-      </Column>
-      <Column style={{ gap: 16 }}>
-        <Button>Alumno</Button>
+        <Button onPress={handleChoiceAlumno}>Alumno</Button>
         <SmallText style={{ width: "75%" }}>
           Podrás usar todas las funcionalidades de un usuario y además
           inscribirte a nuestros cursos de cocina
+        </SmallText>
+      </Column>
+      <Column style={{ gap: 16 }}>
+        <Button onPress={handleChoiceUsuario}>Usuario</Button>
+        <SmallText style={{ width: "75%" }}>
+          Podrás acceder al catálogo de recetas creadas por otros usuarios,
+          guardar tus favoritas y crear recetas propias
         </SmallText>
       </Column>
     </Column>

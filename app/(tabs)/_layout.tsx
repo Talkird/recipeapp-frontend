@@ -6,6 +6,7 @@ import {
   GraduationCap,
   User,
   CirclePlus,
+  Heart,
 } from "lucide-react-native";
 import { View } from "react-native";
 
@@ -35,7 +36,7 @@ export default function TabLayout() {
           title: "Favorites",
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
-              <Star size={24} color={color} />
+              <Heart size={24} color={color} />
             </View>
           ),
         }}

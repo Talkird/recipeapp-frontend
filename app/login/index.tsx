@@ -47,7 +47,7 @@ export default function Index() {
           Iniciar sesión
         </Button>
         <SmallText>¿No tenés cuenta?</SmallText>
-        <Link href="/register">
+        <Link href="/register/choice">
           <SmallText
             style={{ color: primary, textDecorationLine: "underline" }}
           >

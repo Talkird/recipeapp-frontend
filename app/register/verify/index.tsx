@@ -44,7 +44,10 @@ export default function Index() {
         </Row>
       </Column>
 
-      <Button style={{ marginBottom: 10 }} onPress={() => router.push("/home")}>
+      <Button
+        style={{ marginBottom: 10 }}
+        onPress={() => router.push("/register/verify/success")}
+      >
         Verificar
       </Button>
     </Column>
