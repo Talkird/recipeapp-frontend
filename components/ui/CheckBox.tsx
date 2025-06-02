@@ -1,57 +1,35 @@
-import React, { useState } from "react";
-import { View, Pressable, StyleSheet } from "react-native";
-import { Check } from "lucide-react-native";
-import { primary } from "@/utils/colors";
-import { Row } from "./Row";
-import { SmallText } from "./SmallText";
+import * as CheckboxPrimitive from "@rn-primitives/checkbox";
+import * as React from "react";
+import { Platform } from "react-native";
+import { Check } from "~/lib/icons/Check";
+import { cn } from "~/lib/utils";
 
-interface CheckBoxProps {
-  label?: string;
-  checked?: boolean;
-  onChange?: (checked: boolean) => void;
+function Checkbox({
+  className,
+  ...props
+}: CheckboxPrimitive.RootProps & {
+  ref?: React.RefObject<CheckboxPrimitive.RootRef>;
+}) {
+  return (
+    <CheckboxPrimitive.Root
+      className={cn(
+        "web:peer h-4 w-4 native:h-[20] native:w-[20] shrink-0 rounded-sm native:rounded border border-primary web:ring-offset-background web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        props.checked && "bg-primary",
+        className
+      )}
+      {...props}
+    >
+      <CheckboxPrimitive.Indicator
+        className={cn("items-center justify-center h-full w-full")}
+      >
+        <Check
+          size={12}
+          strokeWidth={Platform.OS === "web" ? 2.5 : 3.5}
+          className="text-primary-foreground"
+        />
+      </CheckboxPrimitive.Indicator>
+    </CheckboxPrimitive.Root>
+  );
 }
 
-const CheckBox = ({ label, checked: checkedProp, onChange }: CheckBoxProps) => {
-  const [checked, setChecked] = useState(checkedProp ?? false);
-
-  const handlePress = () => {
-    const newChecked = !checked;
-    setChecked(newChecked);
-    onChange?.(newChecked);
-  };
-
-  return (
-    <Row>
-      <Pressable
-        style={[
-          styles.checkbox,
-          {
-            backgroundColor: checked ? primary : "transparent",
-            borderColor: checked ? primary : "#ccc",
-          },
-        ]}
-        onPress={handlePress}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked }}
-      >
-        {checked && <Check size={18} color="#fff" />}
-      </Pressable>
-      <SmallText>{label}</SmallText>
-    </Row>
-  );
-};
-
-const styles = StyleSheet.create({
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-});
-
-export default CheckBox;
+export { Checkbox };

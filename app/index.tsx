@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { WelcomeRecipe } from "@/components/WelcomeRecipe";
@@ -6,6 +6,7 @@ import { Column } from "@/components/ui/Column";
 import { SmallText } from "@/components/ui/SmallText";
 import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";
+import { View } from "react-native";
 
 export default function Index() {
   return (

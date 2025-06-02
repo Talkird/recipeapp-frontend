@@ -1,6 +1,6 @@
 import React from "react";
 import { Title } from "@/components/ui/Title";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { router } from "expo-router";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";

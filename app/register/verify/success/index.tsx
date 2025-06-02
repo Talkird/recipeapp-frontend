@@ -1,7 +1,7 @@
 import React from "react";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import VerifiedIllustration from "@/assets/illustrations/confirmed.svg";
 import { router } from "expo-router";
 

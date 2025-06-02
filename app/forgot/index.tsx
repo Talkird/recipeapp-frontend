@@ -4,12 +4,10 @@ import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import Input from "@/components/ui/Input";
 import { Link, router } from "expo-router";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { primary } from "@/utils/colors";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
 import { Mail } from "lucide-react-native";
-
-
 
 export default function Index() {
   return (

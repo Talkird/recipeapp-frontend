@@ -1,16 +1,20 @@
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/Input";
 import { primary } from "@/utils/colors";
 import { SmallText } from "@/components/ui/SmallText";
 import { Link, router } from "expo-router";
 import LoginIllustration from "@/assets/illustrations/login.svg";
 import { Mail, Lock } from "lucide-react-native";
-import CheckBox from "@/components/ui/CheckBox";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+import { View } from "react-native";
 
 export default function Index() {
+  const [checked, setChecked] = useState(false);
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -21,10 +25,10 @@ export default function Index() {
       <Column style={{ gap: 20 }}>
         <Input Icon={Mail} placeholder="Dirección de correo" />
         <Input Icon={Lock} type="password" placeholder="Contraseña" />
-        <CheckBox
-          label="¿Recordar contraseña?"
-          onChange={(checked) => console.log("Checkbox checked:", checked)}
-        />
+        <View className="flex-row gap-2 items-center">
+          <SmallText>Recordar contraseña</SmallText>
+          <Checkbox checked={checked} onCheckedChange={setChecked} />
+        </View>
       </Column>
 
       <Column>

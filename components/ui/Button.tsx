@@ -1,71 +1,88 @@
-import React from "react";
-import {
-  Pressable,
-  Text,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
-} from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
-import { primary } from "@/utils/colors";
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
+import { Pressable } from "react-native";
+import { cn } from "~/lib/utils";
+import { TextClassContext } from "~/components/ui/text";
 
-interface ButtonProps {
-  children: React.ReactNode;
-  onPress?: () => void;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-}
+const buttonVariants = cva(
+  "group flex items-center justify-center rounded-md web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary web:hover:opacity-90 active:opacity-90",
+        destructive: "bg-destructive web:hover:opacity-90 active:opacity-90",
+        outline:
+          "border border-input bg-background web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
+        secondary: "bg-secondary web:hover:opacity-80 active:opacity-80",
+        ghost:
+          "web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
+        link: "web:underline-offset-4 web:hover:underline web:focus:underline",
+      },
+      size: {
+        default: "w-[235px] h-[35px] px-[24px] py-[14px]",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8 native:h-14",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
 
-export function Button({ children, onPress, style, textStyle }: ButtonProps) {
-  const scale = useSharedValue(1);
+const buttonTextVariants = cva(
+  "web:whitespace-nowrap text-sm native:text-base font-medium text-foreground web:transition-colors",
+  {
+    variants: {
+      variant: {
+        default: "text-primary-foreground",
+        destructive: "text-destructive-foreground",
+        outline: "group-active:text-accent-foreground",
+        secondary:
+          "text-secondary-foreground group-active:text-secondary-foreground",
+        ghost: "group-active:text-accent-foreground",
+        link: "text-primary group-active:underline",
+      },
+      size: {
+        default: "",
+        sm: "",
+        lg: "native:text-lg",
+        icon: "",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+type ButtonProps = React.ComponentProps<typeof Pressable> &
+  VariantProps<typeof buttonVariants>;
 
-  const handlePressIn = () => {
-    scale.value = withTiming(0.97, { duration: 150 });
-  };
-
-  const handlePressOut = () => {
-    scale.value = withTiming(1, { duration: 150 });
-  };
-
+function Button({ ref, className, variant, size, ...props }: ButtonProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+    <TextClassContext.Provider
+      value={buttonTextVariants({
+        variant,
+        size,
+        className: "web:pointer-events-none",
+      })}
     >
-      <Animated.View style={[styles.button, animatedStyle, style]}>
-        <Text style={[styles.text, textStyle]}>{children}</Text>
-      </Animated.View>
-    </Pressable>
+      <Pressable
+        className={cn(
+          props.disabled && "opacity-50 web:pointer-events-none",
+          buttonVariants({ variant, size, className })
+        )}
+        ref={ref}
+        role="button"
+        {...props}
+      />
+    </TextClassContext.Provider>
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: primary,
-    opacity: 0.8,
-    borderRadius: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    width: 235,
-    height: 55,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: "500",
-    fontFamily: "DMSans_500Medium",
-    color: "#000000",
-    opacity: 0.8,
-  },
-});
+export { Button, buttonTextVariants, buttonVariants };
+export type { ButtonProps };

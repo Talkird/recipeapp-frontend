@@ -4,7 +4,7 @@ import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import Cooking from "@/assets/illustrations/cooking.svg";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 const index = () => {
   return (

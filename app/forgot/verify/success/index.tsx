@@ -2,7 +2,7 @@ import React from "react";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { router } from "expo-router";
 import ConfirmedIllustration from "@/assets/illustrations/confirmed.svg";
 

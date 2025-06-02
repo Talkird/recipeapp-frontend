@@ -1,7 +1,7 @@
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/Input";
 import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";

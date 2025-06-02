@@ -3,7 +3,7 @@ import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import Label from "@/components/ui/Label";
 import { User, Mail, CircleHelp } from "lucide-react-native";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { router } from "expo-router";
 
 export default function Index() {

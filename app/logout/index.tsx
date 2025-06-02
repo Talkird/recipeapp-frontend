@@ -3,11 +3,11 @@ import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Logout from "@/assets/illustrations/logout.svg";
 import { Link } from "expo-router";
 import { primary } from "@/utils/colors";
-
+import CustomAlert from "@/components/ui/CustomAlert";
 const index = () => {
   return (
     <Column style={{ flex: 1, gap: 64 }}>
@@ -20,7 +20,13 @@ const index = () => {
       </Column>
       <Logout style={{ width: 165, height: 193 }} />
       <Column>
-        <Button>Cerrar sesión</Button>
+        <CustomAlert
+          title="Estas seguro que queres cerrar sesion?"
+          description="Deberas reingresar todos tus datos de inicio de sesion"
+          onConfirm={() => {
+            console.log("Sesión cerrada");
+          }}
+        />
         <SmallText>¿No querés cerrar sesión?</SmallText>
         <Link href="/user">
           <SmallText
