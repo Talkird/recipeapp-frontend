@@ -23,20 +23,20 @@ const index = () => {
   return (
     <Column style={{ flex: 1, gap: 64, padding: 16 }}>
       <Column>
-        <Title style={{ width: "75%" }}>Elegí el tipo de usuario</Title>
+        <Title>Elegí el tipo de usuario</Title>
         <SubTitle>¿Cómo te querés registrar?</SubTitle>
       </Column>
 
       <Column style={{ gap: 16 }}>
         <Button onPress={handleChoiceAlumno}>Alumno</Button>
-        <SmallText style={{ width: "75%" }}>
+        <SmallText>
           Podrás usar todas las funcionalidades de un usuario y además
           inscribirte a nuestros cursos de cocina
         </SmallText>
       </Column>
       <Column style={{ gap: 16 }}>
         <Button onPress={handleChoiceUsuario}>Usuario</Button>
-        <SmallText style={{ width: "75%" }}>
+        <SmallText>
           Podrás acceder al catálogo de recetas creadas por otros usuarios,
           guardar tus favoritas y crear recetas propias
         </SmallText>

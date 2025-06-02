@@ -10,12 +10,12 @@ const index = () => {
   return (
     <Column style={{ flex: 1, gap: 64 }}>
       <Column style={{ gap: 8 }}>
-        <Title style={{ width: "80%" }}>Convertite en alumno hoy</Title>
-        <SubTitle style={{ width: "50%" }}>
+        <Title style={{ marginHorizontal: 16 }}>Convertite en alumno hoy</Title>
+        <SubTitle style={{ marginHorizontal: 16 }}>
           Convertite en alumno para acceder a este curso y muchos más
         </SubTitle>
       </Column>
-      <Cooking style={{ width: 207, height: 177 }} />
+      <Cooking width={207} height={177} />
       <Button>Convertirse en alumno</Button>
     </Column>
   );

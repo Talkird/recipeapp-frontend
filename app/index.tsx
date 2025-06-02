@@ -18,6 +18,7 @@ export default function Index() {
       <Column style={{ gap: 36 }}>
         <WelcomeRecipe />
         <WelcomeRecipe />
+        <WelcomeRecipe />
       </Column>
 
       <Column>

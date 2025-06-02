@@ -8,7 +8,7 @@ import { router } from "expo-router";
 const index = () => {
   return (
     <Column style={{ flex: 1, gap: 32 }}>
-      <VerifiedIllustration style={{ height: 200, width: 200 }} />
+      <VerifiedIllustration height={200} width={200} />
       <Title>¡Se verificó con éxito!</Title>
       <Button
         onPress={() => {

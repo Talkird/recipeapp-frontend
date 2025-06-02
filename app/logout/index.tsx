@@ -4,7 +4,7 @@ import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import { Button } from "@/components/ui/Button";
-import Logout from "@/assets/illustrations/logout.svg";
+import LogoutIllustration from "@/assets/illustrations/logout.svg";
 import { Link } from "expo-router";
 import { primary } from "@/utils/colors";
 
@@ -12,13 +12,13 @@ const index = () => {
   return (
     <Column style={{ flex: 1, gap: 64 }}>
       <Column>
-        <Title style={{ width: "80%" }}>¿Querés cerrar sesión?</Title>
-        <SubTitle style={{ width: "50%" }}>
+        <Title>¿Querés cerrar sesión?</Title>
+        <SubTitle style={{ marginHorizontal: 16 }}>
           Si cerrás sesión, vas a necesitar ingresar tu correo y contraseña para
           volver a acceder a tu cuenta.
         </SubTitle>
       </Column>
-      <Logout style={{ width: 165, height: 193 }} />
+      <LogoutIllustration width={165} height={193} />
       <Column>
         <Button>Cerrar sesión</Button>
         <SmallText>¿No querés cerrar sesión?</SmallText>

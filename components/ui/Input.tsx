@@ -8,6 +8,7 @@ interface InputProps {
   onChangeText?: (text: string) => void;
   Icon?: LucideIcon;
   type?: "text" | "password";
+  disabled?: boolean;
 }
 
 export default function Input({
@@ -16,6 +17,7 @@ export default function Input({
   onChangeText,
   Icon,
   type = "text",
+  disabled = false,
 }: InputProps) {
   return (
     <View style={styles.container}>
@@ -38,6 +40,7 @@ export default function Input({
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={type === "password"}
+        editable={!disabled}
       />
     </View>
   );

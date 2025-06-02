@@ -27,7 +27,7 @@ export default function Index() {
         <Title>Crea tu cuenta</Title>
         <SubTitle>Y empezá a cocinar</SubTitle>
       </Column>
-
+    
       <AvatarIllustration height={135} width={135} />
 
       <Column style={{ gap: 20 }}>
