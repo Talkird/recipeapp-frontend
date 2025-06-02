@@ -1,9 +1,7 @@
 import { Column } from "@/components/ui/Column";
-import { Row } from "@/components/ui/Row";
 import { Button } from "@/components/ui/Button";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
-import { View, Text } from "react-native";
 import { router } from "expo-router";
 import AvatarIllustration from "@/assets/illustrations/avatar.svg";
 import { CodeInput } from "@/components/CodeInput";
