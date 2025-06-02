@@ -12,7 +12,7 @@ const index = () => {
   return (
     <Column style={{ flex: 1, gap: 64 }}>
       <Column>
-        <Title>¿Querés cerrar sesión?</Title>
+        <Title style={{ width: "80%" }}>¿Querés cerrar sesión?</Title>
         <SubTitle style={{ width: "50%" }}>
           Si cerrás sesión, vas a necesitar ingresar tu correo y contraseña para
           volver a acceder a tu cuenta.
@@ -22,7 +22,7 @@ const index = () => {
       <Column>
         <Button>Cerrar sesión</Button>
         <SmallText>¿No querés cerrar sesión?</SmallText>
-        <Link href="/home">
+        <Link href="/user">
           <SmallText
             style={{ color: primary, textDecorationLine: "underline" }}
           >

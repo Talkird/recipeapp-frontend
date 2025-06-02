@@ -13,7 +13,7 @@ export default function Index() {
         marginTop: 32,
       }}
     >
-      <Title>Home</Title>
+      <Title>Inicio</Title>
       <SearchBar />
       <Recipe
         title={"Pizza Margarita"}

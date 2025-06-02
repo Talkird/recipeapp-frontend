@@ -22,7 +22,7 @@ export default function Index() {
       >
         Convertirse en alumno
       </Button>
-      <Button>Cerrar sesión</Button>
+      <Button onPress={() => router.push("/logout")}>Cerrar sesión</Button>
     </Column>
   );
 }

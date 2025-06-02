@@ -1,7 +1,8 @@
 import React from "react";
-import { TextInput, View, StyleSheet, TextInputProps } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { LucideIcon } from "lucide-react-native";
 import { SmallText } from "./SmallText";
+
 interface LabelProps {
   text: string;
   Icon: LucideIcon;
@@ -19,7 +20,7 @@ export default function Label({ text, Icon }: LabelProps) {
 const styles = StyleSheet.create({
   container: {
     width: 250,
-    backgroundColor: "#fff",
+    backgroundColor: "#dddddd",
     borderRadius: 999,
     flexDirection: "row",
     paddingVertical: 12,
