@@ -9,8 +9,6 @@ import { primary } from "@/utils/colors";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
 import { Mail } from "lucide-react-native";
 
-
-
 export default function Index() {
   return (
     <Column style={{ flex: 1, gap: 32 }}>

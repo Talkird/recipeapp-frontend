@@ -8,16 +8,27 @@ import { SmallText } from "./SmallText";
 interface CheckBoxProps {
   label?: string;
   checked?: boolean;
-  onChange?: (checked: boolean) => void;
+  value?: boolean;
+  setValue?: (checked: boolean) => void;
 }
 
-const CheckBox = ({ label, checked: checkedProp, onChange }: CheckBoxProps) => {
+const CheckBox = ({
+  label,
+  checked: checkedProp,
+  value,
+  setValue,
+}: CheckBoxProps) => {
+  const isControlled = value !== undefined && setValue !== undefined;
   const [checked, setChecked] = useState(checkedProp ?? false);
+  const currentChecked = isControlled ? value : checked;
 
   const handlePress = () => {
-    const newChecked = !checked;
-    setChecked(newChecked);
-    onChange?.(newChecked);
+    const newChecked = !currentChecked;
+    if (isControlled) {
+      setValue?.(newChecked);
+    } else {
+      setChecked(newChecked);
+    }
   };
 
   return (
@@ -26,15 +37,15 @@ const CheckBox = ({ label, checked: checkedProp, onChange }: CheckBoxProps) => {
         style={[
           styles.checkbox,
           {
-            backgroundColor: checked ? primary : "transparent",
-            borderColor: checked ? primary : "#ccc",
+            backgroundColor: currentChecked ? primary : "transparent",
+            borderColor: currentChecked ? primary : "#ccc",
           },
         ]}
         onPress={handlePress}
         accessibilityRole="checkbox"
-        accessibilityState={{ checked }}
+        accessibilityState={{ checked: currentChecked }}
       >
-        {checked && <Check size={18} color="#fff" />}
+        {currentChecked && <Check size={18} color="#fff" />}
       </Pressable>
       <SmallText>{label}</SmallText>
     </Row>

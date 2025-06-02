@@ -9,8 +9,10 @@ import { Link, router } from "expo-router";
 import LoginIllustration from "@/assets/illustrations/login.svg";
 import { Mail, Lock } from "lucide-react-native";
 import CheckBox from "@/components/ui/CheckBox";
+import { useState } from "react";
 
 export default function Index() {
+  const [rembemerPassword, setRememberPassword] = useState(false);
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -23,7 +25,8 @@ export default function Index() {
         <Input Icon={Lock} type="password" placeholder="Contraseña" />
         <CheckBox
           label="¿Recordar contraseña?"
-          onChange={(checked) => console.log("Checkbox checked:", checked)}
+          value={rembemerPassword}
+          setValue={setRememberPassword}
         />
       </Column>
 

@@ -3,14 +3,14 @@ import { Row } from "@/components/ui/Row";
 import { Button } from "@/components/ui/Button";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
-import { View, Text } from "react-native";
 import { router } from "expo-router";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
-import CodeInput from "@/components/CodeInput";
-
-const numbers = [1, 2, 3, 4, 5, 6];
+import { CodeInput } from "@/components/CodeInput";
+import { useState } from "react";
 
 export default function Index() {
+  const [value, setValue] = useState("");
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Title style={{ width: "80%" }}>Restablecer contraseña</Title>
@@ -22,12 +22,12 @@ export default function Index() {
       </SubTitle>
 
       <Column style={{ gap: 20 }}>
-        <CodeInput />
+        <CodeInput value={value} setValue={setValue} />
       </Column>
 
       <Button
         style={{ marginBottom: 10 }}
-        onPress={() => router.push("/forgot/verify/success")}
+        onPress={() => router.push("/forgot/reset")}
       >
         Restablecer
       </Button>

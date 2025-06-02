@@ -6,10 +6,11 @@ import { SubTitle } from "@/components/ui/SubTitle";
 import { View, Text } from "react-native";
 import { router } from "expo-router";
 import AvatarIllustration from "@/assets/illustrations/avatar.svg";
-
-const numbers = [1, 2, 3, 4, 5, 6];
-
+import { CodeInput } from "@/components/CodeInput";
+import { useState } from "react";
 export default function Index() {
+  const [value, setValue] = useState("");
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -25,28 +26,12 @@ export default function Index() {
       </SubTitle>
 
       <Column style={{ gap: 20 }}>
-        <Row style={{ gap: 10 }}>
-          {numbers.map((number) => (
-            <View
-              style={{
-                width: 50,
-                height: 65,
-                borderRadius: 8,
-                backgroundColor: "#D9D9D9",
-                justifyContent: "center",
-                alignContent: "center",
-              }}
-              key={number}
-            >
-              <SubTitle style={{ fontSize: 24 }}>{number}</SubTitle>
-            </View>
-          ))}
-        </Row>
+        <CodeInput value={value} setValue={setValue} />
       </Column>
 
       <Button
         style={{ marginBottom: 10 }}
-        onPress={() => router.push("/register/verify/success")}
+        onPress={() => router.push("/register/success")}
       >
         Verificar
       </Button>
