@@ -6,6 +6,7 @@ import { SubTitle } from "@/components/ui/SubTitle";
 import { View, Text } from "react-native";
 import { router } from "expo-router";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
+import CodeInput from "@/components/CodeInput";
 
 const numbers = [1, 2, 3, 4, 5, 6];
 
@@ -21,23 +22,7 @@ export default function Index() {
       </SubTitle>
 
       <Column style={{ gap: 20 }}>
-        <Row style={{ gap: 10 }}>
-          {numbers.map((number) => (
-            <View
-              style={{
-                width: 50,
-                height: 65,
-                borderRadius: 8,
-                backgroundColor: "#D9D9D9",
-                justifyContent: "center",
-                alignContent: "center",
-              }}
-              key={number}
-            >
-              <SubTitle style={{ fontSize: 24 }}>{number}</SubTitle>
-            </View>
-          ))}
-        </Row>
+        <CodeInput />
       </Column>
 
       <Button
