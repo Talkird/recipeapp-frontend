@@ -11,23 +11,13 @@ import { User, Mail } from "lucide-react-native";
 import useUserStore from "@/stores/user";
 
 export default function Index() {
-  const isAlumno = useUserStore((state) => state.isAlumno);
-
-  const handleRegister = () => {
-    if (isAlumno) {
-      router.push("/register/alumno");
-    } else {
-      router.push("/register/verify");
-    }
-  };
-
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
         <Title>Crea tu cuenta</Title>
         <SubTitle>Y empezá a cocinar</SubTitle>
       </Column>
-    
+
       <AvatarIllustration height={135} width={135} />
 
       <Column style={{ gap: 20 }}>
@@ -36,7 +26,12 @@ export default function Index() {
       </Column>
 
       <Column>
-        <Button onPress={handleRegister} style={{ marginBottom: 10 }}>
+        <Button
+          onPress={() => {
+            router.push("/register/verify");
+          }}
+          style={{ marginBottom: 10 }}
+        >
           Continuar Registración
         </Button>
         <SmallText>¿Ya tenés cuenta?</SmallText>

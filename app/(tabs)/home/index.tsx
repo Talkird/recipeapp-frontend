@@ -20,6 +20,7 @@ export default function Index() {
       >
         <Title>Inicio</Title>
         <SearchBar />
+
         <Recipe
           title={"Pizza Margarita"}
           author={"Juan Losauro"}

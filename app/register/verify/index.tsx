@@ -6,9 +6,19 @@ import { router } from "expo-router";
 import AvatarIllustration from "@/assets/illustrations/avatar.svg";
 import { CodeInput } from "@/components/CodeInput";
 import { useState } from "react";
+import useUserStore from "@/stores/user";
+
 export default function Index() {
   const [value, setValue] = useState("");
+  const isAlumno = useUserStore((state) => state.isAlumno);
 
+  const handleVerify = () => {
+    if (isAlumno) {
+      router.push("/register/alumno");
+    } else {
+      router.push("/register/success");
+    }
+  };
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -27,10 +37,7 @@ export default function Index() {
         <CodeInput value={value} setValue={setValue} />
       </Column>
 
-      <Button
-        style={{ marginBottom: 10 }}
-        onPress={() => router.push("/register/success")}
-      >
+      <Button style={{ marginBottom: 10 }} onPress={handleVerify}>
         Verificar
       </Button>
     </Column>
