@@ -5,7 +5,6 @@ import { Image } from "expo-image";
 import { SubTitle } from "./ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import { Timer, Users } from "lucide-react-native";
-import { Text } from "react-native";
 import { primary } from "@/utils/colors";
 import { Star, StarHalf } from "lucide-react-native";
 
@@ -72,11 +71,11 @@ const Recipe = ({
       >
         <Row style={{ gap: 6 }}>
           <Timer style={styles.icon} />
-          <Text style={styles.iconText}>{cookTime}'</Text>
+          <SmallText style={styles.iconText}>{cookTime}'</SmallText>
         </Row>
         <Row style={{ gap: 6 }}>
           <Users style={styles.icon} />
-          <Text style={styles.iconText}>{servings}</Text>
+          <SmallText style={styles.iconText}>{servings}</SmallText>
         </Row>
       </Column>
     </Row>

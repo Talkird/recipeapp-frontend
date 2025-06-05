@@ -7,7 +7,7 @@ export default function Index() {
     <Column
       style={{ flex: 1, gap: 32, justifyContent: "flex-start", marginTop: 32 }}
     >
-      <Title>Mis recetas</Title>
+      <Title>Recetas guardadas</Title>
     </Column>
   );
 }
