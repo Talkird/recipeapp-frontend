@@ -9,8 +9,12 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import { primary } from "@/utils/colors";
 import { SubTitle } from "@/components/ui/SubTitle";
+import { router } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
+
+// Set splash screen background color
+// SplashScreen.setBackgroundColorAsync("#f7741c");
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -22,6 +26,7 @@ export default function Layout() {
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
+      router.push("/home");
     }
   }, [fontsLoaded]);
 

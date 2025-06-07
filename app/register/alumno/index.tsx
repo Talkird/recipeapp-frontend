@@ -13,7 +13,7 @@ const index = () => {
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column style={{}}>
-        <Title>Creá tu cuenta</Title>
+        <Title>Convertite en alumno</Title>
         <SubTitle>Y empezá a cocinar</SubTitle>
       </Column>
       <PersonalInfo width={210} height={140} />
