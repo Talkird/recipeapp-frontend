@@ -8,17 +8,58 @@ import { Button } from "@/components/ui/Button";
 import { primary } from "@/utils/colors";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
 import { Lock, RefreshCcw } from "lucide-react-native";
+import { useState } from "react";
+import { useUserStore } from "@/stores/user";
 
 export default function Index() {
+  const [nuevaClave, setNuevaClave] = useState("");
+  const [confirmarClave, setConfirmarClave] = useState("");
+
+  const { actualizarClave } = useUserStore();
+
+  const handleConfirmarClave = () => {
+    if (!nuevaClave || !confirmarClave) {
+      alert("Por favor, completa ambos campos.");
+      return;
+    }
+
+    if (nuevaClave !== confirmarClave) {
+      alert("Las contraseñas no coinciden. Por favor, inténtalo de nuevo.");
+      return;
+    }
+
+    actualizarClave(nuevaClave, confirmarClave)
+      .then(() => {
+        alert("Contraseña actualizada exitosamente.");
+        router.push("/forgot/success");
+      })
+      .catch((error) => {
+        console.error("Error al actualizar la contraseña:", error);
+        alert(
+          "Ocurrió un error al actualizar la contraseña. Inténtalo de nuevo más tarde."
+        );
+      });
+  };
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Title style={{ width: "50%" }}>Restablecer contraseña</Title>
 
       <ForgotPasswordIllustration width={205} height={135} />
-      <Input Icon={Lock} placeholder="Nueva contraseña" />
-      <Input Icon={RefreshCcw} placeholder="Confirmar contraseña" />
+      <Input
+        onChangeText={setNuevaClave}
+        value={nuevaClave}
+        Icon={Lock}
+        placeholder="Nueva contraseña"
+      />
+      <Input
+        onChangeText={setConfirmarClave}
+        value={confirmarClave}
+        Icon={RefreshCcw}
+        placeholder="Confirmar contraseña"
+      />
 
-      <Button onPress={() => router.push("/forgot/success")}>Finalizar</Button>
+      <Button onPress={handleConfirmarClave}>Finalizar</Button>
     </Column>
   );
 }

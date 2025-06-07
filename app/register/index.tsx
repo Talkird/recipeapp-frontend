@@ -8,9 +8,23 @@ import { primary } from "@/utils/colors";
 import { SmallText } from "@/components/ui/SmallText";
 import AvatarIllustration from "@/assets/illustrations/avatar.svg";
 import { User, Mail } from "lucide-react-native";
-import useUserStore from "@/stores/user";
+import { useUserStore } from "@/stores/user";
+import { useState } from "react";
 
 export default function Index() {
+  const { inciarRegistro } = useUserStore();
+  const [mail, setMail] = useState("");
+  const [nickname, setNickname] = useState("");
+
+  const handleRegister = async () => {
+    try {
+      await inciarRegistro(mail, nickname);
+      router.push("/register/verify");
+    } catch (error) {
+      console.error("Error during registration:", error);
+    }
+  };
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -21,17 +35,22 @@ export default function Index() {
       <AvatarIllustration height={135} width={135} />
 
       <Column style={{ gap: 20 }}>
-        <Input Icon={User} placeholder="Nombre de usuario" />
-        <Input Icon={Mail} placeholder="Dirección de correo" />
+        <Input
+          value={nickname}
+          onChangeText={setNickname}
+          Icon={User}
+          placeholder="Nombre de usuario"
+        />
+        <Input
+          value={mail}
+          onChangeText={setMail}
+          Icon={Mail}
+          placeholder="Dirección de correo"
+        />
       </Column>
 
       <Column>
-        <Button
-          onPress={() => {
-            router.push("/register/verify");
-          }}
-          style={{ marginBottom: 10 }}
-        >
+        <Button onPress={handleRegister} style={{ marginBottom: 10 }}>
           Continuar Registración
         </Button>
         <SmallText>¿Ya tenés cuenta?</SmallText>
