@@ -17,7 +17,7 @@ export default function Index() {
       <Label text="Tipo de cuenta" Icon={CircleHelp} />
       <Button
         onPress={() => {
-          router.push("/becomestudent");
+          router.push("/register/alumno");
         }}
       >
         Convertirse en alumno
