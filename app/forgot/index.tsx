@@ -8,8 +8,31 @@ import { Button } from "@/components/ui/Button";
 import { primary } from "@/utils/colors";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
 import { Mail } from "lucide-react-native";
+import { useState } from "react";
+import { useUserStore } from "@/stores/user";
 
 export default function Index() {
+  const [mail, setMail] = useState("");
+  const { recuperarClave } = useUserStore();
+
+  const handleSendLink = () => {
+    if (!mail) {
+      alert("Por favor, ingresa tu correo electrónico.");
+      return;
+    }
+
+    recuperarClave(mail)
+      .then(() => {
+        router.push("/forgot/verify");
+      })
+      .catch((error) => {
+        console.error("Error al enviar el enlace de recuperación:", error);
+        alert(
+          "Ocurrió un error al enviar el enlace. Inténtalo de nuevo más tarde."
+        );
+      });
+  };
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column style={{ gap: 16 }}>
@@ -19,7 +42,12 @@ export default function Index() {
           restablecer tu clave.
         </SubTitle>
       </Column>
-      <Input Icon={Mail} placeholder="Dirección de correo" />
+      <Input
+        onChangeText={setMail}
+        value={mail}
+        Icon={Mail}
+        placeholder="Dirección de correo"
+      />
 
       <Column>
         <SmallText>¿Recordaste tu clave?</SmallText>
@@ -33,9 +61,7 @@ export default function Index() {
       </Column>
 
       <ForgotPasswordIllustration width={205} height={135} />
-      <Button onPress={() => router.push("/forgot/verify")}>
-        Enviar enlace
-      </Button>
+      <Button onPress={handleSendLink}>Enviar enlace</Button>
     </Column>
   );
 }

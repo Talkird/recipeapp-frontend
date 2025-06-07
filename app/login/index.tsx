@@ -10,9 +10,32 @@ import LoginIllustration from "@/assets/illustrations/login.svg";
 import { Mail, Lock } from "lucide-react-native";
 import CheckBox from "@/components/ui/CheckBox";
 import { useState } from "react";
+import { useUserStore } from "@/stores/user";
 
 export default function Index() {
-  const [rembemerPassword, setRememberPassword] = useState(false);
+  const [rememberPassword, setRememberPassword] = useState(false);
+  const [mail, setMail] = useState("");
+  const [clave, setClave] = useState("");
+  const { login } = useUserStore();
+
+  const handleLogin = () => {
+    if (!mail || !clave) {
+      alert("Por favor, completa ambos campos.");
+      return;
+    }
+
+    try {
+      login(mail, clave);
+      if (rememberPassword) {
+        //santi lo hace
+      }
+      router.push("/home");
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      alert("Credenciales inválidas. Por favor, inténtalo de nuevo.");
+    }
+  };
+
   return (
     <Column style={{ flex: 1, gap: 32 }}>
       <Column>
@@ -21,11 +44,22 @@ export default function Index() {
       </Column>
 
       <Column style={{ gap: 20 }}>
-        <Input Icon={Mail} placeholder="Dirección de correo" />
-        <Input Icon={Lock} type="password" placeholder="Contraseña" />
+        <Input
+          onChangeText={setMail}
+          value={mail}
+          Icon={Mail}
+          placeholder="Dirección de correo"
+        />
+        <Input
+          onChangeText={setClave}
+          value={clave}
+          Icon={Lock}
+          type="password"
+          placeholder="Contraseña"
+        />
         <CheckBox
           label="¿Recordar contraseña?"
-          value={rembemerPassword}
+          value={rememberPassword}
           setValue={setRememberPassword}
         />
       </Column>
@@ -43,10 +77,7 @@ export default function Index() {
 
       <LoginIllustration height={135} width={135} />
       <Column>
-        <Button
-          style={{ marginBottom: 10 }}
-          onPress={() => router.push("/home")}
-        >
+        <Button style={{ marginBottom: 10 }} onPress={handleLogin}>
           Iniciar sesión
         </Button>
         <SmallText>¿No tenés cuenta?</SmallText>

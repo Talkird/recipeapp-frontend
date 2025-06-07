@@ -1,5 +1,4 @@
 import { Column } from "@/components/ui/Column";
-import { Row } from "@/components/ui/Row";
 import { Button } from "@/components/ui/Button";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
@@ -7,9 +6,31 @@ import { router } from "expo-router";
 import ForgotPasswordIllustration from "@/assets/illustrations/forgot-password.svg";
 import { CodeInput } from "@/components/CodeInput";
 import { useState } from "react";
+import { useUserStore } from "@/stores/user";
 
 export default function Index() {
   const [value, setValue] = useState("");
+  const { validarCodigoRecuperacion } = useUserStore();
+  const { mail } = useUserStore.getState();
+
+  const handleVerifyCode = () => {
+    if (value.length !== 6) {
+      alert("El código debe tener 6 dígitos.");
+      return;
+    }
+    if (!mail) {
+      alert("No se encontró un correo electrónico válido.");
+      return;
+    }
+    validarCodigoRecuperacion(mail, value)
+      .then(() => {
+        router.push("/forgot/reset");
+      })
+      .catch((error) => {
+        console.error("Error al validar el código:", error);
+        alert("Código inválido. Por favor, inténtalo de nuevo.");
+      });
+  };
 
   return (
     <Column style={{ flex: 1, gap: 32 }}>
@@ -25,10 +46,7 @@ export default function Index() {
         <CodeInput value={value} setValue={setValue} />
       </Column>
 
-      <Button
-        style={{ marginBottom: 10 }}
-        onPress={() => router.push("/forgot/reset")}
-      >
+      <Button style={{ marginBottom: 10 }} onPress={handleVerifyCode}>
         Restablecer
       </Button>
     </Column>

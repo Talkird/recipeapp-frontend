@@ -6,18 +6,31 @@ import { router } from "expo-router";
 import AvatarIllustration from "@/assets/illustrations/avatar.svg";
 import { CodeInput } from "@/components/CodeInput";
 import { useState } from "react";
-import useUserStore from "@/stores/user";
+import { useUserStore } from "@/stores/user";
 
 export default function Index() {
   const [value, setValue] = useState("");
-  const isAlumno = useUserStore((state) => state.isAlumno);
+  const { validarCodigoRegistro } = useUserStore();
+  const { mail } = useUserStore.getState();
 
   const handleVerify = () => {
-    if (isAlumno) {
-      router.push("/register/alumno");
-    } else {
-      router.push("/register/success");
+    if (value.length !== 6) {
+      alert("El código debe tener 6 dígitos.");
+      return;
     }
+    if (!mail) {
+      alert("No se encontró un correo electrónico válido.");
+      return;
+    }
+    validarCodigoRegistro(mail, value)
+      .then(() => {
+        router.push("/register/input");
+      })
+      .catch((error) => {
+        console.error("Error al validar el código:", error);
+
+        alert("Código inválido. Por favor, inténtalo de nuevo.");
+      });
   };
   return (
     <Column style={{ flex: 1, gap: 32 }}>
