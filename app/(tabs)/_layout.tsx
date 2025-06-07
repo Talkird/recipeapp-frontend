@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import { primary } from "@/utils/colors";
 import {
   Home,
-  Star,
   GraduationCap,
   User,
   CirclePlus,
@@ -15,7 +14,19 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: primary,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 13,
+          fontWeight: "600",
+          marginBottom: 0,
+        },
+        tabBarStyle: {
+          height: 64,
+          paddingBottom: 8,
+          backgroundColor: "#fff",
+          borderTopWidth: 0.5,
+          borderTopColor: "#eee",
+        },
         headerShown: false,
       }}
     >
@@ -24,7 +35,12 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Home size={24} color={color} />
             </View>
           ),
@@ -33,7 +49,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="favorites/index"
         options={{
-          title: "Favorites",
+          title: "Favoritos",
+          tabBarLabel: "Favoritos",
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
               <Heart size={24} color={color} />
@@ -44,10 +61,11 @@ export default function TabLayout() {
       <Tabs.Screen
         name="add/index"
         options={{
-          title: "Add",
+          title: "Crear",
+          tabBarLabel: "Crear",
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
-              <CirclePlus size={32} color={color} />
+              <CirclePlus size={24} color={color} />
             </View>
           ),
         }}
@@ -55,7 +73,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="courses/index"
         options={{
-          title: "Courses",
+          title: "Cursos",
+          tabBarLabel: "Cursos",
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
               <GraduationCap size={24} color={color} />
@@ -66,7 +85,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="user/index"
         options={{
-          title: "User",
+          title: "Perfil",
+          tabBarLabel: "Perfil",
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
               <User size={24} color={color} />
