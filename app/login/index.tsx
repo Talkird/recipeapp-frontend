@@ -9,14 +9,18 @@ import { Link, router } from "expo-router";
 import LoginIllustration from "@/assets/illustrations/login.svg";
 import { Mail, Lock } from "lucide-react-native";
 import CheckBox from "@/components/ui/CheckBox";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUserStore } from "@/stores/user";
 
 export default function Index() {
   const [rememberPassword, setRememberPassword] = useState(false);
   const [mail, setMail] = useState("");
   const [clave, setClave] = useState("");
-  const { login } = useUserStore();
+  const { login, logout } = useUserStore();
+
+  useEffect(() => {
+    logout();
+  }, []);
 
   const handleLogin = () => {
     if (!mail || !clave) {

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/usuarios";
+const API_URL_ALUMNO = "http://localhost:8080/api/alumnos";
 
 interface Alumno {
   idAlumno: number;
@@ -17,6 +18,8 @@ interface UserStore {
   nickname: string | null;
   clave: string | null;
   idUsuario: number | null;
+  choiceAlumno: boolean;
+  setChoiceAlumno: (choice: boolean) => void;
   inciarRegistro: (mail: string, nickname: string) => Promise<void>;
   validarCodigoRegistro: (mail: string, codigo: string) => Promise<void>;
   finalizarRegistro: (clave: string, confirmarClave: string) => Promise<void>;
@@ -29,6 +32,13 @@ interface UserStore {
   logout: () => void;
   login: (mail: string, password: string) => Promise<void>;
   updateUserId: (mail: string) => Promise<void>;
+  createAlumno: (
+    tramite: string,
+    numeroTarjeta: string,
+    dniFrente: string,
+    dniFondo: string
+  ) => Promise<void>;
+  getAccountInfo: () => Promise<Alumno | null>;
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
@@ -36,6 +46,37 @@ export const useUserStore = create<UserStore>((set, get) => ({
   nickname: null,
   clave: null,
   idUsuario: null,
+  choiceAlumno: false,
+
+  setChoiceAlumno: (choice) => {
+    set({ choiceAlumno: choice });
+  },
+
+  getAccountInfo: async () => {
+    const { idUsuario } = get();
+    try {
+      const response = await axios.get(`${API_URL}/${idUsuario}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.data) {
+        console.warn(
+          "No se encontró información de la cuenta para el ID:",
+          idUsuario
+        );
+        return null;
+      } else {
+        console.log("Respuesta completa de usuario:", response.data);
+        const { mail, nickname } = response.data;
+        set({ mail, nickname });
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error al obtener la información de la cuenta:", error);
+      throw error;
+    }
+  },
 
   updateUserId: async (mail) => {
     try {
@@ -53,7 +94,13 @@ export const useUserStore = create<UserStore>((set, get) => ({
     }
   },
   logout: () => {
-    set({ mail: null, nickname: null, clave: null });
+    set({
+      mail: null,
+      nickname: null,
+      clave: null,
+      idUsuario: null,
+      choiceAlumno: false,
+    });
   },
 
   login: async (mail, password) => {
@@ -62,8 +109,8 @@ export const useUserStore = create<UserStore>((set, get) => ({
         mail,
         password,
       });
-      set({ mail: mail });
-      get().updateUserId(mail);
+      set({ mail });
+      await get().updateUserId(mail);
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       throw error;
@@ -142,6 +189,24 @@ export const useUserStore = create<UserStore>((set, get) => ({
       get().logout();
     } catch (error) {
       console.error("Error al actualizar clave:", error);
+      throw error;
+    }
+  },
+
+  createAlumno: async (tramite, numeroTarjeta, dniFondo, dniFrente) => {
+    try {
+      const { idUsuario } = get();
+
+      const response = await axios.post(`${API_URL_ALUMNO}/crear`, {
+        idUsuario,
+        tramite,
+        numeroTarjeta,
+        dniFrente,
+        dniFondo,
+      });
+      console.log("Usuario creado:", response.data);
+    } catch (error) {
+      console.error("Error al crear usuario:", error);
       throw error;
     }
   },

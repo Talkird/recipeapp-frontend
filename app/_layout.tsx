@@ -13,9 +13,6 @@ import { router } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
 
-// Set splash screen background color
-// SplashScreen.setBackgroundColorAsync("#f7741c");
-
 export default function Layout() {
   const [fontsLoaded] = useFonts({
     DMSans_400Regular,
@@ -26,7 +23,7 @@ export default function Layout() {
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
-      router.push("/home");
+      //router.push("/home");
     }
   }, [fontsLoaded]);
 

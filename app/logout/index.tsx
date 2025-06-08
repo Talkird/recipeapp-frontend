@@ -7,8 +7,17 @@ import { Button } from "@/components/ui/Button";
 import LogoutIllustration from "@/assets/illustrations/logout.svg";
 import { Link } from "expo-router";
 import { primary } from "@/utils/colors";
+import { useUserStore } from "@/stores/user";
+import { router } from "expo-router";
 
 const index = () => {
+  const { logout } = useUserStore();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
+
   return (
     <Column style={{ flex: 1, gap: 64 }}>
       <Column>
@@ -20,7 +29,7 @@ const index = () => {
       </Column>
       <LogoutIllustration width={165} height={193} />
       <Column>
-        <Button>Cerrar sesión</Button>
+        <Button onPress={handleLogout}>Cerrar sesión</Button>
         <SmallText>¿No querés cerrar sesión?</SmallText>
         <Link href="/user">
           <SmallText

@@ -5,18 +5,18 @@ import { router } from "expo-router";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import { Column } from "@/components/ui/Column";
-import useUserStore from "@/stores/user";
+import { useUserStore } from "@/stores/user";
 
 const index = () => {
-  const setIsAlumno = useUserStore((state) => state.setIsAlumno);
+  const { setChoiceAlumno } = useUserStore();
 
   const handleChoiceAlumno = () => {
-    setIsAlumno(true);
+    setChoiceAlumno(true);
     router.push("/register");
   };
 
   const handleChoiceUsuario = () => {
-    setIsAlumno(false);
+    setChoiceAlumno(false);
     router.push("/register");
   };
 
