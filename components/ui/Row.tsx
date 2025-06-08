@@ -16,6 +16,7 @@ export function Row({ children, style, ...rest }: RowProps) {
 
 const styles = StyleSheet.create({
   row: {
+    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

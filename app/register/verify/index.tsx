@@ -42,8 +42,8 @@ export default function Index() {
       <AvatarIllustration height={135} width={135} />
 
       <SubTitle style={{ width: "75%", textAlign: "center" }}>
-        Se envió un código de verificación a example@mail.com. Por favor,
-        ingresalo a continuación para finalizar la registración:
+        Se envió un código de verificación a {mail}. Por favor, ingresalo a
+        continuación para finalizar la registración:
       </SubTitle>
 
       <Column style={{ gap: 20 }}>

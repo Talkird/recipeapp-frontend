@@ -30,7 +30,6 @@ export default function Index() {
 
     actualizarClave(nuevaClave, confirmarClave)
       .then(() => {
-        alert("Contraseña actualizada exitosamente.");
         router.push("/forgot/success");
       })
       .catch((error) => {

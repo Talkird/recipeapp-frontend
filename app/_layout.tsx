@@ -9,6 +9,7 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import { primary } from "@/utils/colors";
 import { SubTitle } from "@/components/ui/SubTitle";
+import { router } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,6 +23,7 @@ export default function Layout() {
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
+      //router.push("/home");
     }
   }, [fontsLoaded]);
 

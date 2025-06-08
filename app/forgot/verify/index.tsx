@@ -38,8 +38,8 @@ export default function Index() {
 
       <ForgotPasswordIllustration width={205} height={135} />
       <SubTitle style={{ width: "75%", textAlign: "center" }}>
-        Se envió un código de verificación a example@mail.com. Por favor,
-        ingresalo a continuación para restablecer tu contraseña:
+        Se envió un código de verificación a {mail}. Por favor, ingresalo a
+        continuación para restablecer tu contraseña:
       </SubTitle>
 
       <Column style={{ gap: 20 }}>

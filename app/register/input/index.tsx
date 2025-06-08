@@ -15,6 +15,7 @@ export default function Index() {
   const [clave, setClave] = useState("");
   const [confirmarClave, setConfirmarClave] = useState("");
   const { finalizarRegistro } = useUserStore();
+  const { choiceAlumno } = useUserStore();
 
   const handleFinalizar = () => {
     if (clave !== confirmarClave) {
@@ -24,7 +25,12 @@ export default function Index() {
 
     finalizarRegistro(clave, confirmarClave)
       .then(() => {
-        router.push("/register/success");
+        if (choiceAlumno) {
+          router.push("/register/alumno");
+          return;
+        } else {
+          router.push("/register/success");
+        }
       })
       .catch((error) => {
         console.error("Error al finalizar el registro:", error);

@@ -5,6 +5,7 @@ import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import Cooking from "@/assets/illustrations/cooking.svg";
 import { Button } from "@/components/ui/Button";
+import { router } from "expo-router";
 
 const index = () => {
   return (
@@ -16,7 +17,13 @@ const index = () => {
         </SubTitle>
       </Column>
       <Cooking width={207} height={177} />
-      <Button>Convertirse en alumno</Button>
+      <Button
+        onPress={() => {
+          router.push("/register/alumno");
+        }}
+      >
+        Convertirse en alumno
+      </Button>
     </Column>
   );
 };
