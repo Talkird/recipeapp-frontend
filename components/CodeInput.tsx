@@ -15,6 +15,7 @@ import {
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
+import { Title } from "./ui/Title";
 
 interface CodeInputProps {
   value: string;
@@ -50,9 +51,9 @@ export function CodeInput({ value, setValue, cellCount = 6 }: CodeInputProps) {
           style={[styles.numberBox, isFocused && styles.focusedBox]}
           onLayout={getCellOnLayoutHandler(index)}
         >
-          <Text style={styles.cellText}>
+          <Title style={styles.cellText}>
             {symbol || (isFocused ? <Cursor /> : null)}
-          </Text>
+          </Title>
         </View>
       )}
     />

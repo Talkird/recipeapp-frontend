@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
 import React from "react";
 import { Plus } from "lucide-react-native";
+
 const CamaraUpload = () => {
   return (
     <View
