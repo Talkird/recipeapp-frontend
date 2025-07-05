@@ -20,6 +20,7 @@
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@react-native-community/netinfo": "^11.4.1",
+    "@react-native-picker/picker": "^2.11.1",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "@reduxjs/toolkit": "^2.6.1",

@@ -1,9 +1,9 @@
-import { Row } from "./ui/Row";
+import { Row } from "./Row";
 import { StyleSheet } from "react-native";
 import { Search } from "lucide-react-native";
 import { TextInput } from "react-native";
 
-function SearchBar() {
+function CoursesSearchBar() {
   return (
     <Row style={styles.searchBar}>
       <TextInput
@@ -35,4 +35,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchBar;
+export default CoursesSearchBar;

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
-import SearchBar from "@/components/SearchBar";
+import SearchBar from "@/components/RecipeSearchBar";
 import Course from "@/components/Course";
 import { useCursoStore } from "@/stores/courses";
 import { Row } from "@/components/ui/Row";
 import { useUserStore } from "@/stores/user";
 import { Button, View } from "react-native";
 import { primary } from "@/utils/colors";
+import CoursesSearchBar from "@/components/ui/CoursesSearchBar";
 
 export default function Index() {
   const cursos = useCursoStore((state) => state.cursos);
@@ -60,7 +61,7 @@ export default function Index() {
           color={tab === "mine" ? primary : "#ccc"}
         />
       </Row>
-      <SearchBar />
+      <CoursesSearchBar />
       {tab === "all" &&
         cursos.map((curso) => (
           <Course

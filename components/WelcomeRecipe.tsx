@@ -7,18 +7,27 @@ import { Column } from "./ui/Column";
 import { primary } from "@/utils/colors";
 import { Image } from "expo-image";
 
-export function WelcomeRecipe() {
+interface WelcomeRecipeProps {
+  title?: string;
+  description?: string;
+  source?: string;
+}
+
+export function WelcomeRecipe({
+  title,
+  description,
+  image,
+}: {
+  title: string;
+  description: string;
+  image: string;
+}) {
   return (
     <Row style={{ gap: 16 }}>
-      <Image
-        source={
-          "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Zm9vZHxlbnwwfHwwfHx8MA%3D%3D"
-        }
-        style={styles.image}
-      />
+      <Image source={image} style={styles.image} />
       <Column>
-        <Title style={{ fontSize: 24, color: primary }}>Recipe</Title>
-        <SubTitle>Description</SubTitle>
+        <Title style={{ fontSize: 18, color: primary }}>{title}</Title>
+        <SubTitle>{description}</SubTitle>
       </Column>
     </Row>
   );

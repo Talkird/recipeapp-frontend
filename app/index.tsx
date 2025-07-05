@@ -6,22 +6,43 @@ import { Column } from "@/components/ui/Column";
 import { SmallText } from "@/components/ui/SmallText";
 import { Link, router } from "expo-router";
 import { primary } from "@/utils/colors";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import NetInfo from "@react-native-community/netinfo";
 import { Pressable, StyleSheet } from "react-native";
 
 export default function Index() {
+  const [ultimasRecetas, setUltimasRecetas] = useState<
+    Array<{
+      id: number;
+      nombreReceta: string;
+      usuario: string;
+      calificacion: number;
+      cantidadPersonas: number;
+      duracion: number;
+      fotoPrincipal: string;
+    }>
+  >([]);
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       if (!state.isConnected) {
         router.replace("/nointernet");
       }
     });
+    // Fetch last three recipes on mount
+    axios
+      .get("http://localhost:8080/api/recetas/ultimas-tres")
+      .then((res) => {
+        setUltimasRecetas(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching ultimas tres recetas:", err);
+      });
     return () => unsubscribe();
   }, []);
 
   const handleLaterPress = () => {
-    
     router.push("/home");
   };
 
@@ -41,9 +62,16 @@ export default function Index() {
         </Column>
 
         <Column style={{ gap: 36 }}>
-          <WelcomeRecipe />
-          <WelcomeRecipe />
-          <WelcomeRecipe />
+          {ultimasRecetas.map((receta) => (
+            <WelcomeRecipe
+              key={receta.id}
+              title={receta.nombreReceta}
+              description={`Por: ${
+                receta.usuario
+              } - Rating: ${receta.calificacion.toFixed(1)}`}
+              image={receta.fotoPrincipal}
+            />
+          ))}
         </Column>
 
         <Column>
