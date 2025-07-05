@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { useUserStore } from "@/stores/user";
 export default function Index() {
   const { getAccountInfo, mail, nickname } = useUserStore();
-
+ 
   useEffect(() => {
     getAccountInfo()
       .then((info) => {

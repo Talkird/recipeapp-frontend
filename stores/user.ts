@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-
+ 
 const API_URL = "http://localhost:8080/api/usuarios";
 const API_URL_ALUMNO = "http://localhost:8080/api/alumnos";
 
