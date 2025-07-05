@@ -1,6 +1,7 @@
 import { Column } from "@/components/ui/Column";
 import { Row } from "@/components/ui/Row";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import { SubTitle } from "./ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
@@ -15,9 +16,11 @@ interface RecipeProps {
   cookTime: number;
   servings: number;
   imageUrl?: string;
+  id?: number;
 }
 
 const Recipe = ({
+  id,
   title,
   rating,
   author,
@@ -25,6 +28,7 @@ const Recipe = ({
   servings,
   imageUrl,
 }: RecipeProps) => {
+  const router = useRouter();
   const renderStars = (rating: number = 0) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -41,50 +45,61 @@ const Recipe = ({
     return <Row style={{ gap: 2 }}>{stars}</Row>;
   };
 
+  const handleClick = () => {
+    if (id !== undefined) {
+      router.push(`/home/recipe/${id}`);
+    }
+  };
+
   return (
-    <Row style={styles.container}>
-      <Row style={{ gap: 12 }}>
-        <Image style={styles.image} source={imageUrl} />
+    <TouchableOpacity
+      onPress={handleClick}
+      activeOpacity={0.8}
+      style={{ width: "80%" }}
+    >
+      <Row style={[styles.container, { width: "100%" }]}>
+        <Row style={{ gap: 12 }}>
+          <Image style={styles.image} source={imageUrl} />
+
+          <Column
+            style={{
+              gap: 2,
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+            }}
+          >
+            <SubTitle style={{ fontSize: 18 }}>{title}</SubTitle>
+
+            {renderStars(rating)}
+            <SmallText>Por: {author}</SmallText>
+          </Column>
+        </Row>
 
         <Column
           style={{
-            gap: 2,
-            alignItems: "flex-start",
             justifyContent: "flex-start",
+            alignItems: "flex-start",
+
+            gap: 2,
+            marginRight: 12,
           }}
         >
-          <SubTitle style={{ fontSize: 18 }}>{title}</SubTitle>
-
-          {renderStars(rating)}
-          <SmallText>Por: {author}</SmallText>
+          <Row style={{ gap: 6 }}>
+            <Timer style={styles.icon} />
+            <SmallText style={styles.iconText}>{cookTime}'</SmallText>
+          </Row>
+          <Row style={{ gap: 6 }}>
+            <Users style={styles.icon} />
+            <SmallText style={styles.iconText}>{servings}</SmallText>
+          </Row>
         </Column>
       </Row>
-
-      <Column
-        style={{
-          justifyContent: "flex-start",
-          alignItems: "flex-start",
-
-          gap: 2,
-          marginRight: 12,
-        }}
-      >
-        <Row style={{ gap: 6 }}>
-          <Timer style={styles.icon} />
-          <SmallText style={styles.iconText}>{cookTime}'</SmallText>
-        </Row>
-        <Row style={{ gap: 6 }}>
-          <Users style={styles.icon} />
-          <SmallText style={styles.iconText}>{servings}</SmallText>
-        </Row>
-      </Column>
-    </Row>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    width: "80%",
     height: 75,
     borderRadius: 12,
 

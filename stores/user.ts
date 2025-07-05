@@ -39,6 +39,8 @@ interface UserStore {
     dniFondo: string
   ) => Promise<void>;
   getAccountInfo: () => Promise<Alumno | null>;
+  isAlumno: () => Promise<boolean>;
+  getAlumnoId: () => Promise<number | null>;
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
@@ -47,6 +49,34 @@ export const useUserStore = create<UserStore>((set, get) => ({
   clave: null,
   idUsuario: null,
   choiceAlumno: false,
+
+  getAlumnoId: async () => {
+    const { idUsuario } = get();
+    if (!idUsuario) return null;
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/alumnos/usuario/${idUsuario}/alumno-id`
+      );
+      return typeof response.data === "number" ? response.data : null;
+    } catch (error) {
+      console.error("Error al obtener el id del alumno:", error);
+      return null;
+    }
+  },
+
+  isAlumno: async () => {
+    const { idUsuario } = get();
+    if (!idUsuario) return false;
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/alumnos/usuario/${idUsuario}/es-alumno`
+      );
+      return response.data === true;
+    } catch (error) {
+      console.error("Error al verificar si el usuario es alumno:", error);
+      return false;
+    }
+  },
 
   setChoiceAlumno: (choice) => {
     set({ choiceAlumno: choice });

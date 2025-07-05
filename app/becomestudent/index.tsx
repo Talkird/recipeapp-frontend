@@ -2,7 +2,6 @@ import React from "react";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
-import { SmallText } from "@/components/ui/SmallText";
 import Cooking from "@/assets/illustrations/cooking.svg";
 import { Button } from "@/components/ui/Button";
 import { router } from "expo-router";

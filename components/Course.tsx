@@ -1,5 +1,6 @@
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
+import { useRouter } from "expo-router";
 import { Row } from "./ui/Row";
 import { Column } from "./ui/Column";
 import { StyleSheet } from "react-native";
@@ -9,37 +10,52 @@ import { SmallText } from "./ui/SmallText";
 import { primary } from "@/utils/colors";
 
 interface CourseProps {
+  id: number;
   title: string;
   description: string;
   imageUrl: string;
   state: "active" | "inactive";
+  // You can add more fields as needed for passing full data
 }
 
-const Course = ({ title, description, state, imageUrl }: CourseProps) => {
+const Course = ({ id, title, description, state, imageUrl }: CourseProps) => {
+  const router = useRouter();
+  const handleClick = () => {
+    if (id !== undefined) {
+      router.push(`/courses/course/${id}`);
+    }
+  };
+
   return (
-    <Row style={styles.container}>
-      <Row style={{ gap: 12 }}>
-        <Image style={styles.image} source={imageUrl} />
-        <Column
-          style={{
-            gap: 2,
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
-          }}
-        >
-          <SubTitle>{title}</SubTitle>
-          <SmallText
+    <TouchableOpacity
+      onPress={handleClick}
+      activeOpacity={0.8}
+      style={{ width: "80%" }}
+    >
+      <Row style={styles.container}>
+        <Row style={{ gap: 12 }}>
+          <Image style={styles.image} source={imageUrl} />
+          <Column
             style={{
-              width: "80%",
-              textAlign: "left",
+              gap: 2,
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
             }}
           >
-            {description}
-          </SmallText>
-        </Column>
+            <SubTitle>{title}</SubTitle>
+            <SmallText
+              style={{
+                width: "80%",
+                textAlign: "left",
+              }}
+            >
+              {description}
+            </SmallText>
+          </Column>
+        </Row>
+        {/* TODO: Agregar estado del curso */}
       </Row>
-      {/* TODO: Agregar estado del curso */}
-    </Row>
+    </TouchableOpacity>
   );
 };
 
