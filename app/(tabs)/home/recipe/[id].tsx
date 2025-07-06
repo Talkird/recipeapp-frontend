@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { ScrollView, TouchableOpacity } from "react-native";
+import { ScrollView, TouchableOpacity, Alert } from "react-native";
 import { Heart } from "lucide-react-native";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
@@ -14,6 +14,7 @@ import { Star, StarHalf } from "lucide-react-native";
 import { Row } from "@/components/ui/Row";
 import { StyleSheet } from "react-native";
 import Comment from "@/components/Comment";
+import { useUserStore } from "@/stores/user";
 
 interface Comment {
   rating: number;
@@ -97,6 +98,26 @@ export default function RecipeDetail() {
     }
   }, [id]);
 
+  const idUsuario = useUserStore((s) => s.idUsuario);
+  const [addingFavorite, setAddingFavorite] = useState(false);
+  const handleAddFavorite = async () => {
+    if (!idUsuario || !receta) return;
+    setAddingFavorite(true);
+    try {
+      console.log("Sending recetaId as raw number:", receta.id);
+      await axios.post(
+        `http://localhost:8080/api/recetas-favoritas/${idUsuario}/agregar`,
+        receta.id,
+        { headers: { "Content-Type": "application/json" } }
+      );
+      Alert.alert("Favorito", "Receta agregada a favoritos");
+    } catch (e) {
+      Alert.alert("Error", "No se pudo agregar a favoritos");
+    } finally {
+      setAddingFavorite(false);
+    }
+  };
+
   if (loading || !receta) {
     return <SmallText>Cargando...</SmallText>;
   }
@@ -107,7 +128,11 @@ export default function RecipeDetail() {
         source={receta.fotoPrincipal}
         style={{ width: "100%", height: 250 }}
       />
-      <TouchableOpacity style={{ position: "absolute", top: 16, left: 16 }}>
+      <TouchableOpacity
+        style={{ position: "absolute", top: 16, left: 16 }}
+        onPress={handleAddFavorite}
+        disabled={addingFavorite}
+      >
         <Heart color={primary} fill={primary} size={32} />
       </TouchableOpacity>
 

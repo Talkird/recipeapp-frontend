@@ -23,7 +23,7 @@ export function WelcomeRecipe({
   image: string;
 }) {
   return (
-    <Row style={{ gap: 16 }}>
+    <Row style={{ gap: 16, width: "50%" }}>
       <Image source={image} style={styles.image} />
       <Column>
         <Title style={{ fontSize: 18, color: primary }}>{title}</Title>

@@ -1,26 +1,28 @@
+import React from "react";
+import { View, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { Image } from "expo-image";
+import { SubTitle } from "@/components/ui/SubTitle";
+import { Timer, Users, Star, StarHalf } from "lucide-react-native";
+import { primary } from "@/utils/colors";
 import { Column } from "@/components/ui/Column";
 import { Row } from "@/components/ui/Row";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { SubTitle } from "./ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
-import { Timer, Users } from "lucide-react-native";
-import { primary } from "@/utils/colors";
-import { Star, StarHalf } from "lucide-react-native";
+import { Title } from "@/components/ui/Title";
+import { Trash2 } from "lucide-react-native";
 
-interface RecipeProps {
+interface FavoriteRecipeProps {
+  id: number;
   title: string;
   rating?: number;
   author?: string;
-  cookTime: number;
-  servings: number;
+  cookTime?: number;
+  servings?: number;
   imageUrl?: string;
-  id?: number;
-  style?: any;
+  onRemove: (id: number) => void;
+  onPress?: () => void;
 }
 
-const Recipe = ({
+const FavoriteRecipe: React.FC<FavoriteRecipeProps> = ({
   id,
   title,
   rating,
@@ -28,9 +30,9 @@ const Recipe = ({
   cookTime,
   servings,
   imageUrl,
-  style,
-}: RecipeProps) => {
-  const router = useRouter();
+  onRemove,
+  onPress,
+}) => {
   const renderStars = (rating: number = 0) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -47,22 +49,15 @@ const Recipe = ({
     return <Row style={{ gap: 2 }}>{stars}</Row>;
   };
 
-  const handleClick = () => {
-    if (id !== undefined) {
-      router.push(`/home/recipe/${id}`);
-    }
-  };
-
   return (
     <TouchableOpacity
-      onPress={handleClick}
+      onPress={onPress}
       activeOpacity={0.8}
-      style={[{ width: "80%" }, style]}
+      style={{ width: "100%" }}
     >
-      <Row style={[styles.container, { width: "100%" }]}>
+      <Row style={styles.container}>
         <Row style={{ gap: 12 }}>
           <Image style={styles.image} source={imageUrl} />
-
           <Column
             style={{
               gap: 2,
@@ -71,30 +66,36 @@ const Recipe = ({
             }}
           >
             <SubTitle style={{ fontSize: 18 }}>{title}</SubTitle>
-
             {renderStars(rating)}
-            {author ? <SmallText>Por: {author}</SmallText> : null}
+            <SmallText>Por: {author}</SmallText>
           </Column>
         </Row>
-
-        <Column
+        {/* Removed cook time and servings for favorite recipe card */}
+        <TouchableOpacity
+          onPress={(e) => {
+            e.stopPropagation();
+            Alert.alert(
+              "Eliminar favorito",
+              "¿Seguro que quieres eliminar esta receta de tus favoritos?",
+              [
+                { text: "Cancelar", style: "cancel" },
+                {
+                  text: "Eliminar",
+                  style: "destructive",
+                  onPress: () => onRemove(id),
+                },
+              ]
+            );
+          }}
           style={{
-            justifyContent: "flex-start",
-            alignItems: "flex-start",
-
-            gap: 2,
-            marginRight: 12,
+            padding: 16,
+            justifyContent: "center",
+            alignItems: "center",
+            alignSelf: "stretch",
           }}
         >
-          <Row style={{ gap: 6 }}>
-            <Timer style={styles.icon} />
-            <SmallText style={styles.iconText}>{cookTime}'</SmallText>
-          </Row>
-          <Row style={{ gap: 6 }}>
-            <Users style={styles.icon} />
-            <SmallText style={styles.iconText}>{servings}</SmallText>
-          </Row>
-        </Column>
+          <Trash2 color="#e74c3c" size={32} />
+        </TouchableOpacity>
       </Row>
     </TouchableOpacity>
   );
@@ -104,7 +105,6 @@ const styles = StyleSheet.create({
   container: {
     height: 75,
     borderRadius: 12,
-
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -112,11 +112,12 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     flexDirection: "row",
-
     justifyContent: "space-between",
     padding: 0,
-
     backgroundColor: "#FFFFFF",
+    marginBottom: 12,
+    width: "90%",
+    alignSelf: "center",
   },
   image: {
     borderTopLeftRadius: 12,
@@ -152,4 +153,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Recipe;
+export default FavoriteRecipe;

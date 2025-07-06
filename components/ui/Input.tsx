@@ -41,6 +41,7 @@ export default function Input({
         onChangeText={onChangeText}
         secureTextEntry={type === "password"}
         editable={!disabled}
+        autoCapitalize="none"
       />
     </View>
   );

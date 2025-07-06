@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import { View } from "react-native";
 import { useUserStore } from "@/stores/user";
 import { ScrollView } from "react-native";
 import { Column } from "@/components/ui/Column";
@@ -26,30 +27,8 @@ const AddRecipeScreen: React.FC = () => {
   const [createError, setCreateError] = React.useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = React.useState<string | null>(null);
   // Helper to map ingredients to UtilizadoRequest (with IDs)
+  // Build utilizados array for UtilizadoRequest DTO
   const buildUtilizados = () => {
-    // Only allow dummy if both arrays are non-empty and have valid IDs
-    if (ingredients.length === 0) {
-      const dummyIng = ingredientesBackend[0];
-      const dummyUnidad = unidadesBackend[0];
-      if (
-        dummyIng &&
-        dummyIng.idIngrediente != null &&
-        dummyUnidad &&
-        dummyUnidad.idUnidad != null
-      ) {
-        return [
-          {
-            idIngrediente: dummyIng.idIngrediente,
-            cantidad: 1,
-            idUnidad: dummyUnidad.idUnidad,
-            observaciones: "Ingrediente de ejemplo",
-          },
-        ];
-      }
-      // If no valid dummy, return empty array
-      return [];
-    }
-    // Filter out any ingredient with missing IDs
     return ingredients
       .filter(
         (ing) =>
@@ -61,7 +40,7 @@ const AddRecipeScreen: React.FC = () => {
         idIngrediente: ing.idIngrediente,
         cantidad: parseFloat(ing.quantity),
         idUnidad: ing.idUnidad,
-        observaciones: null,
+        observaciones: ing.observaciones ?? null,
       }));
   };
   // Minimal UI for tipoReceta picker (fetch from backend)
@@ -127,6 +106,15 @@ const AddRecipeScreen: React.FC = () => {
   // Minimal UI for pasos (steps)
   const [pasos, setPasos] = React.useState<any[]>([]);
   const [pasoTexto, setPasoTexto] = React.useState("");
+  const [mediaUrl, setMediaUrl] = React.useState("");
+  const [mediaType, setMediaType] = React.useState<"imagen" | "video">(
+    "imagen"
+  );
+  const [mediaExtension, setMediaExtension] = React.useState("jpg");
+  const [selectedPasoIdx, setSelectedPasoIdx] = React.useState<number | null>(
+    null
+  );
+
   const handleAddPaso = () => {
     if (pasoTexto.trim()) {
       setPasos([
@@ -134,11 +122,36 @@ const AddRecipeScreen: React.FC = () => {
         {
           nroPaso: pasos.length + 1,
           texto: pasoTexto,
-          multimedia: [], // Always include multimedia array
+          multimedia: [],
         },
       ]);
       setPasoTexto("");
     }
+  };
+
+  // Add multimedia to a specific paso
+  const handleAddMediaToPaso = (idx: number) => {
+    if (!mediaUrl.trim()) return;
+    setPasos((prev) =>
+      prev.map((p: any, i: number) =>
+        i === idx
+          ? {
+              ...p,
+              multimedia: [
+                ...(Array.isArray(p.multimedia) ? p.multimedia : []),
+                {
+                  tipoContenido: mediaType,
+                  extension: mediaExtension,
+                  urlContenido: mediaUrl,
+                },
+              ],
+            }
+          : p
+      )
+    );
+    setMediaUrl("");
+    setMediaExtension(mediaType === "imagen" ? "jpg" : "mp4");
+    setSelectedPasoIdx(null);
   };
 
   // Minimal UI for fotos (photos)
@@ -174,6 +187,11 @@ const AddRecipeScreen: React.FC = () => {
         setCreating(false);
         return;
       }
+      if (!pasos.length) {
+        setCreateError("Debes agregar al menos un paso.");
+        setCreating(false);
+        return;
+      }
       const recetaRequest = {
         idUsuario: idUsuario,
         nombreReceta: recipeName,
@@ -183,12 +201,18 @@ const AddRecipeScreen: React.FC = () => {
         cantidadPersonas: servings ? parseInt(servings) : 1,
         duracion: estimatedTime ? parseInt(estimatedTime) : 1,
         idTipoReceta: tipoRecetaId,
-        pasos: pasos.map((p) => ({
+        pasos: pasos.map((p: any) => ({
           nroPaso: p.nroPaso,
           texto: p.texto,
-          multimedia: Array.isArray(p.multimedia) ? p.multimedia : [],
+          multimedia: Array.isArray(p.multimedia)
+            ? p.multimedia.map((m: any) => ({
+                tipoContenido: m.tipoContenido,
+                extension: m.extension,
+                urlContenido: m.urlContenido,
+              }))
+            : [],
         })),
-        utilizados: utilizados.map((u) => ({
+        utilizados: buildUtilizados().map((u: any) => ({
           idIngrediente: u.idIngrediente,
           cantidad: u.cantidad,
           idUnidad: u.idUnidad,
@@ -203,13 +227,14 @@ const AddRecipeScreen: React.FC = () => {
       };
       // Get token if needed
       // const token = useUserStore((s) => s.token);
+      console.log("recetaRequest", JSON.stringify(recetaRequest, null, 2));
       const response = await axios.post(
         "http://localhost:8080/api/recetas/create",
         recetaRequest
         // , { headers: { Authorization: `Bearer ${token}` } }
       );
       setCreateSuccess("Receta creada exitosamente!");
-      // Optionally reset form
+
       setNameVerified(false);
       setRecipeName("");
       setRecipeDescription("");
@@ -243,8 +268,9 @@ const AddRecipeScreen: React.FC = () => {
   const [ingredientName, setIngredientName] = React.useState("");
   const [ingredientQuantity, setIngredientQuantity] = React.useState("");
   const [ingredientUnit, setIngredientUnit] = React.useState("");
+  const [ingredientObservaciones, setIngredientObservaciones] =
+    React.useState("");
 
-  // Get the current user's nickname from the user store
   const nickname = useUserStore((s) => s.nickname);
   const uid = useUserStore((s) => s.idUsuario);
 
@@ -284,6 +310,7 @@ const AddRecipeScreen: React.FC = () => {
     quantity: string;
     idUnidad: number;
     unit: string;
+    observaciones?: string | null;
   };
 
   const [ingredients, setIngredients] = React.useState<Ingredient[]>([]);
@@ -305,11 +332,13 @@ const AddRecipeScreen: React.FC = () => {
           quantity: ingredientQuantity,
           idUnidad: selectedUnidad.idUnidad,
           unit: selectedUnidad.descripcion,
+          observaciones: ingredientObservaciones || null,
         },
       ]);
       setIngredientName("");
       setIngredientQuantity("");
       setIngredientUnit("");
+      setIngredientObservaciones("");
     }
   };
 
@@ -353,20 +382,107 @@ const AddRecipeScreen: React.FC = () => {
           <>
             <Column style={{ gap: 16 }}>
               <SubTitle>Tipo de receta</SubTitle>
-              <RNPickerSelect
-                onValueChange={setTipoReceta}
-                items={tipoRecetaOptions}
-                value={tipoReceta}
-                placeholder={{ label: "Selecciona un tipo", value: "" }}
-                style={{ inputIOS: { padding: 12, fontSize: 16 } }}
-              />
+              <View
+                style={{ width: 250, alignSelf: "center", marginBottom: 8 }}
+              >
+                <RNPickerSelect
+                  onValueChange={setTipoReceta}
+                  items={tipoRecetaOptions}
+                  value={tipoReceta}
+                  placeholder={{ label: "Selecciona un tipo", value: "" }}
+                  style={{
+                    inputIOS: {
+                      padding: 12,
+                      fontSize: 16,
+                      color: "#000",
+                      width: "100%",
+                    },
+                    viewContainer: { width: "100%" },
+                    placeholder: { color: "#808080" },
+                    iconContainer: {
+                      top: 0,
+                      right: 0,
+                      height: "100%",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      position: "absolute",
+                      width: 32,
+                    },
+                  }}
+                  doneText="Listo"
+                  Icon={() => <Pipette size={20} color="#808080" />}
+                />
+              </View>
               <Column style={{ gap: 16 }}>
                 <SubTitle>Pasos</SubTitle>
                 {pasos.map((paso, idx) => (
-                  <Row key={idx} style={{ gap: 8 }}>
-                    <SmallText>Paso {paso.nroPaso}:</SmallText>
-                    <SmallText>{paso.texto}</SmallText>
-                  </Row>
+                  <Column key={idx} style={{ gap: 4, marginBottom: 8 }}>
+                    <Row style={{ gap: 8 }}>
+                      <SmallText>Paso {paso.nroPaso}:</SmallText>
+                      <SmallText>{paso.texto}</SmallText>
+                    </Row>
+                    {/* List multimedia for this paso */}
+                    {Array.isArray(paso.multimedia) &&
+                      paso.multimedia.length > 0 && (
+                        <Column style={{ marginLeft: 16, gap: 2 }}>
+                          {paso.multimedia.map((m: any, mIdx: number) => (
+                            <SmallText key={mIdx}>
+                              {m.tipoContenido === "imagen" ? "🖼️" : "🎬"}{" "}
+                              {m.urlContenido} ({m.extension})
+                            </SmallText>
+                          ))}
+                        </Column>
+                      )}
+                    {/* Add multimedia UI */}
+                    {selectedPasoIdx === idx ? (
+                      <Column style={{ gap: 8, marginTop: 4 }}>
+                        <Input
+                          placeholder="URL de imagen o video"
+                          value={mediaUrl}
+                          onChangeText={setMediaUrl}
+                        />
+                        <RNPickerSelect
+                          onValueChange={(v) => {
+                            setMediaType(v);
+                            setMediaExtension(v === "imagen" ? "jpg" : "mp4");
+                          }}
+                          items={[
+                            { label: "Imagen", value: "imagen" },
+                            { label: "Video", value: "video" },
+                          ]}
+                          value={mediaType}
+                          style={{
+                            inputIOS: {
+                              padding: 8,
+                              fontSize: 14,
+                              color: "#000",
+                            },
+                          }}
+                        />
+                        <Input
+                          placeholder="Extensión"
+                          value={mediaExtension}
+                          onChangeText={setMediaExtension}
+                        />
+                        <Button onPress={() => handleAddMediaToPaso(idx)}>
+                          Agregar
+                        </Button>
+                        <Button
+                          onPress={() => setSelectedPasoIdx(null)}
+                          style={{ backgroundColor: "#eee" }}
+                        >
+                          Cancelar
+                        </Button>
+                      </Column>
+                    ) : (
+                      <Button
+                        onPress={() => setSelectedPasoIdx(idx)}
+                        style={{ width: 120 }}
+                      >
+                        + Multimedia
+                      </Button>
+                    )}
+                  </Column>
                 ))}
                 <Input
                   placeholder="Describe el siguiente paso"
@@ -375,34 +491,87 @@ const AddRecipeScreen: React.FC = () => {
                 />
                 <Button onPress={handleAddPaso}>Agregar paso</Button>
                 <SubTitle>Agregá ingredientes a tu receta</SubTitle>
-                <RNPickerSelect
-                  onValueChange={setIngredientName}
-                  items={ingredientesBackend.map((ing) => ({
-                    label: ing.nombre,
-                    value: ing.nombre,
-                  }))}
-                  value={ingredientName}
-                  placeholder={{
-                    label: "Selecciona un ingrediente",
-                    value: "",
-                  }}
-                  style={{ inputIOS: { padding: 12, fontSize: 16 } }}
-                />
+                <View
+                  style={{ width: 250, alignSelf: "center", marginBottom: 8 }}
+                >
+                  <RNPickerSelect
+                    onValueChange={setIngredientName}
+                    items={ingredientesBackend.map((ing) => ({
+                      label: ing.nombre,
+                      value: ing.nombre,
+                    }))}
+                    value={ingredientName}
+                    placeholder={{
+                      label: "Selecciona un ingrediente",
+                      value: "",
+                    }}
+                    style={{
+                      inputIOS: {
+                        padding: 12,
+                        fontSize: 16,
+                        color: "#000",
+                        width: "100%",
+                      },
+                      viewContainer: { width: "100%" },
+                      placeholder: { color: "#808080" },
+                      iconContainer: {
+                        top: 0,
+                        right: 0,
+                        height: "100%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        position: "absolute",
+                        width: 32,
+                      },
+                    }}
+                    doneText="Listo"
+                    Icon={() => <Pizza size={20} color="#808080" />}
+                  />
+                </View>
                 <Input
                   Icon={Hash}
                   placeholder="Cantidad"
                   value={ingredientQuantity}
                   onChangeText={setIngredientQuantity}
                 />
-                <RNPickerSelect
-                  onValueChange={setIngredientUnit}
-                  items={unidadesBackend.map((unidad) => ({
-                    label: unidad.descripcion,
-                    value: unidad.descripcion,
-                  }))}
-                  value={ingredientUnit}
-                  placeholder={{ label: "Selecciona una unidad", value: "" }}
-                  style={{ inputIOS: { padding: 12, fontSize: 16 } }}
+                <View
+                  style={{ width: 250, alignSelf: "center", marginBottom: 8 }}
+                >
+                  <RNPickerSelect
+                    onValueChange={setIngredientUnit}
+                    items={unidadesBackend.map((unidad) => ({
+                      label: unidad.descripcion,
+                      value: unidad.descripcion,
+                    }))}
+                    value={ingredientUnit}
+                    placeholder={{ label: "Selecciona una unidad", value: "" }}
+                    style={{
+                      inputIOS: {
+                        padding: 12,
+                        fontSize: 16,
+                        color: "#000",
+                        width: "100%",
+                      },
+                      viewContainer: { width: "100%" },
+                      placeholder: { color: "#808080" },
+                      iconContainer: {
+                        top: 0,
+                        right: 0,
+                        height: "100%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        position: "absolute",
+                        width: 32,
+                      },
+                    }}
+                    doneText="Listo"
+                    Icon={() => <Hash size={20} color="#808080" />}
+                  />
+                </View>
+                <Input
+                  placeholder="Observaciones (opcional)"
+                  value={ingredientObservaciones}
+                  onChangeText={setIngredientObservaciones}
                 />
                 <Button onPress={handleAddIngredient}>Agregar</Button>
               </Column>
