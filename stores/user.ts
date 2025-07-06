@@ -1,16 +1,33 @@
 import { create } from "zustand";
 import axios from "axios";
- 
-const API_URL = "http://localhost:8080/api/usuarios";
-const API_URL_ALUMNO = "http://localhost:8080/api/alumnos";
+import { API_URLS } from "@/lib/constants";
+
+const API_URL = API_URLS.USUARIOS;
+const API_URL_ALUMNO = API_URLS.ALUMNOS;
 
 interface Alumno {
   idAlumno: number;
   numeroTarjeta: string;
   dniFrente: string;
-  dniFondo: string;
-  tramite: string;
-  cuentaCorriente: number; // Cambiado de string a number para coincidir con el backend
+  dniFondo?: string;
+  tramite?: string;
+  cuentaCorriente?: number; // Opcional, podría estar aquí
+  saldo?: number; // Opcional, podría estar aquí
+}
+
+// Tipo para la respuesta de la API de información de cuenta
+interface AccountInfoResponse {
+  idUsuario: number;
+  mail: string;
+  nickname: string;
+  nombre: string | null;
+  direccion: string | null;
+  avatar: string | null;
+  habilitado: boolean;
+  alumno?: Alumno; // Nested alumno object
+  cuentaCorriente?: number; // Fallback location
+  saldo?: number; // Fallback location
+  numeroTarjeta?: string; // Fallback location
 }
 
 interface UserStore {
@@ -44,7 +61,7 @@ interface UserStore {
     dniFondo: string,
     cuentaCorriente?: string
   ) => Promise<void>;
-  getAccountInfo: () => Promise<Alumno | null>;
+  getAccountInfo: () => Promise<AccountInfoResponse | null>;
   isAlumno: () => Promise<boolean>;
   getAlumnoId: () => Promise<number | null>;
   refreshAlumnoId: () => Promise<void>;
@@ -113,7 +130,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
     // Solo si no tenemos la información, hacer la llamada al backend
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/alumnos/usuario/${idUsuario}/es-alumno`
+        `${API_URLS.ALUMNOS}/usuario/${idUsuario}/es-alumno`
       );
       const isAlumnoResult = response.data === true;
       set({ esAlumno: isAlumnoResult });
@@ -217,7 +234,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
   login: async (mail, password) => {
     try {
-      const response = await axios.post(`http://localhost:8080/auth/login`, {
+      const response = await axios.post(`${API_URLS.AUTH}/login`, {
         mail,
         password,
       });
@@ -393,33 +410,124 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
   getAlumnoDetails: async () => {
     const { idUsuario } = get();
+    console.log("🔍 getAlumnoDetails - idUsuario:", idUsuario);
+    
     if (!idUsuario) {
-      console.warn("No hay usuario logueado");
+      console.warn("❌ No hay usuario logueado");
       return null;
     }
     
     try {
-      const response = await axios.get(`${API_URL_ALUMNO}/usuario/${idUsuario}`);
+      const url = `${API_URL_ALUMNO}/usuario/${idUsuario}`;
+      console.log("🔍 getAlumnoDetails - URL:", url);
+      
+      const response = await axios.get(url);
+      console.log("🔍 getAlumnoDetails - Response status:", response.status);
+      console.log("🔍 getAlumnoDetails - Response data:", response.data);
+      
       return response.data;
     } catch (error) {
-      console.error("Error al obtener detalles del alumno:", error);
+      console.error("❌ Error al obtener detalles del alumno:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("❌ Status:", error.response?.status);
+        console.error("❌ Data:", error.response?.data);
+        console.error("❌ URL:", error.config?.url);
+      }
       return null;
     }
   },
 
   getSaldo: async () => {
+    console.log("💰 getSaldo - Iniciando...");
+    
+    // Primero intentar obtener desde el endpoint
     const alumnoDetails = await get().getAlumnoDetails();
-    if (alumnoDetails) {
-      return alumnoDetails.cuentaCorriente || 0;
+    console.log("💰 getSaldo - alumnoDetails:", alumnoDetails);
+    
+    if (alumnoDetails && alumnoDetails.cuentaCorriente !== undefined) {
+      const saldo = alumnoDetails.cuentaCorriente;
+      console.log("💰 getSaldo - saldo desde endpoint:", saldo);
+      return saldo;
     }
+    
+    // Fallback: intentar obtener desde getAccountInfo
+    console.log("💰 getSaldo - Intentando fallback con getAccountInfo...");
+    try {
+      const accountInfo = await get().getAccountInfo();
+      console.log("💰 getSaldo - accountInfo COMPLETO:", JSON.stringify(accountInfo, null, 2));
+      
+      // Verificar si está en accountInfo.alumno.saldo
+      if (accountInfo?.alumno?.saldo !== undefined) {
+        console.log("💰 getSaldo - Saldo encontrado en accountInfo.alumno:", accountInfo.alumno.saldo);
+        return accountInfo.alumno.saldo;
+      }
+      
+      // Verificar si está en accountInfo.alumno.cuentaCorriente
+      if (accountInfo?.alumno?.cuentaCorriente !== undefined) {
+        console.log("💰 getSaldo - Saldo encontrado en accountInfo.alumno.cuentaCorriente:", accountInfo.alumno.cuentaCorriente);
+        return accountInfo.alumno.cuentaCorriente;
+      }
+      
+      // Verificar si está en accountInfo.cuentaCorriente (fallback)
+      if (accountInfo?.cuentaCorriente !== undefined) {
+        console.log("💰 getSaldo - Saldo encontrado en accountInfo.cuentaCorriente:", accountInfo.cuentaCorriente);
+        return accountInfo.cuentaCorriente;
+      }
+      
+      // Verificar si está en accountInfo.saldo (fallback)
+      if (accountInfo?.saldo !== undefined) {
+        console.log("💰 getSaldo - Saldo encontrado en accountInfo.saldo:", accountInfo.saldo);
+        return accountInfo.saldo;
+      }
+      
+      // Si no encontramos saldo en ningún lugar, devolver 0 como valor por defecto
+      console.log("💰 getSaldo - No se encontró saldo en ninguna ubicación, devolviendo 0");
+      return 0;
+    } catch (error) {
+      console.error("💰 getSaldo - Error en fallback:", error);
+    }
+    
+    console.log("💰 getSaldo - No se pudo obtener saldo");
     return null;
   },
 
   getNumeroTarjeta: async () => {
+    console.log("💳 getNumeroTarjeta - Iniciando...");
+    
+    // Primero intentar obtener desde el endpoint
     const alumnoDetails = await get().getAlumnoDetails();
-    if (alumnoDetails) {
-      return alumnoDetails.numeroTarjeta || null;
+    console.log("💳 getNumeroTarjeta - alumnoDetails:", alumnoDetails);
+    
+    if (alumnoDetails && alumnoDetails.numeroTarjeta) {
+      const tarjeta = alumnoDetails.numeroTarjeta;
+      console.log("💳 getNumeroTarjeta - tarjeta desde endpoint:", tarjeta ? `****${tarjeta.slice(-4)}` : null);
+      return tarjeta;
     }
+    
+    // Fallback: intentar obtener desde getAccountInfo
+    console.log("💳 getNumeroTarjeta - Intentando fallback con getAccountInfo...");
+    try {
+      const accountInfo = await get().getAccountInfo();
+      console.log("💳 getNumeroTarjeta - accountInfo:", accountInfo);
+      
+      // Verificar si está en accountInfo.alumno.numeroTarjeta
+      if (accountInfo?.alumno?.numeroTarjeta) {
+        const tarjeta = accountInfo.alumno.numeroTarjeta;
+        console.log("💳 getNumeroTarjeta - tarjeta desde accountInfo.alumno:", tarjeta ? `****${tarjeta.slice(-4)}` : null);
+        return tarjeta;
+      }
+      
+      // Fallback: verificar si está en accountInfo.numeroTarjeta
+      if (accountInfo?.numeroTarjeta) {
+        const tarjeta = accountInfo.numeroTarjeta;
+        console.log("💳 getNumeroTarjeta - tarjeta desde accountInfo:", tarjeta ? `****${tarjeta.slice(-4)}` : null);
+        return tarjeta;
+      }
+    } catch (error) {
+      console.error("💳 getNumeroTarjeta - Error en fallback:", error);
+    }
+    
+    console.log("💳 getNumeroTarjeta - No se pudo obtener tarjeta");
     return null;
   },
 }));

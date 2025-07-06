@@ -13,6 +13,7 @@ import { Timer, Users } from "lucide-react-native";
 import { Star, StarHalf } from "lucide-react-native";
 import { Row } from "@/components/ui/Row";
 import { StyleSheet } from "react-native";
+import { API_URLS } from "@/lib/constants";
 import Comment from "@/components/Comment";
 
 interface Comment {
@@ -91,7 +92,7 @@ export default function RecipeDetail() {
   useEffect(() => {
     if (id) {
       axios
-        .get(`http://localhost:8080/api/recetas/${id}`)
+        .get(`${API_URLS.RECETAS}/${id}`)
         .then((res) => setReceta(res.data))
         .finally(() => setLoading(false));
     }

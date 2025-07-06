@@ -8,6 +8,7 @@ import { SubTitle } from "@/components/ui/SubTitle";
 import Input from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Row } from "@/components/ui/Row";
+import { API_URLS } from "@/lib/constants";
 import {
   FileQuestion,
   Hash,
@@ -71,7 +72,7 @@ const AddRecipeScreen: React.FC = () => {
   >([]);
   React.useEffect(() => {
     axios
-      .post("http://localhost:8080/api/tiporeceta/getAll")
+      .post(`${API_URLS.TIPOS_RECETA}/getAll`)
       .then((res) => {
         if (Array.isArray(res.data)) {
           setTipoRecetaOptions(
@@ -88,7 +89,7 @@ const AddRecipeScreen: React.FC = () => {
   React.useEffect(() => {
     if (tipoReceta) {
       axios
-        .post("http://localhost:8080/api/tiporeceta/getByDescripcion", null, {
+        .post(`${API_URLS.TIPOS_RECETA}/getByDescripcion`, null, {
           params: { descripcion: tipoReceta },
         })
         .then((res) => {
@@ -110,7 +111,7 @@ const AddRecipeScreen: React.FC = () => {
   );
   React.useEffect(() => {
     axios
-      .get("http://localhost:8080/ingredientes/get/All")
+      .get(`${API_URLS.INGREDIENTES}/get/All`)
       .then((res) => setIngredientesBackend(res.data))
       .catch(() => setIngredientesBackend([]));
   }, []);
@@ -119,7 +120,7 @@ const AddRecipeScreen: React.FC = () => {
   const [unidadesBackend, setUnidadesBackend] = React.useState<any[]>([]);
   React.useEffect(() => {
     axios
-      .get("http://localhost:8080/api/unidades")
+      .get(`${API_URLS.UNIDADES}`)
       .then((res) => setUnidadesBackend(res.data))
       .catch(() => setUnidadesBackend([]));
   }, []);
@@ -204,7 +205,7 @@ const AddRecipeScreen: React.FC = () => {
       // Get token if needed
       // const token = useUserStore((s) => s.token);
       const response = await axios.post(
-        "http://localhost:8080/api/recetas/create",
+        `${API_URLS.RECETAS}/create`,
         recetaRequest
         // , { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -259,7 +260,7 @@ const AddRecipeScreen: React.FC = () => {
       }
       // Call backend: /api/recetas/usuario/id/{idUsuario}?nombreReceta={recipeName}
       const response = await axios.get(
-        `http://localhost:8080/api/recetas/usuario/id/${uid}`,
+        `${API_URLS.RECETAS}/usuario/id/${uid}`,
         { params: { nombreReceta: recipeName } }
       );
       // If no recipe exists, backend should return null or 404

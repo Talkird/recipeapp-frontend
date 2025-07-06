@@ -1,6 +1,6 @@
 import { ScrollView, Alert } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLocalSearchParams, useFocusEffect, router } from "expo-router";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
@@ -13,6 +13,7 @@ import Label from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
 import { useUserStore } from "@/stores/user";
 import { useCursoStore, CursoDetalleDTO } from "@/stores/courses";
+import { API_URLS } from "@/lib/constants";
 
 export default function CursoDetail() {
   const { id } = useLocalSearchParams();
@@ -21,43 +22,64 @@ export default function CursoDetail() {
   const [inscribiendose, setInscribiendose] = useState(false);
   const [yaInscripto, setYaInscripto] = useState(false);
   const getAlumnoId = useUserStore((state) => state.getAlumnoId);
+  const { isAlumno } = useUserStore();
   const { fetchCursoDetalle, crearInscripcion } = useCursoStore();
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!id) return;
-      setLoading(true);
-      try {
-        // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
-        const cursoDetalle = await fetchCursoDetalle(parseInt(id as string));
-        if (cursoDetalle) {
-          setCurso(cursoDetalle);
-        }
-
-        // Verificar si el alumno ya está inscrito en este curso
-        const alumnoId = await getAlumnoId();
-        if (alumnoId) {
-          try {
-            const inscripcionesRes = await axios.get(
-              `http://localhost:8080/api/inscripciones/alumno/${alumnoId}`
-            );
-            const inscripciones = inscripcionesRes.data;
-            const yaEstaInscrito = inscripciones.some(
-              (inscripcion: any) => inscripcion.cronograma.curso.idCurso === parseInt(id as string)
-            );
-            setYaInscripto(yaEstaInscrito);
-          } catch (error) {
-            console.error("Error al verificar inscripción:", error);
-          }
-        }
-      } catch (e) {
-        console.error("Error al obtener detalle del curso:", e);
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = useCallback(async () => {
+    if (!id) return;
+    
+    // VERIFICAR SI EL USUARIO ES ALUMNO ANTES DE MOSTRAR EL CURSO
+    // Si no es alumno, redirigir a la página de registro de alumno
+    const esAlumno = await isAlumno();
+    
+    if (!esAlumno) {
+      console.log("Usuario no es alumno, redirigiendo a registro de alumno");
+      router.replace("/becomestudent");
+      return;
     }
+    
+    // Solo continuar si el usuario es alumno
+    setLoading(true);
+    try {
+      // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
+      const cursoDetalle = await fetchCursoDetalle(parseInt(id as string));
+      if (cursoDetalle) {
+        setCurso(cursoDetalle);
+      }
+
+      // Verificar si el alumno ya está inscrito en este curso
+      const alumnoId = await getAlumnoId();
+      if (alumnoId) {
+        try {
+          const inscripcionesRes = await axios.get(
+            `${API_URLS.INSCRIPCIONES}/alumno/${alumnoId}`
+          );
+          const inscripciones = inscripcionesRes.data;
+          const yaEstaInscrito = inscripciones.some(
+            (inscripcion: any) => inscripcion.cronograma.curso.idCurso === parseInt(id as string)
+          );
+          setYaInscripto(yaEstaInscrito);
+        } catch (error) {
+          console.error("Error al verificar inscripción:", error);
+        }
+      }
+    } catch (e) {
+      console.error("Error al obtener detalle del curso:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, [id, fetchCursoDetalle, getAlumnoId, isAlumno]);
+
+  useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [fetchData]);
+
+  // Actualizar datos cada vez que el usuario regresa a esta pantalla
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
 
   const handleInscribirse = async () => {
     try {
