@@ -131,7 +131,11 @@ const AddRecipeScreen: React.FC = () => {
     if (pasoTexto.trim()) {
       setPasos([
         ...pasos,
-        { nroPaso: pasos.length + 1, texto: pasoTexto, multimedia: [] },
+        {
+          nroPaso: pasos.length + 1,
+          texto: pasoTexto,
+          multimedia: [], // Always include multimedia array
+        },
       ]);
       setPasoTexto("");
     }
@@ -171,25 +175,31 @@ const AddRecipeScreen: React.FC = () => {
         return;
       }
       const recetaRequest = {
+        idUsuario: idUsuario,
         nombreReceta: recipeName,
         descripcionReceta: recipeDescription,
-        idTipoReceta: tipoRecetaId,
+        fotoPrincipal: fotoUrl || "https://placehold.co/600x400",
         porciones: servings ? parseInt(servings) : 1,
-        pasos: pasos,
-        utilizados,
+        cantidadPersonas: servings ? parseInt(servings) : 1,
+        duracion: estimatedTime ? parseInt(estimatedTime) : 1,
+        idTipoReceta: tipoRecetaId,
+        pasos: pasos.map((p) => ({
+          nroPaso: p.nroPaso,
+          texto: p.texto,
+          multimedia: Array.isArray(p.multimedia) ? p.multimedia : [],
+        })),
+        utilizados: utilizados.map((u) => ({
+          idIngrediente: u.idIngrediente,
+          cantidad: u.cantidad,
+          idUnidad: u.idUnidad,
+          observaciones: u.observaciones ?? null,
+        })),
         fotos: [
           {
-            idFoto: 1,
-            idReceta: null,
             urlFoto: fotoUrl || "https://placehold.co/600x400",
             extension: "jpg",
           },
         ],
-        idUsuario: idUsuario,
-        calificacion: null,
-        cantidadPersonas: servings ? parseInt(servings) : 1,
-        duracion: estimatedTime ? parseInt(estimatedTime) : 1,
-        fotoPrincipal: fotoUrl || "https://placehold.co/600x400",
       };
       // Get token if needed
       // const token = useUserStore((s) => s.token);
@@ -236,6 +246,7 @@ const AddRecipeScreen: React.FC = () => {
 
   // Get the current user's nickname from the user store
   const nickname = useUserStore((s) => s.nickname);
+  const uid = useUserStore((s) => s.idUsuario);
 
   const handleVerifyName = async () => {
     setVerifying(true);
@@ -246,13 +257,13 @@ const AddRecipeScreen: React.FC = () => {
         setVerifying(false);
         return;
       }
-      // Call backend: /api/recetas/search/usuario/{nickname}?criterio={recipeName}
+      // Call backend: /api/recetas/usuario/id/{idUsuario}?nombreReceta={recipeName}
       const response = await axios.get(
-        `http://localhost:8080/api/recetas/search/usuario/${encodeURIComponent(
-          nickname
-        )}?criterio=${encodeURIComponent(recipeName)}`
+        `http://localhost:8080/api/recetas/usuario/id/${uid}`,
+        { params: { nombreReceta: recipeName } }
       );
-      if (Array.isArray(response.data) && response.data.length === 0) {
+      // If no recipe exists, backend should return null or 404
+      if (!response.data) {
         setNameVerified(true);
       } else {
         setVerifyError(

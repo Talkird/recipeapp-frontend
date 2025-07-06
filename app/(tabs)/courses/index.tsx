@@ -9,20 +9,22 @@ import { Row } from "@/components/ui/Row";
 import { useUserStore } from "@/stores/user";
 import { Button, View } from "react-native";
 import { primary } from "@/utils/colors";
-<<<<<<< HEAD
 import CoursesSearchBar from "@/components/ui/CoursesSearchBar";
-=======
 import { useFocusEffect } from "@react-navigation/native";
->>>>>>> 4cd49e3bf89aa8a1db2c00bc7d75e2d912d30006
 
 export default function Index() {
   const [tab, setTab] = useState<"available" | "mine">("available");
   const [loading, setLoading] = useState(false);
   const refreshAlumnoId = useUserStore((state) => state.refreshAlumnoId);
   const alumnoId = useUserStore((state) => state.alumnoId);
-  
+
   // Usar los nuevos métodos del store para ambos tipos de cursos
-  const { cursosDisponibles, cursosInscritos, fetchCursosDisponiblesParaAlumno, fetchCursosInscritosParaAlumno } = useCursoStore();
+  const {
+    cursosDisponibles,
+    cursosInscritos,
+    fetchCursosDisponiblesParaAlumno,
+    fetchCursosInscritosParaAlumno,
+  } = useCursoStore();
 
   useEffect(() => {
     // Intentar obtener el alumnoId al cargar el componente
@@ -39,7 +41,7 @@ export default function Index() {
   // Función para obtener cursos disponibles usando el nuevo endpoint
   const fetchCursosDisponibles = async () => {
     if (!alumnoId) return;
-    
+
     setLoading(true);
     try {
       // Usar el nuevo método del store que llama al endpoint optimizado
@@ -55,7 +57,7 @@ export default function Index() {
   // Función para obtener cursos inscritos usando el nuevo endpoint
   const fetchMisCursos = async () => {
     if (!alumnoId) return;
-    
+
     setLoading(true);
     try {
       // Usar el nuevo método del store que llama al endpoint optimizado
@@ -71,14 +73,17 @@ export default function Index() {
   // Efecto para cargar datos cuando cambia la tab o el alumnoId
   useEffect(() => {
     console.log("useEffect ejecutado - tab:", tab, "alumnoId:", alumnoId);
-    
+
     if (!alumnoId) {
-      console.log("No hay alumnoId, no se pueden cargar cursos. alumnoId actual:", alumnoId);
+      console.log(
+        "No hay alumnoId, no se pueden cargar cursos. alumnoId actual:",
+        alumnoId
+      );
       return;
     }
 
     console.log("AlumnoId válido encontrado:", alumnoId);
-    
+
     // Función para cargar los datos apropiados según la tab
     const loadData = async () => {
       if (tab === "available") {
@@ -95,7 +100,7 @@ export default function Index() {
 
     // Si estamos en la tab de disponibles, configurar polling para actualización automática
     let intervalId: NodeJS.Timeout | null = null;
-    
+
     if (tab === "available") {
       // Actualizar cada 30 segundos
       intervalId = setInterval(() => {
@@ -134,48 +139,21 @@ export default function Index() {
           color={tab === "mine" ? primary : "#ccc"}
         />
       </Row>
-<<<<<<< HEAD
       <CoursesSearchBar />
-      {tab === "all" &&
-        cursos.map((curso) => (
+      {tab === "available" &&
+        cursosDisponibles.map((curso) => (
           <Course
             key={curso.idCurso}
             id={curso.idCurso}
             title={curso.descripcion}
-            description={curso.contenidos}
             imageUrl={
+              curso.imagenPortada ||
               "https://images.unsplash.com/photo-1560781290-7dc94c0f8f4f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWVhdHxlbnwwfHwwfHx8MA%3D%3D"
             }
-            state={"active"}
+            state={curso.tieneVacantes ? "active" : "inactive"}
           />
         ))}
-      {tab === "mine" &&
-        (loadingMisCursos ? (
-          <Title>Cargando tus cursos...</Title>
-        ) : misCursos.length > 0 ? (
-          misCursos.map((curso) => (
-=======
-      <SearchBar />
-      {tab === "available" &&
-        (loading ? (
-          <Title>Cargando cursos disponibles...</Title>
-        ) : cursosDisponibles.length > 0 ? (
-          cursosDisponibles.map((curso) => (
->>>>>>> 4cd49e3bf89aa8a1db2c00bc7d75e2d912d30006
-            <Course
-              key={curso.idCurso}
-              id={curso.idCurso}
-              title={curso.descripcion}
-              description={`${curso.modalidad} • ${curso.duracion} • $${curso.precio}${curso.tienePromocion ? ' 🔥' : ''}${curso.tieneVacantes ? ' ✅' : ' ❌'}`}
-              imageUrl={
-                curso.imagenPortada || "https://images.unsplash.com/photo-1560781290-7dc94c0f8f4f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWVhdHxlbnwwfHwwfHx8MA%3D%3D"
-              }
-              state={"active"}
-            />
-          ))
-        ) : (
-          <Title>No hay cursos disponibles para inscribirse.</Title>
-        ))}
+
       {tab === "mine" &&
         (loading ? (
           <Title>Cargando tus cursos...</Title>

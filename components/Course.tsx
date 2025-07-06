@@ -11,8 +11,8 @@ import { primary } from "@/utils/colors";
 
 interface CourseProps {
   id: number;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   imageUrl: string;
   state: "active" | "inactive";
   // You can add more fields as needed for passing full data
