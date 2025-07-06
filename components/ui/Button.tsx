@@ -19,9 +19,10 @@ interface ButtonProps {
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  disabled?: boolean;
 }
 
-export function Button({ children, onPress, style, textStyle }: ButtonProps) {
+export function Button({ children, onPress, style, textStyle, disabled = false }: ButtonProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -29,21 +30,43 @@ export function Button({ children, onPress, style, textStyle }: ButtonProps) {
   }));
 
   const handlePressIn = () => {
-    scale.value = withTiming(0.97, { duration: 150 });
+    if (!disabled) {
+      scale.value = withTiming(0.97, { duration: 150 });
+    }
   };
 
   const handlePressOut = () => {
-    scale.value = withTiming(1, { duration: 150 });
+    if (!disabled) {
+      scale.value = withTiming(1, { duration: 150 });
+    }
+  };
+
+  const handlePress = () => {
+    if (!disabled && onPress) {
+      onPress();
+    }
   };
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      disabled={disabled}
     >
-      <Animated.View style={[styles.button, animatedStyle, style]}>
-        <Text style={[styles.text, textStyle]}>{children}</Text>
+      <Animated.View style={[
+        styles.button, 
+        animatedStyle, 
+        style,
+        disabled && styles.disabled
+      ]}>
+        <Text style={[
+          styles.text, 
+          textStyle,
+          disabled && styles.disabledText
+        ]}>
+          {children}
+        </Text>
       </Animated.View>
     </Pressable>
   );
@@ -67,5 +90,13 @@ const styles = StyleSheet.create({
     fontFamily: "DMSans_500Medium",
     color: "#000000",
     opacity: 0.8,
+  },
+  disabled: {
+    backgroundColor: "#ccc",
+    opacity: 0.5,
+  },
+  disabledText: {
+    color: "#666",
+    opacity: 0.6,
   },
 });
