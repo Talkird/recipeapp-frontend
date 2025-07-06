@@ -33,6 +33,18 @@
           "backgroundColor": "#f7741c"
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Recipeapp to access your camera to scan QR codes for attendance."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Recipeapp to access your photos to upload ID documents."
+        }
+      ],
       "expo-font"
     ],
     "experiments": {
