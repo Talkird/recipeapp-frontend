@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { View } from "react-native";
+import { View, Alert } from "react-native";
 import { useUserStore } from "@/stores/user";
 import { ScrollView } from "react-native";
 import { Column } from "@/components/ui/Column";
@@ -228,6 +228,30 @@ const AddRecipeScreen: React.FC = () => {
       // Get token if needed
       // const token = useUserStore((s) => s.token);
       console.log("recetaRequest", JSON.stringify(recetaRequest, null, 2));
+
+      // If replacing an existing recipe, delete it first
+      if (isReplacing && existingRecipeId) {
+        try {
+          await axios.delete(
+            `http://localhost:8080/api/recetas/delete/${existingRecipeId}`
+          );
+          console.log(`Deleted existing recipe with ID: ${existingRecipeId}`);
+        } catch (deleteErr: any) {
+          console.error("Error deleting existing recipe:", deleteErr);
+          if (deleteErr.response && deleteErr.response.status === 500) {
+            setCreateError(
+              "No se puede eliminar la receta anterior porque está siendo utilizada en otras listas. La nueva receta se creará con un nombre diferente."
+            );
+            // Continue with creation but modify the name to avoid conflict
+            recetaRequest.nombreReceta = `${recipeName} (Nueva versión)`;
+          } else {
+            setCreateError("Error al eliminar la receta anterior.");
+            setCreating(false);
+            return;
+          }
+        }
+      }
+
       const response = await axios.post(
         "http://localhost:8080/api/recetas/create",
         recetaRequest
@@ -244,6 +268,8 @@ const AddRecipeScreen: React.FC = () => {
       setTipoReceta("");
       setPasos([]);
       setFotoUrl("https://placehold.co/600x400");
+      setExistingRecipeId(null);
+      setIsReplacing(false);
       setFotos([
         {
           idFoto: 1,
@@ -262,6 +288,10 @@ const AddRecipeScreen: React.FC = () => {
   const [recipeName, setRecipeName] = React.useState("");
   const [verifying, setVerifying] = React.useState(false);
   const [verifyError, setVerifyError] = React.useState<string | null>(null);
+  const [existingRecipeId, setExistingRecipeId] = React.useState<number | null>(
+    null
+  );
+  const [isReplacing, setIsReplacing] = React.useState(false);
   const [recipeDescription, setRecipeDescription] = React.useState("");
   const [estimatedTime, setEstimatedTime] = React.useState("");
   const [servings, setServings] = React.useState("");
@@ -283,18 +313,103 @@ const AddRecipeScreen: React.FC = () => {
         setVerifying(false);
         return;
       }
-      // Call backend: /api/recetas/usuario/id/{idUsuario}?nombreReceta={recipeName}
-      const response = await axios.get(
-        `http://localhost:8080/api/recetas/usuario/id/${uid}`,
-        { params: { nombreReceta: recipeName } }
+      // Call backend to check if recipe with this name exists for this user
+      console.log(
+        `Verificando nombre de receta para usuario: ${uid} con nombre: ${recipeName}`
       );
-      // If no recipe exists, backend should return null or 404
-      if (!response.data) {
-        setNameVerified(true);
-      } else {
-        setVerifyError(
-          "Ya tienes una receta con ese nombre. Elige otro nombre."
+
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/recetas/usuario/id/${uid}`,
+          { params: { nombreReceta: recipeName } }
         );
+
+        console.log("Backend response:", response.data);
+
+        // If backend returns a RecetaDTO object, recipe exists
+        if (
+          response.data &&
+          (response.data.id || response.data.idReceta) &&
+          response.data.nombreReceta
+        ) {
+          Alert.alert(
+            "Receta existente",
+            "Ya tienes una receta con ese nombre. ¿Qué quieres hacer?",
+            [
+              {
+                text: "Editar existente",
+                onPress: () => {
+                  setExistingRecipeId(response.data.id);
+                  setIsReplacing(true);
+                  setVerifyError("Editando receta existente...");
+                  // Prefill form fields with existing recipe data
+                  setRecipeDescription(response.data.descripcionReceta || "");
+                  setEstimatedTime(response.data.duracion?.toString() || "");
+                  setServings(response.data.cantidadPersonas?.toString() || "");
+                  setTipoReceta(response.data.tipoReceta || "");
+                  setFotoUrl(response.data.fotoPrincipal || "");
+
+                  // Prefill ingredients
+                  if (Array.isArray(response.data.utilizados)) {
+                    setIngredients(
+                      response.data.utilizados.map((u: any) => ({
+                        idIngrediente: u.ingrediente?.idIngrediente,
+                        name: u.ingrediente?.nombre,
+                        quantity: u.cantidad?.toString() || "",
+                        idUnidad: u.unidad?.idUnidad,
+                        unit: u.unidad?.descripcion,
+                        observaciones: u.observaciones || null,
+                      }))
+                    );
+                  }
+
+                  // Prefill steps
+                  if (Array.isArray(response.data.pasos)) {
+                    setPasos(
+                      response.data.pasos.map((p: any, idx: number) => ({
+                        nroPaso: p.nroPaso || idx + 1,
+                        texto: p.texto || "",
+                        multimedia: Array.isArray(p.multimedia)
+                          ? p.multimedia
+                          : [],
+                      }))
+                    );
+                  }
+
+                  setNameVerified(true);
+                },
+              },
+              {
+                text: "Reemplazar",
+                onPress: () => {
+                  setExistingRecipeId(response.data.id);
+                  setIsReplacing(true);
+                  setNameVerified(true);
+                  setVerifyError(
+                    "Al guardar, tu receta anterior será reemplazada."
+                  );
+                },
+              },
+            ]
+          );
+        } else {
+          // Backend returned empty/null - name is available
+          setNameVerified(true);
+        }
+      } catch (err: any) {
+        console.log("Error response:", err.response);
+        console.log("Full error:", err);
+        // If 404 or no data found, name is available
+        if (
+          err.response &&
+          (err.response.status === 404 || !err.response.data)
+        ) {
+          setNameVerified(true);
+        } else {
+          console.log("Unexpected error status:", err.response?.status);
+          console.log("Error data:", err.response?.data);
+          setVerifyError("Error al verificar el nombre. Intenta de nuevo.");
+        }
       }
     } catch (err) {
       setVerifyError("Error al verificar el nombre. Intenta de nuevo.");

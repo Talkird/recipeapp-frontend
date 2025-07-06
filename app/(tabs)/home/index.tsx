@@ -10,6 +10,11 @@ import {
   fetchIngredienteOptions,
 } from "@/utils/ingredientsAndTypes";
 import { useRecetaStore } from "@/stores/recipes";
+import { Row } from "@/components/ui/Row";
+import { View } from "react-native";
+import RNPickerSelect from "react-native-picker-select";
+import { ChevronDown } from "lucide-react-native";
+import { Picker } from "@react-native-picker/picker";
 
 export default function Index() {
   const recetas = useRecetaStore((state) => state.recetas);
@@ -31,6 +36,8 @@ export default function Index() {
     []
   );
   const [loading, setLoading] = React.useState(false);
+  const [criterio, setCriterio] = React.useState<string>("nombre");
+  const [orden, setOrden] = React.useState<string>("asc");
 
   React.useEffect(() => {
     fetchRecetas();
@@ -42,14 +49,16 @@ export default function Index() {
     setLoading(true);
     try {
       if (filterType === "nombre") {
-        if (searchValue.trim()) await fetchByNombre(searchValue.trim());
+        if (searchValue.trim())
+          await fetchByNombre(searchValue.trim(), criterio, orden);
         else await fetchRecetas();
       } else if (filterType === "tipo") {
-        if (searchValue) await fetchByTipo(searchValue);
+        if (searchValue) await fetchByTipo(searchValue, criterio, orden);
       } else if (filterType === "ingrediente") {
-        if (searchValue) await fetchByIngrediente(searchValue);
+        if (searchValue) await fetchByIngrediente(searchValue, criterio, orden);
       } else if (filterType === "sin-ingrediente") {
-        if (searchValue) await fetchSinIngrediente(searchValue);
+        if (searchValue)
+          await fetchSinIngrediente(searchValue, criterio, orden);
       }
     } finally {
       setLoading(false);
@@ -85,7 +94,96 @@ export default function Index() {
           ingredienteOptions={ingredienteOptions}
           loading={loading}
         />
-
+        <Row style={{ width: "80%", marginTop: 8, gap: 8 }}>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: "#808080",
+              overflow: "hidden",
+              flexDirection: "row",
+              alignItems: "center",
+              paddingRight: 8,
+            }}
+          >
+            <RNPickerSelect
+              onValueChange={setCriterio}
+              items={[
+                { label: "Usuario", value: "usuario" },
+                { label: "Antigüedad", value: "id" },
+              ]}
+              value={criterio}
+              style={{
+                inputIOS: {
+                  padding: 12,
+                  fontSize: 16,
+                  color: "#000",
+                  width: "100%",
+                },
+                viewContainer: { width: "100%" },
+                placeholder: { color: "#808080" },
+                iconContainer: {
+                  top: 0,
+                  right: 0,
+                  height: "100%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "absolute",
+                  width: 32,
+                },
+              }}
+              doneText="Listo"
+              placeholder={{ label: "Criterio", value: "usuario" }}
+              Icon={() => <ChevronDown size={20} color="#808080" />}
+            />
+          </View>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: "#808080",
+              overflow: "hidden",
+              flexDirection: "row",
+              alignItems: "center",
+              paddingRight: 8,
+            }}
+          >
+            <RNPickerSelect
+              onValueChange={setOrden}
+              items={[
+                { label: "Ascendente", value: "asc" },
+                { label: "Descendente", value: "desc" },
+              ]}
+              value={orden}
+              style={{
+                inputIOS: {
+                  padding: 12,
+                  fontSize: 16,
+                  color: "#000",
+                  width: "100%",
+                },
+                viewContainer: { width: "100%" },
+                placeholder: { color: "#808080" },
+                iconContainer: {
+                  top: 0,
+                  right: 0,
+                  height: "100%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "absolute",
+                  width: 32,
+                },
+              }}
+              doneText="Listo"
+              placeholder={{ label: "Orden", value: "asc" }}
+              Icon={() => <ChevronDown size={20} color="#808080" />}
+            />
+          </View>
+        </Row>
         {recetas.map((receta) => (
           <Recipe
             key={receta.idReceta}

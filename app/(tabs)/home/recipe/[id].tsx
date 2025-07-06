@@ -6,6 +6,8 @@ import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
 import { useEffect, useState } from "react";
+import Input from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import axios from "axios";
 import { Image } from "expo-image";
 import { primary } from "@/utils/colors";
@@ -84,6 +86,21 @@ interface RecetaDTO {
   fotoPrincipal: string;
 }
 
+interface CalificacionDTO {
+  idCalificacion: number;
+  usuarioNickname: string;
+  idReceta: number;
+  calificacion: number;
+  comentarios: string;
+}
+
+interface CalificacionRequest {
+  idUsuario: number;
+  idReceta: number;
+  calificacion: number;
+  comentarios: string;
+}
+
 export default function RecipeDetail() {
   const { id } = useLocalSearchParams();
   const [receta, setReceta] = useState<RecetaDTO | null>(null);
@@ -100,6 +117,57 @@ export default function RecipeDetail() {
 
   const idUsuario = useUserStore((s) => s.idUsuario);
   const [addingFavorite, setAddingFavorite] = useState(false);
+  // Rating state
+  const [userRating, setUserRating] = useState<number>(0);
+  const [userComment, setUserComment] = useState("");
+  const [submittingRating, setSubmittingRating] = useState(false);
+  const [comments, setComments] = useState<CalificacionDTO[]>([]);
+  const [loadingComments, setLoadingComments] = useState(true);
+  // Fetch comments for this recipe
+  useEffect(() => {
+    if (!receta?.id) return;
+    setLoadingComments(true);
+    axios
+      .get(
+        `http://localhost:8080/calificaciones/receta/autorizados/${receta.id}`
+      )
+      .then((res) => setComments(res.data || []))
+      .catch(() => setComments([]))
+      .finally(() => setLoadingComments(false));
+  }, [receta?.id]);
+  // Submit or update rating
+  const handleSubmitRating = async () => {
+    if (!idUsuario || !receta) return;
+    setSubmittingRating(true);
+    try {
+      const req: CalificacionRequest = {
+        idUsuario,
+        idReceta: receta.id,
+        calificacion: userRating,
+        comentarios: userComment,
+      };
+      const res = await axios.post(
+        `http://localhost:8080/calificaciones/actualizar-calificacion`,
+        req,
+        { headers: { "Content-Type": "application/json" } }
+      );
+      // Optionally update average rating in UI
+      setReceta((prev) => (prev ? { ...prev, calificacion: res.data } : prev));
+      setUserComment("");
+      setUserRating(0);
+      // Refetch comments
+      axios
+        .get(
+          `http://localhost:8080/calificaciones/receta/autorizados/${receta.id}`
+        )
+        .then((res) => setComments(res.data || []));
+      Alert.alert("¡Gracias!", "Tu calificación fue enviada.");
+    } catch (e) {
+      Alert.alert("Error", "No se pudo enviar la calificación");
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
   const handleAddFavorite = async () => {
     if (!idUsuario || !receta) return;
     setAddingFavorite(true);
@@ -151,19 +219,21 @@ export default function RecipeDetail() {
           <Row style={{ gap: 2, alignItems: "center" }}>
             {[...Array(5)].map((_, i) => {
               const rating = receta.calificacion || 0;
-              if (i < Math.floor(rating)) {
-                return (
-                  <Star key={i} color={primary} fill={primary} size={20} />
-                );
-              } else if (i === Math.floor(rating) && rating % 1 >= 0.5) {
-                return (
-                  <StarHalf key={i} color={primary} fill={primary} size={20} />
-                );
-              } else {
-                return <Star key={i} color="#D9D9D9" size={20} />;
-              }
+              const isSelected = i < Math.floor(rating);
+              const isHalf = i === Math.floor(rating) && rating % 1 >= 0.5;
+              return isHalf ? (
+                <StarHalf key={i} color={primary} fill={primary} size={20} />
+              ) : (
+                <Star
+                  key={i}
+                  color={isSelected ? primary : "#D9D9D9"}
+                  fill={isSelected ? primary : "none"}
+                  size={20}
+                />
+              );
             })}
           </Row>
+          {/* ...existing code... */}
         </Row>
 
         <Row
@@ -263,7 +333,72 @@ export default function RecipeDetail() {
           ))}
         </Column>
 
-        {/* Comentarios: puedes mapearlos si los tienes en el backend */}
+        {/* Comentario y calificación debajo de procedimiento */}
+        <Column
+          style={{
+            gap: 12,
+            alignItems: "flex-start",
+            width: "100%",
+            marginTop: 32,
+          }}
+        >
+          <SubTitle>Deja tu comentario</SubTitle>
+          <Row style={{ gap: 8 }}>
+            {[1, 2, 3, 4, 5].map((val) => {
+              // All stars gray by default, fill up to userRating with primary
+              const isSelected = val <= userRating;
+              return (
+                <TouchableOpacity
+                  key={val}
+                  onPress={() => setUserRating(val)}
+                  disabled={submittingRating}
+                  style={{
+                    backgroundColor: isSelected ? "#fffbe6" : "transparent",
+                    borderRadius: 16,
+                    padding: 2,
+                  }}
+                >
+                  <Star
+                    color={isSelected ? primary : "#E0E0E0"}
+                    fill={isSelected ? primary : "#E0E0E0"}
+                    size={28}
+                  />
+                </TouchableOpacity>
+              );
+            })}
+          </Row>
+          <Input
+            placeholder="Deja un comentario (opcional)"
+            value={userComment}
+            onChangeText={setUserComment}
+            style={{ width: "100%" }}
+          />
+          <Button
+            onPress={handleSubmitRating}
+            disabled={submittingRating || userRating === 0}
+          >
+            {submittingRating ? "Enviando..." : "Enviar calificación"}
+          </Button>
+        </Column>
+
+        {/* Sección de comentarios debajo del input */}
+        <Column style={{ gap: 12, alignItems: "flex-start", width: "100%" }}>
+          <SubTitle>Comentarios</SubTitle>
+          {loadingComments ? (
+            <SmallText>Cargando comentarios...</SmallText>
+          ) : comments.length === 0 ? (
+            <SmallText>No hay comentarios aún.</SmallText>
+          ) : (
+            comments.map((c) => (
+              <Comment
+                key={c.idCalificacion}
+                rating={c.calificacion}
+                text={c.comentarios}
+                author={c.usuarioNickname}
+              />
+            ))
+          )}
+        </Column>
       </Column>
     </ScrollView>
   );

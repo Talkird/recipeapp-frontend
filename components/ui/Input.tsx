@@ -9,6 +9,7 @@ interface InputProps {
   Icon?: LucideIcon;
   type?: "text" | "password";
   disabled?: boolean;
+  style?: any;
 }
 
 export default function Input({
@@ -18,9 +19,10 @@ export default function Input({
   Icon,
   type = "text",
   disabled = false,
+  style,
 }: InputProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       {Icon && (
         <View
           style={{
