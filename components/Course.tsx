@@ -7,7 +7,7 @@ import { StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { SubTitle } from "./ui/SubTitle";
 import { SmallText } from "./ui/SmallText";
-import { primary } from "@/utils/colors";
+import { primary, orange, gray, darkGray } from "@/utils/colors";
 
 interface CourseProps {
   id: number;
@@ -53,7 +53,18 @@ const Course = ({ id, title, description, state, imageUrl }: CourseProps) => {
             </SmallText>
           </Column>
         </Row>
-        {/* TODO: Agregar estado del curso */}
+        {/* Estado del curso */}
+        <View style={[
+          styles.statusBadge,
+          { backgroundColor: state === "active" ? orange : gray }
+        ]}>
+          <Text style={[
+            styles.statusText,
+            { color: state === "active" ? "#000000" : darkGray }
+          ]}>
+            {state === "active" ? "ABIERTO" : "CERRADO"}
+          </Text>
+        </View>
       </Row>
     </TouchableOpacity>
   );
@@ -88,6 +99,18 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginLeft: 0,
     marginRight: 0,
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignSelf: "center",
+    marginRight: 12,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "600",
+    textAlign: "center",
   },
 });
 

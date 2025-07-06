@@ -10,7 +10,7 @@ interface Alumno {
   dniFrente: string;
   dniFondo: string;
   tramite: string;
-  cuentaCorriente: number; // Cambiado de string a number para coincidir con el backend (Double)
+  cuentaCorriente: number; // Cambiado de string a number para coincidir con el backend
 }
 
 interface UserStore {
@@ -48,6 +48,9 @@ interface UserStore {
   isAlumno: () => Promise<boolean>;
   getAlumnoId: () => Promise<number | null>;
   refreshAlumnoId: () => Promise<void>;
+  getAlumnoDetails: () => Promise<Alumno | null>;
+  getSaldo: () => Promise<number | null>;
+  getNumeroTarjeta: () => Promise<string | null>;
   setAuthToken: (token: string | null) => void;
 }
 
@@ -386,5 +389,37 @@ export const useUserStore = create<UserStore>((set, get) => ({
       console.error("Error al crear alumno:", error);
       throw error;
     }
+  },
+
+  getAlumnoDetails: async () => {
+    const { idUsuario } = get();
+    if (!idUsuario) {
+      console.warn("No hay usuario logueado");
+      return null;
+    }
+    
+    try {
+      const response = await axios.get(`${API_URL_ALUMNO}/usuario/${idUsuario}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener detalles del alumno:", error);
+      return null;
+    }
+  },
+
+  getSaldo: async () => {
+    const alumnoDetails = await get().getAlumnoDetails();
+    if (alumnoDetails) {
+      return alumnoDetails.cuentaCorriente || 0;
+    }
+    return null;
+  },
+
+  getNumeroTarjeta: async () => {
+    const alumnoDetails = await get().getAlumnoDetails();
+    if (alumnoDetails) {
+      return alumnoDetails.numeroTarjeta || null;
+    }
+    return null;
   },
 }));

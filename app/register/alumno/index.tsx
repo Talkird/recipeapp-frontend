@@ -15,14 +15,34 @@ const index = () => {
   const { createAlumno } = useUserStore();
   const [numeroTarjeta, setNumeroTarjeta] = useState("");
   const [tramite, setTramite] = useState("");
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+
+  const handleImagesChange = (images: string[]) => {
+    setSelectedImages(images);
+  };
 
   const handleFinalizar = async () => {
+    if (selectedImages.length === 0) {
+      alert("Por favor, selecciona al menos una imagen del DNI");
+      return;
+    }
+
+    if (!numeroTarjeta.trim()) {
+      alert("Por favor, ingresa el número de tarjeta");
+      return;
+    }
+
+    if (!tramite.trim()) {
+      alert("Por favor, ingresa el número de trámite");
+      return;
+    }
+
     try {
       await createAlumno(
         tramite,
         numeroTarjeta,
-        "dni_frente.jpg",
-        "dni_fondo.jpg"
+        selectedImages[0] || "dni_frente.jpg",
+        selectedImages[1] || selectedImages[0] || "dni_fondo.jpg"
       );
       router.push("/register/success");
     } catch (error) {
@@ -41,7 +61,7 @@ const index = () => {
 
       <Column style={{ gap: 16 }}>
         <SmallText>Cargá una imagen del frente y el dorso de tu DNI:</SmallText>
-        <CamaraUpload />
+        <CamaraUpload onImagesChange={handleImagesChange} maxImages={2} />
       </Column>
 
       <Input onChangeText={setTramite} value={tramite} Icon={Hash} placeholder="Número de trámite" />
