@@ -14,7 +14,6 @@ import { Row } from "@/components/ui/Row";
 import { View } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import { ChevronDown } from "lucide-react-native";
-import { Picker } from "@react-native-picker/picker";
 
 export default function Index() {
   const recetas = useRecetaStore((state) => state.recetas);
@@ -83,7 +82,15 @@ export default function Index() {
           marginTop: 32,
         }}
       >
-        <Title>Inicio</Title>
+        <Row
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <Title>Inicio</Title>
+        </Row>
         <RecipeSearchBar
           value={searchValue}
           onChange={setSearchValue}

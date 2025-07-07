@@ -10,8 +10,10 @@ import {
 } from "lucide-react-native";
 import { View } from "react-native";
 import { SubTitle } from "@/components/ui/SubTitle";
+import { useUserStore } from "@/stores/user";
 
 export default function TabLayout() {
+  const isGuest = useUserStore((s) => s.isGuest);
   return (
     <Tabs
       screenOptions={{
@@ -65,6 +67,7 @@ export default function TabLayout() {
         options={{
           title: "Favoritos",
           tabBarLabel: "Favoritos",
+          href: isGuest ? null : undefined, // Hide tab for guests
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
               <Heart size={24} color={color} />
@@ -77,6 +80,7 @@ export default function TabLayout() {
         options={{
           title: "Crear",
           tabBarLabel: "Crear",
+          href: isGuest ? null : undefined, // Hide tab for guests
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
               <CirclePlus size={24} color={color} />
@@ -89,6 +93,7 @@ export default function TabLayout() {
         options={{
           title: "Pendientes",
           tabBarLabel: "Pendientes",
+          href: isGuest ? null : undefined, // Hide tab for guests
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
               <Clock size={24} color={color} />
@@ -101,6 +106,7 @@ export default function TabLayout() {
         options={{
           title: "Cursos",
           tabBarLabel: "Cursos",
+          href: undefined, // Always show this tab (for both guests and authenticated users)
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
               <GraduationCap size={24} color={color} />
@@ -113,6 +119,7 @@ export default function TabLayout() {
         options={{
           title: "Perfil",
           tabBarLabel: "Perfil",
+          href: isGuest ? null : undefined, // Hide tab for guests
           tabBarIcon: ({ color }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
               <User size={24} color={color} />

@@ -1,4 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import {
   ScrollView,
   TouchableOpacity,
@@ -135,6 +136,8 @@ export default function RecipeDetail() {
   const { id } = useLocalSearchParams();
   const [receta, setReceta] = useState<RecetaDTO | null>(null);
   const [loading, setLoading] = useState(true);
+  const idUsuario = useUserStore((s) => s.idUsuario);
+  const isGuest = useUserStore((s) => s.isGuest);
 
   useEffect(() => {
     if (id) {
@@ -192,7 +195,6 @@ export default function RecipeDetail() {
     }
   };
 
-  const idUsuario = useUserStore((s) => s.idUsuario);
   const [addingFavorite, setAddingFavorite] = useState(false);
   // Rating state
   const [userRating, setUserRating] = useState<number>(0);
@@ -376,7 +378,7 @@ export default function RecipeDetail() {
         source={receta.fotoPrincipal}
         style={{ width: "100%", height: 250 }}
       />
-      {!isViewingAdjustedRecipe && (
+      {!isViewingAdjustedRecipe && !isGuest && (
         <TouchableOpacity
           style={{ position: "absolute", top: 16, left: 16 }}
           onPress={handleAddFavorite}
@@ -386,7 +388,7 @@ export default function RecipeDetail() {
         </TouchableOpacity>
       )}
 
-      {hasAdjustments && !isViewingAdjustedRecipe && (
+      {hasAdjustments && !isViewingAdjustedRecipe && !isGuest && (
         <TouchableOpacity
           style={{ position: "absolute", top: 16, left: 60 }}
           onPress={saveAdjustedRecipe}
@@ -395,7 +397,7 @@ export default function RecipeDetail() {
         </TouchableOpacity>
       )}
 
-      {!isViewingAdjustedRecipe && (
+      {!isViewingAdjustedRecipe && !isGuest && (
         <TouchableOpacity
           style={{ position: "absolute", top: 16, right: 16 }}
           onPress={() => setShowAdjustModal(true)}
@@ -581,8 +583,8 @@ export default function RecipeDetail() {
           ))}
         </Column>
 
-        {/* Comentario y calificación debajo de procedimiento - Solo para recetas originales */}
-        {!isViewingAdjustedRecipe && (
+        {/* Comentario y calificación debajo de procedimiento - Solo para recetas originales y usuarios autenticados */}
+        {!isViewingAdjustedRecipe && !isGuest && (
           <>
             <Column
               style={{
@@ -687,8 +689,51 @@ export default function RecipeDetail() {
             <SmallText
               style={{ textAlign: "center", color: "#888", fontSize: 12 }}
             >
-              Para comentar o calificar, visita la receta original
+              Para comentar o calificar, visitá la receta original
             </SmallText>
+          </Column>
+        )}
+
+        {/* Mensaje para usuarios invitados */}
+        {isGuest && (
+          <Column
+            style={{
+              gap: 12,
+              alignItems: "center",
+              width: "100%",
+              marginTop: 32,
+              padding: 16,
+              backgroundColor: "#fff4e6",
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: primary,
+            }}
+          >
+            <SmallText
+              style={{ fontWeight: "bold", fontSize: 16, color: primary }}
+            >
+              👤 Modo Invitado
+            </SmallText>
+            <SmallText style={{ textAlign: "center", color: "#666" }}>
+              Para ajustar porciones, guardar favoritos y dejar comentarios,
+              necesitás crear una cuenta o iniciar sesión.
+            </SmallText>
+            <TouchableOpacity
+              onPress={() => {
+                useUserStore.getState().setGuestMode(false);
+                router.replace("/login");
+              }}
+              style={{
+                backgroundColor: primary,
+                borderRadius: 8,
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+              }}
+            >
+              <SmallText style={{ color: "white", fontWeight: "bold" }}>
+                Iniciar Sesión
+              </SmallText>
+            </TouchableOpacity>
           </Column>
         )}
       </Column>
@@ -867,39 +912,51 @@ export default function RecipeDetail() {
               Selecciona un ingrediente
             </SmallText>
             <ScrollView style={{ maxHeight: 300, width: "100%" }}>
-              {receta?.utilizados.map((ing, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  style={[
-                    styles.ingredientOption,
-                    selectedIngredient === idx &&
-                      styles.ingredientOptionSelected,
-                  ]}
-                  onPress={() => {
-                    setSelectedIngredient(idx);
-                    setShowIngredientModal(false);
+              {receta?.utilizados && receta.utilizados.length > 0 ? (
+                receta.utilizados.map((ing, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    style={[
+                      styles.ingredientOption,
+                      selectedIngredient === idx &&
+                        styles.ingredientOptionSelected,
+                    ]}
+                    onPress={() => {
+                      setSelectedIngredient(idx);
+                      setShowIngredientModal(false);
+                    }}
+                  >
+                    <SmallText
+                      style={{
+                        ...styles.ingredientOptionText,
+                        ...(selectedIngredient === idx &&
+                          styles.ingredientOptionTextSelected),
+                      }}
+                    >
+                      {ing.ingrediente?.nombre || "Ingrediente sin nombre"}
+                    </SmallText>
+                    <SmallText
+                      style={{
+                        ...styles.ingredientOptionAmount,
+                        ...(selectedIngredient === idx &&
+                          styles.ingredientOptionAmountSelected),
+                      }}
+                    >
+                      {ing.cantidad} {ing.unidad?.descripcion || "unidad"}
+                    </SmallText>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <SmallText
+                  style={{
+                    textAlign: "center",
+                    color: "#666",
+                    marginVertical: 20,
                   }}
                 >
-                  <SmallText
-                    style={{
-                      ...styles.ingredientOptionText,
-                      ...(selectedIngredient === idx &&
-                        styles.ingredientOptionTextSelected),
-                    }}
-                  >
-                    {ing.ingrediente?.nombre}
-                  </SmallText>
-                  <SmallText
-                    style={{
-                      ...styles.ingredientOptionAmount,
-                      ...(selectedIngredient === idx &&
-                        styles.ingredientOptionAmountSelected),
-                    }}
-                  >
-                    {ing.cantidad} {ing.unidad?.descripcion || ""}
-                  </SmallText>
-                </TouchableOpacity>
-              ))}
+                  No hay ingredientes disponibles para ajustar
+                </SmallText>
+              )}
             </ScrollView>
             <TouchableOpacity
               style={styles.closeModalButton}

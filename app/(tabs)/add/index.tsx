@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { View, Alert } from "react-native";
+import { View, Alert, TouchableOpacity } from "react-native";
 import { useUserStore } from "@/stores/user";
 import { ScrollView } from "react-native";
 import { Column } from "@/components/ui/Column";
@@ -145,6 +145,17 @@ const AddRecipeScreen: React.FC = () => {
       ]);
       setPasoTexto("");
     }
+  };
+
+  const handleRemovePaso = (index: number) => {
+    setPasos(
+      pasos
+        .filter((_, i) => i !== index)
+        .map((p, idx) => ({
+          ...p,
+          nroPaso: idx + 1, // Renumber the steps
+        }))
+    );
   };
 
   // Add multimedia to a specific paso
@@ -495,6 +506,10 @@ const AddRecipeScreen: React.FC = () => {
     }
   };
 
+  const handleRemoveIngredient = (index: number) => {
+    setIngredients(ingredients.filter((_, i) => i !== index));
+  };
+
   return (
     <ScrollView
       style={{ flex: 1, marginBottom: 32 }}
@@ -570,9 +585,29 @@ const AddRecipeScreen: React.FC = () => {
                 <SubTitle>Pasos</SubTitle>
                 {pasos.map((paso, idx) => (
                   <Column key={idx} style={{ gap: 4, marginBottom: 8 }}>
-                    <Row style={{ gap: 8 }}>
-                      <SmallText>Paso {paso.nroPaso}:</SmallText>
-                      <SmallText>{paso.texto}</SmallText>
+                    <Row
+                      style={{
+                        gap: 8,
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Row style={{ gap: 8, flex: 1 }}>
+                        <SmallText>Paso {paso.nroPaso}:</SmallText>
+                        <SmallText>{paso.texto}</SmallText>
+                      </Row>
+                      <TouchableOpacity
+                        onPress={() => handleRemovePaso(idx)}
+                        style={{
+                          backgroundColor: "#ff4444",
+                          borderRadius: 4,
+                          padding: 4,
+                        }}
+                      >
+                        <SmallText style={{ color: "white", fontSize: 12 }}>
+                          Eliminar
+                        </SmallText>
+                      </TouchableOpacity>
                     </Row>
                     {/* List multimedia for this paso */}
                     {Array.isArray(paso.multimedia) &&
@@ -643,6 +678,12 @@ const AddRecipeScreen: React.FC = () => {
                   onChangeText={setPasoTexto}
                 />
                 <Button onPress={handleAddPaso}>Agregar paso</Button>
+                <Button
+                  onPress={() => handleRemovePaso(pasos.length - 1)}
+                  style={{ backgroundColor: "#dc3545", marginTop: 8 }}
+                >
+                  Eliminar último paso
+                </Button>
                 <SubTitle>Agregá ingredientes a tu receta</SubTitle>
                 <View
                   style={{ width: 250, alignSelf: "center", marginBottom: 8 }}
@@ -737,6 +778,19 @@ const AddRecipeScreen: React.FC = () => {
                       <SmallText>{ingredient.name}</SmallText>
                       <SmallText>{ingredient.quantity}</SmallText>
                       <SmallText>{ingredient.unit}</SmallText>
+                      <Button
+                        onPress={() => handleRemoveIngredient(index)}
+                        style={{
+                          backgroundColor: "#dc3545",
+                          paddingVertical: 4,
+                          paddingHorizontal: 8,
+                          borderRadius: 4,
+                        }}
+                      >
+                        <SmallText style={{ color: "#fff" }}>
+                          Eliminar
+                        </SmallText>
+                      </Button>
                     </Row>
                   ))
                 ) : (

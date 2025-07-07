@@ -40,14 +40,13 @@ export default function Layout() {
           } catch (error) {
             console.log("Auto-login failed, removing stored credentials");
             await AsyncStorage.removeItem("userCredentials");
-            router.replace("/login");
+            // Stay on main screen (don't redirect)
           }
-        } else {
-          router.replace("/login");
         }
+        // If no stored credentials, stay on main index screen
       } catch (error) {
         console.error("Error checking stored credentials:", error);
-        router.replace("/login");
+        // Stay on main screen on error
       }
     };
 
@@ -74,6 +73,14 @@ export default function Layout() {
         gestureEnabled: true,
       }}
     >
+      {/* Main welcome screen */}
+      <Stack.Screen
+        name="index"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
       {/* Hide header for login and register screens */}
       <Stack.Screen
         name="login/index"
@@ -90,7 +97,35 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
-        name="forgot"
+        name="forgot/index"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="forgot/error/index"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="forgot/reset/index"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="forgot/success/index"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="forgot/verify/index"
         options={{
           headerShown: false,
           gestureEnabled: false,

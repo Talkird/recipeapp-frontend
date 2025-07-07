@@ -132,6 +132,13 @@ export default function Index() {
             Registrate
           </SmallText>
         </Link>
+        <Link href="/">
+          <SmallText
+            style={{ color: primary, textDecorationLine: "underline" }}
+          >
+            Volver al inicio
+          </SmallText>
+        </Link>
       </Column>
     </Column>
   );

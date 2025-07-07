@@ -25,7 +25,9 @@ interface UserStore {
   direccion: string | null;
   esAlumno: boolean;
   choiceAlumno: boolean;
+  isGuest: boolean;
   setChoiceAlumno: (choice: boolean) => void;
+  setGuestMode: (isGuest: boolean) => void;
   inciarRegistro: (mail: string, nickname: string) => Promise<void>;
   validarCodigoRegistro: (mail: string, codigo: string) => Promise<void>;
   finalizarRegistro: (clave: string, confirmarClave: string) => Promise<void>;
@@ -63,6 +65,15 @@ export const useUserStore = create<UserStore>((set, get) => ({
   direccion: null,
   esAlumno: false,
   choiceAlumno: false,
+  isGuest: false,
+
+  setGuestMode: (isGuest: boolean) => {
+    set({ isGuest });
+  },
+
+  setChoiceAlumno: (choice: boolean) => {
+    set({ choiceAlumno: choice });
+  },
 
   refreshAlumnoId: async () => {
     const { idUsuario } = get();
@@ -120,10 +131,6 @@ export const useUserStore = create<UserStore>((set, get) => ({
       console.error("Error al verificar si el usuario es alumno:", error);
       return false;
     }
-  },
-
-  setChoiceAlumno: (choice) => {
-    set({ choiceAlumno: choice });
   },
 
   setAuthToken: (token) => {
@@ -199,7 +206,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
     // Limpiar el token de autenticación
     get().setAuthToken(null);
 
-    // Clear stored credentials
+    // Clear stored credentials only (not guest mode since it's not stored)
     try {
       await AsyncStorage.removeItem("userCredentials");
     } catch (error) {
@@ -217,6 +224,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       direccion: null,
       esAlumno: false,
       choiceAlumno: false,
+      isGuest: false,
     });
   },
 
