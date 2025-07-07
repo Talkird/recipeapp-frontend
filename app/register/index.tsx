@@ -11,6 +11,7 @@ import { User, Mail } from "lucide-react-native";
 import { useUserStore } from "@/stores/user";
 import { useState } from "react";
 import { Row } from "@/components/ui/Row";
+import { ScrollView, SafeAreaView } from "react-native";
 
 export default function Register() {
   const { inciarRegistro } = useUserStore();
@@ -43,67 +44,94 @@ export default function Register() {
   };
 
   return (
-    <Column style={{ flex: 1, gap: 32 }}>
-      <Column>
-        <Title>Crea tu cuenta</Title>
-        <SubTitle>Y empezá a cocinar</SubTitle>
-      </Column>
-
-      <AvatarIllustration height={135} width={135} />
-
-      <Column style={{ gap: 20 }}>
-        <Input
-          value={nickname}
-          onChangeText={setNickname}
-          Icon={User}
-          placeholder="Nombre de usuario"
-        />
-
-        <Input
-          value={mail}
-          onChangeText={setMail}
-          Icon={Mail}
-          placeholder="Dirección de correo"
-        />
-        {suggestedNicknames.length > 0 && (
-          <Column style={{ gap: 4, marginTop: 0 }}>
-            <SubTitle>
-              Nombre de usuario ya en uso. Intentá con otro. Sugerencias:
-            </SubTitle>
-            <Row style={{ gap: 4 }}>
-              {suggestedNicknames.map((s, i) => (
-                <SmallText
-                  key={i}
-                  style={{
-                    backgroundColor: "#00000066", // #000 with 0.4 opacity
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 4,
-                    color: "#fff",
-                    alignSelf: "flex-start",
-                  }}
-                >
-                  {s}
-                </SmallText>
-              ))}
-            </Row>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          paddingHorizontal: 16,
+          paddingVertical: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        <Column
+          style={{
+            flex: 1,
+            gap: 32,
+            alignItems: "center",
+            maxWidth: 400,
+            alignSelf: "center",
+            width: "100%",
+          }}
+        >
+          <Column style={{ alignItems: "center" }}>
+            <Title>Crea tu cuenta</Title>
+            <SubTitle>Y empezá a cocinar</SubTitle>
           </Column>
-        )}
-      </Column>
 
-      <Column>
-        <Button onPress={handleRegister} style={{ marginBottom: 10 }}>
-          Continuar Registración
-        </Button>
-        <SmallText>¿Ya tenés cuenta?</SmallText>
-        <Link href="/login">
-          <SmallText
-            style={{ color: primary, textDecorationLine: "underline" }}
-          >
-            Iniciar sesión
-          </SmallText>
-        </Link>
-      </Column>
-    </Column>
+          <AvatarIllustration height={135} width={135} />
+
+          <Column style={{ gap: 20, width: "100%" }}>
+            <Input
+              value={nickname}
+              onChangeText={setNickname}
+              Icon={User}
+              placeholder="Nombre de usuario"
+              style={{ width: "100%" }}
+            />
+
+            <Input
+              value={mail}
+              onChangeText={setMail}
+              Icon={Mail}
+              placeholder="Dirección de correo"
+              style={{ width: "100%" }}
+            />
+            {suggestedNicknames.length > 0 && (
+              <Column style={{ gap: 4, marginTop: 0 }}>
+                <SubTitle>
+                  Nombre de usuario ya en uso. Intentá con otro. Sugerencias:
+                </SubTitle>
+                <Row style={{ gap: 4 }}>
+                  {suggestedNicknames.map((s, i) => (
+                    <SmallText
+                      key={i}
+                      style={{
+                        backgroundColor: "#00000066", // #000 with 0.4 opacity
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        paddingVertical: 4,
+                        color: "#fff",
+                        alignSelf: "flex-start",
+                      }}
+                    >
+                      {s}
+                    </SmallText>
+                  ))}
+                </Row>
+              </Column>
+            )}
+          </Column>
+
+          <Column style={{ alignItems: "center", width: "100%" }}>
+            <Button
+              onPress={handleRegister}
+              style={{ marginBottom: 10, width: "100%" }}
+            >
+              Continuar Registración
+            </Button>
+            <SmallText>¿Ya tenés cuenta?</SmallText>
+            <Link href="/login">
+              <SmallText
+                style={{ color: primary, textDecorationLine: "underline" }}
+              >
+                Iniciar sesión
+              </SmallText>
+            </Link>
+          </Column>
+        </Column>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

@@ -34,6 +34,7 @@ import { API_URLS } from "@/lib/constants";
 import Comment from "@/components/Comment";
 import { useUserStore } from "@/stores/user";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNPickerSelect from "react-native-picker-select";
 
 interface Comment {
   rating: number;
@@ -231,7 +232,6 @@ export default function RecipeDetail() {
   const [hasAdjustments, setHasAdjustments] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<number>(-1);
   const [ingredientAmount, setIngredientAmount] = useState("");
-  const [showIngredientModal, setShowIngredientModal] = useState(false);
   const [isViewingAdjustedRecipe, setIsViewingAdjustedRecipe] = useState(false);
   const [adjustedRecipeData, setAdjustedRecipeData] =
     useState<SavedAdjustedRecipe | null>(null);
@@ -273,9 +273,18 @@ export default function RecipeDetail() {
       const originalAmount = receta.utilizados[selectedIngredient].cantidad;
       const multiplier = newAmount / originalAmount;
       setPortionMultiplier(multiplier);
+
+      // Show a brief success feedback
+      Alert.alert(
+        "¡Ajuste aplicado!",
+        `Todas las cantidades han sido ajustadas proporcionalmente (x${multiplier.toFixed(
+          2
+        )})`,
+        [{ text: "OK" }]
+      );
+
       setIngredientAmount("");
-      setSelectedIngredient(-1);
-      setShowAdjustModal(false);
+      // Keep ingredient selected so user can make further adjustments
     }
   };
 
@@ -903,58 +912,187 @@ export default function RecipeDetail() {
 
                 {/* Individual ingredient adjustment */}
                 <Column style={{ gap: 8, width: "100%" }}>
-                  <SmallText style={{ fontWeight: "bold" }}>
-                    Ajustar por ingrediente:
-                  </SmallText>
-                  <TouchableOpacity
-                    style={styles.ingredientSelector}
-                    onPress={() => setShowIngredientModal(true)}
+                  <Row
+                    style={{
+                      justifyContent: "space-between",
+                      width: "100%",
+                      alignItems: "center",
+                    }}
                   >
-                    <SmallText style={styles.ingredientSelectorText}>
-                      {selectedIngredient >= 0 && receta
-                        ? `${
-                            receta.utilizados[selectedIngredient].ingrediente
-                              ?.nombre
-                          } (${
-                            receta.utilizados[selectedIngredient].cantidad
-                          } ${
-                            receta.utilizados[selectedIngredient].unidad
-                              ?.descripcion || ""
-                          })`
-                        : "Selecciona ingrediente..."}
+                    <SmallText style={{ fontWeight: "bold" }}>
+                      Ajustar por ingrediente:
                     </SmallText>
-                    <ChevronDown color="#666" size={16} />
-                  </TouchableOpacity>
-                  {selectedIngredient >= 0 && (
-                    <Row
-                      style={{
-                        gap: 6,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <TextInput
-                        style={styles.customInputSmall}
-                        placeholder="Cantidad"
-                        value={ingredientAmount}
-                        onChangeText={setIngredientAmount}
-                        keyboardType="numeric"
-                      />
-                      <SmallText style={{ fontSize: 12 }}>
-                        {receta?.utilizados[selectedIngredient]?.unidad
-                          ?.descripcion || ""}
-                      </SmallText>
+                    {selectedIngredient >= 0 && (
                       <TouchableOpacity
-                        style={styles.smallButton}
-                        onPress={handleIngredientAdjustment}
-                        disabled={!ingredientAmount}
+                        onPress={() => {
+                          setSelectedIngredient(-1);
+                          setIngredientAmount("");
+                        }}
                       >
-                        <SmallText style={styles.smallButtonText}>
-                          Ajustar
+                        <SmallText
+                          style={{
+                            color: primary,
+                            fontSize: 12,
+                            textDecorationLine: "underline",
+                          }}
+                        >
+                          Cambiar ingrediente
                         </SmallText>
                       </TouchableOpacity>
-                    </Row>
+                    )}
+                  </Row>
+
+                  {/* Picker para seleccionar ingrediente */}
+                  <View
+                    style={{
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: "#e0e6ed",
+                      width: "100%",
+                    }}
+                  >
+                    <RNPickerSelect
+                      onValueChange={(value) => {
+                        setSelectedIngredient(value);
+                        setIngredientAmount("");
+                      }}
+                      items={
+                        receta?.utilizados?.map((ing, idx) => ({
+                          label: `${ing.ingrediente?.nombre} (${ing.cantidad} ${
+                            ing.unidad?.descripcion || ""
+                          })`,
+                          value: idx,
+                        })) || []
+                      }
+                      value={
+                        selectedIngredient >= 0 ? selectedIngredient : null
+                      }
+                      placeholder={{
+                        label: "Selecciona un ingrediente...",
+                        value: -1,
+                      }}
+                      style={{
+                        inputIOS: {
+                          padding: 12,
+                          fontSize: 14,
+                          color: "#2c3e50",
+                          backgroundColor: "#f8f9fa",
+                        },
+                        inputAndroid: {
+                          padding: 12,
+                          fontSize: 14,
+                          color: "#2c3e50",
+                          backgroundColor: "#f8f9fa",
+                        },
+                        placeholder: { color: "#7f8c8d" },
+                        iconContainer: {
+                          top: 0,
+                          right: 15,
+                          height: "100%",
+                          justifyContent: "center",
+                        },
+                      }}
+                      Icon={() => <ChevronDown color="#666" size={16} />}
+                    />
+                  </View>
+
+                  {selectedIngredient >= 0 && receta && (
+                    <Column style={{ gap: 8, width: "100%" }}>
+                      <View
+                        style={{
+                          backgroundColor: "#e8f4fd",
+                          borderRadius: 8,
+                          padding: 12,
+                          borderLeftWidth: 4,
+                          borderLeftColor: primary,
+                        }}
+                      >
+                        <SmallText
+                          style={{
+                            fontSize: 12,
+                            color: "#333",
+                            fontStyle: "italic",
+                            lineHeight: 16,
+                          }}
+                        >
+                          💡 Seleccionaste:{" "}
+                          <SmallText style={{ fontWeight: "bold" }}>
+                            {
+                              receta.utilizados[selectedIngredient].ingrediente
+                                ?.nombre
+                            }
+                          </SmallText>
+                          . Cambia su cantidad y todos los demás ingredientes se
+                          ajustarán automáticamente.
+                        </SmallText>
+                      </View>
+
+                      <SmallText
+                        style={{
+                          textAlign: "center",
+                          fontSize: 12,
+                          color: "#666",
+                        }}
+                      >
+                        Cantidad original:{" "}
+                        <SmallText style={{ fontWeight: "bold" }}>
+                          {receta?.utilizados[selectedIngredient]?.cantidad}{" "}
+                          {receta?.utilizados[selectedIngredient]?.unidad
+                            ?.descripcion || ""}
+                        </SmallText>
+                      </SmallText>
+                      {hasAdjustments && (
+                        <SmallText
+                          style={{
+                            textAlign: "center",
+                            fontSize: 12,
+                            color: primary,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Cantidad actual:{" "}
+                          {(
+                            receta.utilizados[selectedIngredient].cantidad *
+                            portionMultiplier
+                          ).toFixed(1)}{" "}
+                          {receta?.utilizados[selectedIngredient]?.unidad
+                            ?.descripcion || ""}
+                        </SmallText>
+                      )}
+                      <Row
+                        style={{
+                          gap: 6,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <SmallText style={{ fontSize: 12 }}>
+                          Nueva cantidad:
+                        </SmallText>
+                        <TextInput
+                          style={styles.customInputSmall}
+                          placeholder="Cantidad"
+                          value={ingredientAmount}
+                          onChangeText={setIngredientAmount}
+                          keyboardType="numeric"
+                        />
+                        <SmallText style={{ fontSize: 12 }}>
+                          {receta?.utilizados[selectedIngredient]?.unidad
+                            ?.descripcion || ""}
+                        </SmallText>
+                        <TouchableOpacity
+                          style={styles.smallButton}
+                          onPress={handleIngredientAdjustment}
+                          disabled={!ingredientAmount}
+                        >
+                          <SmallText style={styles.smallButtonText}>
+                            Aplicar
+                          </SmallText>
+                        </TouchableOpacity>
+                      </Row>
+                    </Column>
                   )}
                 </Column>
 
@@ -967,7 +1105,9 @@ export default function RecipeDetail() {
                     lineHeight: 16,
                   }}
                 >
-                  Todos los ingredientes se ajustarán proporcionalmente
+                  {selectedIngredient >= 0
+                    ? "Ingresa la nueva cantidad para este ingrediente y todos los demás se ajustarán proporcionalmente"
+                    : "Todos los ingredientes se ajustarán proporcionalmente"}
                 </SmallText>
 
                 <Button onPress={() => setShowAdjustModal(false)}>
@@ -975,77 +1115,6 @@ export default function RecipeDetail() {
                 </Button>
               </Column>
             </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Ingredient Selection Modal */}
-      <Modal
-        visible={showIngredientModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowIngredientModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.ingredientModalContent}>
-            <SmallText
-              style={{ fontWeight: "bold", fontSize: 16, marginBottom: 16 }}
-            >
-              Selecciona un ingrediente
-            </SmallText>
-            <ScrollView style={{ maxHeight: 300, width: "100%" }}>
-              {receta?.utilizados && receta.utilizados.length > 0 ? (
-                receta.utilizados.map((ing, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={[
-                      styles.ingredientOption,
-                      selectedIngredient === idx &&
-                        styles.ingredientOptionSelected,
-                    ]}
-                    onPress={() => {
-                      setSelectedIngredient(idx);
-                      setShowIngredientModal(false);
-                    }}
-                  >
-                    <SmallText
-                      style={{
-                        ...styles.ingredientOptionText,
-                        ...(selectedIngredient === idx &&
-                          styles.ingredientOptionTextSelected),
-                      }}
-                    >
-                      {ing.ingrediente?.nombre || "Ingrediente sin nombre"}
-                    </SmallText>
-                    <SmallText
-                      style={{
-                        ...styles.ingredientOptionAmount,
-                        ...(selectedIngredient === idx &&
-                          styles.ingredientOptionAmountSelected),
-                      }}
-                    >
-                      {ing.cantidad} {ing.unidad?.descripcion || "unidad"}
-                    </SmallText>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <SmallText
-                  style={{
-                    textAlign: "center",
-                    color: "#666",
-                    marginVertical: 20,
-                  }}
-                >
-                  No hay ingredientes disponibles para ajustar
-                </SmallText>
-              )}
-            </ScrollView>
-            <TouchableOpacity
-              style={styles.closeModalButton}
-              onPress={() => setShowIngredientModal(false)}
-            >
-              <SmallText style={styles.closeModalButtonText}>Cerrar</SmallText>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -1276,61 +1345,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     flex: 1,
-  },
-  ingredientModalContent: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 20,
-    width: "90%",
-    maxWidth: 350,
-    maxHeight: "80%",
-    alignItems: "center",
-  },
-  ingredientOption: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    width: "100%",
-  },
-  ingredientOptionSelected: {
-    backgroundColor: "#fff4e6",
-    borderRadius: 8,
-    borderBottomColor: primary,
-  },
-  ingredientOptionText: {
-    fontSize: 14,
-    color: "#333",
-    flex: 1,
-    fontWeight: "500",
-  },
-  ingredientOptionTextSelected: {
-    color: primary,
-    fontWeight: "bold",
-  },
-  ingredientOptionAmount: {
-    fontSize: 12,
-    color: "#666",
-  },
-  ingredientOptionAmountSelected: {
-    color: primary,
-    fontWeight: "bold",
-  },
-  closeModalButton: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 16,
-    alignItems: "center",
-  },
-  closeModalButtonText: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
   },
   photoGalleryOverlay: {
     flex: 1,
