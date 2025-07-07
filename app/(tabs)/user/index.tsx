@@ -3,29 +3,48 @@ import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import Label from "@/components/ui/Label";
-import { User, Mail, CircleHelp, DollarSign, CreditCard, Eye, EyeOff } from "lucide-react-native";
+import {
+  User,
+  Mail,
+  CircleHelp,
+  DollarSign,
+  CreditCard,
+  Eye,
+  EyeOff,
+} from "lucide-react-native";
 import { Button } from "@/components/ui/Button";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { useUserStore } from "@/stores/user";
-import { TouchableOpacity, View, StyleSheet } from "react-native";
+import { TouchableOpacity, View, StyleSheet, Alert } from "react-native";
 import { SmallText } from "@/components/ui/SmallText";
 
 export default function Index() {
-  const { getAccountInfo, mail, nickname, nombre, esAlumno, getSaldo, getNumeroTarjeta, isAlumno, getAlumnoId } = useUserStore();
-  
+  const {
+    getAccountInfo,
+    mail,
+    nickname,
+    nombre,
+    esAlumno,
+    getSaldo,
+    getNumeroTarjeta,
+    isAlumno,
+    getAlumnoId,
+    logout,
+  } = useUserStore();
+
   // Estados para datos adicionales de alumno
   const [saldoCuenta, setSaldoCuenta] = useState<number | null>(null);
   const [numeroTarjeta, setNumeroTarjeta] = useState<string | null>(null);
   const [mostrarTarjeta, setMostrarTarjeta] = useState(false);
   const [loadingDatosAlumno, setLoadingDatosAlumno] = useState(false);
- 
+
   useEffect(() => {
     const cargarDatos = async () => {
       try {
         const info = await getAccountInfo();
         console.log("Información de la cuenta:", info);
-        
+
         // Si es alumno, cargar datos adicionales
         if (esAlumno) {
           console.log("👤 Usuario es alumno, cargando datos adicionales...");
@@ -35,12 +54,15 @@ export default function Index() {
             const saldo = await getSaldo();
             console.log("💰 Saldo obtenido:", saldo);
             setSaldoCuenta(saldo);
-            
+
             console.log("💳 Obteniendo número de tarjeta...");
             const tarjeta = await getNumeroTarjeta();
-            console.log("💳 Tarjeta obtenida:", tarjeta ? `****${tarjeta.slice(-4)}` : null);
+            console.log(
+              "💳 Tarjeta obtenida:",
+              tarjeta ? `****${tarjeta.slice(-4)}` : null
+            );
             setNumeroTarjeta(tarjeta);
-            
+
             console.log("✅ Datos de alumno cargados exitosamente");
           } catch (error) {
             console.error("❌ Error al cargar datos del alumno:", error);
@@ -54,7 +76,7 @@ export default function Index() {
         console.error("Error al obtener la información de la cuenta:", error);
       }
     };
-    
+
     cargarDatos();
   }, [esAlumno]);
 
@@ -66,7 +88,6 @@ export default function Index() {
   const toggleMostrarTarjeta = () => {
     setMostrarTarjeta(!mostrarTarjeta);
   };
-
 
   //claude
   const handleLogout = async () => {
@@ -83,7 +104,7 @@ export default function Index() {
           style: "destructive",
           onPress: async () => {
             await logout();
-            router.replace("/login");
+            router.replace("/");
           },
         },
       ]
@@ -95,34 +116,46 @@ export default function Index() {
       style={{ flex: 1, gap: 32, justifyContent: "flex-start", marginTop: 32 }}
     >
       <Title>Mi Perfil</Title>
-      
+
       {/* Campos básicos para todos los usuarios */}
       <Label text={nombre || nickname || ""} Icon={User} />
       <Label text={mail ?? ""} Icon={Mail} />
       <Label text={esAlumno ? "Alumno" : "Usuario"} Icon={CircleHelp} />
-      
+
       {/* Campos adicionales solo para alumnos */}
       {esAlumno && (
         <>
           {/* Saldo de cuenta corriente */}
-          <Label 
-            text={saldoCuenta !== null ? `$${saldoCuenta.toFixed(2)}` : (loadingDatosAlumno ? "Cargando..." : "No disponible")} 
+          <Label
+            text={
+              saldoCuenta !== null
+                ? `$${saldoCuenta.toFixed(2)}`
+                : loadingDatosAlumno
+                ? "Cargando..."
+                : "No disponible"
+            }
             Icon={DollarSign}
           />
-          
+
           {/* Número de tarjeta con opción de mostrar/ocultar */}
           <View style={styles.fieldContainer}>
             <View style={styles.fieldInfo}>
               <CreditCard size={20} color="#666" />
               <SmallText style={styles.fieldValue}>
-                {numeroTarjeta 
-                  ? (mostrarTarjeta ? numeroTarjeta : censurarTarjeta(numeroTarjeta))
-                  : (loadingDatosAlumno ? "Cargando..." : "No disponible")
-                }
+                {numeroTarjeta
+                  ? mostrarTarjeta
+                    ? numeroTarjeta
+                    : censurarTarjeta(numeroTarjeta)
+                  : loadingDatosAlumno
+                  ? "Cargando..."
+                  : "No disponible"}
               </SmallText>
             </View>
             {numeroTarjeta && (
-              <TouchableOpacity onPress={toggleMostrarTarjeta} style={styles.eyeButton}>
+              <TouchableOpacity
+                onPress={toggleMostrarTarjeta}
+                style={styles.eyeButton}
+              >
                 {mostrarTarjeta ? (
                   <EyeOff size={20} color="#666" />
                 ) : (
@@ -133,7 +166,7 @@ export default function Index() {
           </View>
         </>
       )}
-      
+
       {/* Solo mostrar el botón si no es alumno */}
       {!esAlumno && (
         <Button

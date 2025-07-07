@@ -85,48 +85,49 @@ export default function CursoDetail() {
       }
     }
 
-    // Solo continuar si el usuario es alumno
-    setLoading(true);
-    try {
-      // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
-      const cursoDetalle = await fetchCursoDetalle(parseInt(id as string));
-      if (cursoDetalle) {
-        setCurso(cursoDetalle);
-      }
-
-      // Verificar si el alumno ya está inscrito en este curso
-      const alumnoId = await getAlumnoId();
-      if (alumnoId) {
-        try {
-          const inscripcionesRes = await axios.get(
-            `${API_URLS.INSCRIPCIONES}/alumno/${alumnoId}`
-          );
-          const inscripciones = inscripcionesRes.data;
-          const yaEstaInscrito = inscripciones.some(
-            (inscripcion: any) =>
-              inscripcion.cronograma.curso.idCurso === parseInt(id as string)
-          );
-          setYaInscripto(yaEstaInscrito);
-        } catch (error) {
-          console.error("Error al verificar inscripción:", error);
-        }
-      }
-    } catch (e) {
-      console.error("Error al obtener detalle del curso:", e);
-    } finally {
-      setLoading(false);
-    }
-  }, [id, fetchCursoDetalle, getAlumnoId, isAlumno]);
-
-  useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [id, fetchCursoDetalle, getAlumnoId, isGuest]);
 
   // Actualizar datos cada vez que el usuario regresa a esta pantalla
   useFocusEffect(
     useCallback(() => {
+      async function fetchData() {
+        if (!id || isGuest) return; // Don't fetch data for guests
+        setLoading(true);
+        try {
+          // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
+          const cursoDetalle = await fetchCursoDetalle(parseInt(id as string));
+          if (cursoDetalle) {
+            setCurso(cursoDetalle);
+          }
+
+          // Verificar si el alumno ya está inscrito en este curso
+          const alumnoId = await getAlumnoId();
+          if (alumnoId) {
+            try {
+              const inscripcionesRes = await axios.get(
+                `http://localhost:8080/api/inscripciones/alumno/${alumnoId}`
+              );
+              const inscripciones = inscripcionesRes.data;
+              const yaEstaInscrito = inscripciones.some(
+                (inscripcion: any) =>
+                  inscripcion.cronograma.curso.idCurso ===
+                  parseInt(id as string)
+              );
+              setYaInscripto(yaEstaInscrito);
+            } catch (error) {
+              console.error("Error al verificar inscripción:", error);
+            }
+          }
+        } catch (e) {
+          console.error("Error al obtener detalle del curso:", e);
+        } finally {
+          setLoading(false);
+        }
+      }
+
       fetchData();
-    }, [fetchData])
+    }, [id, fetchCursoDetalle, getAlumnoId, isGuest])
   );
 
   const handleInscribirse = async () => {

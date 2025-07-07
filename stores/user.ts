@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URLS } from "@/lib/constants";
 
 const API_URL = API_URLS.USUARIOS;
@@ -437,20 +438,20 @@ export const useUserStore = create<UserStore>((set, get) => ({
   getAlumnoDetails: async () => {
     const { idUsuario } = get();
     console.log("🔍 getAlumnoDetails - idUsuario:", idUsuario);
-    
+
     if (!idUsuario) {
       console.warn("❌ No hay usuario logueado");
       return null;
     }
-    
+
     try {
       const url = `${API_URL_ALUMNO}/usuario/${idUsuario}`;
       console.log("🔍 getAlumnoDetails - URL:", url);
-      
+
       const response = await axios.get(url);
       console.log("🔍 getAlumnoDetails - Response status:", response.status);
       console.log("🔍 getAlumnoDetails - Response data:", response.data);
-      
+
       return response.data;
     } catch (error) {
       console.error("❌ Error al obtener detalles del alumno:", error);
@@ -465,94 +466,122 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
   getSaldo: async () => {
     console.log("💰 getSaldo - Iniciando...");
-    
+
     // Primero intentar obtener desde el endpoint
     const alumnoDetails = await get().getAlumnoDetails();
     console.log("💰 getSaldo - alumnoDetails:", alumnoDetails);
-    
+
     if (alumnoDetails && alumnoDetails.cuentaCorriente !== undefined) {
       const saldo = alumnoDetails.cuentaCorriente;
       console.log("💰 getSaldo - saldo desde endpoint:", saldo);
       return saldo;
     }
-    
+
     // Fallback: intentar obtener desde getAccountInfo
     console.log("💰 getSaldo - Intentando fallback con getAccountInfo...");
     try {
       const accountInfo = await get().getAccountInfo();
-      console.log("💰 getSaldo - accountInfo COMPLETO:", JSON.stringify(accountInfo, null, 2));
-      
+      console.log(
+        "💰 getSaldo - accountInfo COMPLETO:",
+        JSON.stringify(accountInfo, null, 2)
+      );
+
       // Verificar si está en accountInfo.alumno.saldo
       if (accountInfo?.alumno?.saldo !== undefined) {
-        console.log("💰 getSaldo - Saldo encontrado en accountInfo.alumno:", accountInfo.alumno.saldo);
+        console.log(
+          "💰 getSaldo - Saldo encontrado en accountInfo.alumno:",
+          accountInfo.alumno.saldo
+        );
         return accountInfo.alumno.saldo;
       }
-      
+
       // Verificar si está en accountInfo.alumno.cuentaCorriente
       if (accountInfo?.alumno?.cuentaCorriente !== undefined) {
-        console.log("💰 getSaldo - Saldo encontrado en accountInfo.alumno.cuentaCorriente:", accountInfo.alumno.cuentaCorriente);
+        console.log(
+          "💰 getSaldo - Saldo encontrado en accountInfo.alumno.cuentaCorriente:",
+          accountInfo.alumno.cuentaCorriente
+        );
         return accountInfo.alumno.cuentaCorriente;
       }
-      
+
       // Verificar si está en accountInfo.cuentaCorriente (fallback)
       if (accountInfo?.cuentaCorriente !== undefined) {
-        console.log("💰 getSaldo - Saldo encontrado en accountInfo.cuentaCorriente:", accountInfo.cuentaCorriente);
+        console.log(
+          "💰 getSaldo - Saldo encontrado en accountInfo.cuentaCorriente:",
+          accountInfo.cuentaCorriente
+        );
         return accountInfo.cuentaCorriente;
       }
-      
+
       // Verificar si está en accountInfo.saldo (fallback)
       if (accountInfo?.saldo !== undefined) {
-        console.log("💰 getSaldo - Saldo encontrado en accountInfo.saldo:", accountInfo.saldo);
+        console.log(
+          "💰 getSaldo - Saldo encontrado en accountInfo.saldo:",
+          accountInfo.saldo
+        );
         return accountInfo.saldo;
       }
-      
+
       // Si no encontramos saldo en ningún lugar, devolver 0 como valor por defecto
-      console.log("💰 getSaldo - No se encontró saldo en ninguna ubicación, devolviendo 0");
+      console.log(
+        "💰 getSaldo - No se encontró saldo en ninguna ubicación, devolviendo 0"
+      );
       return 0;
     } catch (error) {
       console.error("💰 getSaldo - Error en fallback:", error);
     }
-    
+
     console.log("💰 getSaldo - No se pudo obtener saldo");
     return null;
   },
 
   getNumeroTarjeta: async () => {
     console.log("💳 getNumeroTarjeta - Iniciando...");
-    
+
     // Primero intentar obtener desde el endpoint
     const alumnoDetails = await get().getAlumnoDetails();
     console.log("💳 getNumeroTarjeta - alumnoDetails:", alumnoDetails);
-    
+
     if (alumnoDetails && alumnoDetails.numeroTarjeta) {
       const tarjeta = alumnoDetails.numeroTarjeta;
-      console.log("💳 getNumeroTarjeta - tarjeta desde endpoint:", tarjeta ? `****${tarjeta.slice(-4)}` : null);
+      console.log(
+        "💳 getNumeroTarjeta - tarjeta desde endpoint:",
+        tarjeta ? `****${tarjeta.slice(-4)}` : null
+      );
       return tarjeta;
     }
-    
+
     // Fallback: intentar obtener desde getAccountInfo
-    console.log("💳 getNumeroTarjeta - Intentando fallback con getAccountInfo...");
+    console.log(
+      "💳 getNumeroTarjeta - Intentando fallback con getAccountInfo..."
+    );
     try {
       const accountInfo = await get().getAccountInfo();
       console.log("💳 getNumeroTarjeta - accountInfo:", accountInfo);
-      
+
       // Verificar si está en accountInfo.alumno.numeroTarjeta
       if (accountInfo?.alumno?.numeroTarjeta) {
         const tarjeta = accountInfo.alumno.numeroTarjeta;
-        console.log("💳 getNumeroTarjeta - tarjeta desde accountInfo.alumno:", tarjeta ? `****${tarjeta.slice(-4)}` : null);
+        console.log(
+          "💳 getNumeroTarjeta - tarjeta desde accountInfo.alumno:",
+          tarjeta ? `****${tarjeta.slice(-4)}` : null
+        );
         return tarjeta;
       }
-      
+
       // Fallback: verificar si está en accountInfo.numeroTarjeta
       if (accountInfo?.numeroTarjeta) {
         const tarjeta = accountInfo.numeroTarjeta;
-        console.log("💳 getNumeroTarjeta - tarjeta desde accountInfo:", tarjeta ? `****${tarjeta.slice(-4)}` : null);
+        console.log(
+          "💳 getNumeroTarjeta - tarjeta desde accountInfo:",
+          tarjeta ? `****${tarjeta.slice(-4)}` : null
+        );
         return tarjeta;
       }
     } catch (error) {
       console.error("💳 getNumeroTarjeta - Error en fallback:", error);
     }
-    
+
     console.log("💳 getNumeroTarjeta - No se pudo obtener tarjeta");
     return null;
   },

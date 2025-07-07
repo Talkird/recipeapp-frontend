@@ -15,7 +15,7 @@ const index = () => {
 
   const handleLogout = async () => {
     await logout();
-    router.replace("/login");
+    router.replace("/");
   };
 
   return (
