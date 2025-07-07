@@ -10,6 +10,8 @@ interface InputProps {
   type?: "text" | "password";
   disabled?: boolean;
   style?: any;
+  multiline?: boolean;
+  numberOfLines?: number;
 }
 
 export default function Input({
@@ -20,9 +22,13 @@ export default function Input({
   type = "text",
   disabled = false,
   style,
+  multiline = false,
+  numberOfLines = 1,
 }: InputProps) {
   return (
-    <View style={[styles.container, style]}>
+    <View
+      style={[styles.container, style, multiline && styles.multilineContainer]}
+    >
       {Icon && (
         <View
           style={{
@@ -30,13 +36,15 @@ export default function Input({
             height: 24,
             justifyContent: "center",
             alignItems: "center",
+            alignSelf: multiline ? "flex-start" : "center",
+            marginTop: multiline ? 12 : 0,
           }}
         >
           <Icon size={20} color="#808080" />
         </View>
       )}
       <TextInput
-        style={styles.input}
+        style={[styles.input, multiline && { textAlignVertical: "top" }]}
         placeholderTextColor="#808080"
         placeholder={placeholder}
         value={value}
@@ -44,6 +52,8 @@ export default function Input({
         secureTextEntry={type === "password"}
         editable={!disabled}
         autoCapitalize="none"
+        multiline={multiline}
+        numberOfLines={numberOfLines}
       />
     </View>
   );
@@ -51,7 +61,6 @@ export default function Input({
 
 const styles = StyleSheet.create({
   container: {
-    width: 250,
     backgroundColor: "#fff",
     borderRadius: 999,
     flexDirection: "row",
@@ -62,6 +71,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#808080",
+  },
+  multilineContainer: {
+    borderRadius: 12,
+    alignItems: "flex-start",
+    minHeight: 60,
   },
   input: {
     flex: 1,

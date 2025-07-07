@@ -173,10 +173,6 @@ export default function Index() {
             key={curso.idCurso}
             id={curso.idCurso}
             title={curso.descripcion}
-            imageUrl={
-              curso.imagenPortada ||
-              "https://images.unsplash.com/photo-1560781290-7dc94c0f8f4f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWVhdHxlbnwwfHwwfHx8MA%3D%3D"
-            }
             state={curso.tieneVacantes ? "active" : "inactive"}
           />
         ))}
@@ -186,11 +182,7 @@ export default function Index() {
           <Title>Cargando tus cursos...</Title>
         ) : cursosInscritos.length > 0 ? (
           cursosInscritos.map((curso) => (
-            <CursoInscrito
-              key={curso.idInscripcion}
-              curso={curso}
-              imageUrl="https://images.unsplash.com/photo-1560781290-7dc94c0f8f4f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWVhdHxlbnwwfHwwfHx8MA%3D%3D"
-            />
+            <CursoInscrito key={curso.idInscripcion} curso={curso} />
           ))
         ) : (
           <Title>No estás inscripto en ningún curso.</Title>

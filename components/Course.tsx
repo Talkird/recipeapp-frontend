@@ -4,21 +4,20 @@ import { useRouter } from "expo-router";
 import { Row } from "./ui/Row";
 import { Column } from "./ui/Column";
 import { StyleSheet } from "react-native";
-import { Image } from "expo-image";
 import { SubTitle } from "./ui/SubTitle";
 import { SmallText } from "./ui/SmallText";
 import { primary, orange, gray, darkGray } from "@/utils/colors";
+import { ChefHat } from "lucide-react-native";
 
 interface CourseProps {
   id: number;
   title?: string;
   description?: string;
-  imageUrl: string;
   state: "active" | "inactive";
   // You can add more fields as needed for passing full data
 }
 
-const Course = ({ id, title, description, state, imageUrl }: CourseProps) => {
+const Course = ({ id, title, description, state }: CourseProps) => {
   const router = useRouter();
   const handleClick = () => {
     if (id !== undefined) {
@@ -26,42 +25,58 @@ const Course = ({ id, title, description, state, imageUrl }: CourseProps) => {
     }
   };
 
+  // Trim description to 25 characters
+  const trimmedDescription =
+    description && description.length > 25
+      ? description.substring(0, 25) + "..."
+      : description;
+
   return (
     <TouchableOpacity
       onPress={handleClick}
       activeOpacity={0.8}
-      style={{ width: "80%" }}
+      style={{ width: "95%", alignSelf: "center" }}
     >
       <Row style={styles.container}>
-        <Row style={{ gap: 12 }}>
-          <Image style={styles.image} source={imageUrl} />
-          <Column
+        {/* Icon Section */}
+        <View style={styles.iconContainer}>
+          <ChefHat size={24} color={primary} />
+        </View>
+
+        {/* Content Section */}
+        <Column
+          style={{
+            gap: 2,
+            alignItems: "flex-start",
+            justifyContent: "flex-start",
+            flex: 1,
+            paddingLeft: 12,
+          }}
+        >
+          <SubTitle>{title}</SubTitle>
+          <SmallText
             style={{
-              gap: 2,
-              alignItems: "flex-start",
-              justifyContent: "flex-start",
+              textAlign: "left",
+              color: "#666",
             }}
           >
-            <SubTitle>{title}</SubTitle>
-            <SmallText
-              style={{
-                width: "80%",
-                textAlign: "left",
-              }}
-            >
-              {description}
-            </SmallText>
-          </Column>
-        </Row>
+            {trimmedDescription}
+          </SmallText>
+        </Column>
+
         {/* Estado del curso */}
-        <View style={[
-          styles.statusBadge,
-          { backgroundColor: state === "active" ? orange : gray }
-        ]}>
-          <Text style={[
-            styles.statusText,
-            { color: state === "active" ? "#000000" : darkGray }
-          ]}>
+        <View
+          style={[
+            styles.statusBadge,
+            { backgroundColor: state === "active" ? orange : gray },
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              { color: state === "active" ? "#000000" : darkGray },
+            ]}
+          >
             {state === "active" ? "ABIERTO" : "CERRADO"}
           </Text>
         </View>
@@ -72,10 +87,9 @@ const Course = ({ id, title, description, state, imageUrl }: CourseProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: "80%",
+    width: "100%",
     height: 75,
     borderRadius: 12,
-
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -83,22 +97,19 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     flexDirection: "row",
-
     justifyContent: "space-between",
+    alignItems: "center",
     padding: 0,
-
     backgroundColor: "#FFFFFF",
   },
-  image: {
+  iconContainer: {
+    width: 60,
+    height: 75,
+    backgroundColor: "#f8f9fa",
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
-    width: 75,
-    height: 75,
-    alignSelf: "flex-start",
-    marginLeft: 0,
-    marginRight: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
   statusBadge: {
     paddingHorizontal: 12,

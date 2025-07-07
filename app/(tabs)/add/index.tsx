@@ -28,6 +28,7 @@ import {
   checkNetworkConnection,
 } from "@/utils/networkUtils";
 import { SmallText } from "@/components/ui/SmallText";
+import { primary } from "@/utils/colors";
 
 const AddRecipeScreen: React.FC = () => {
   // For creating steps (pasos) and photos, you may want to add UI for those later
@@ -195,6 +196,53 @@ const AddRecipeScreen: React.FC = () => {
     },
   ]);
 
+  // Secondary photos state
+  const [fotosSecundarias, setFotosSecundarias] = React.useState<
+    Array<{
+      url: string;
+      extension: string;
+    }>
+  >([]);
+  const [nuevaFotoSecundaria, setNuevaFotoSecundaria] = React.useState("");
+
+  // Functions for secondary photos
+  const agregarFotoSecundaria = () => {
+    if (nuevaFotoSecundaria.trim()) {
+      // Basic URL validation
+      const url = nuevaFotoSecundaria.trim();
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        Alert.alert(
+          "URL inválida",
+          "La URL debe comenzar con http:// o https://"
+        );
+        return;
+      }
+
+      // Check if URL already exists
+      if (fotosSecundarias.some((foto) => foto.url === url)) {
+        Alert.alert("Foto duplicada", "Esta URL ya fue agregada");
+        return;
+      }
+
+      const extension = url.split(".").pop()?.toLowerCase() || "jpg";
+      setFotosSecundarias([
+        ...fotosSecundarias,
+        {
+          url: url,
+          extension: ["jpg", "jpeg", "png", "webp"].includes(extension)
+            ? extension
+            : "jpg",
+        },
+      ]);
+      setNuevaFotoSecundaria("");
+    }
+  };
+
+  const eliminarFotoSecundaria = (index: number) => {
+    const nuevasFotos = fotosSecundarias.filter((_, i) => i !== index);
+    setFotosSecundarias(nuevasFotos);
+  };
+
   const handleCreateRecipe = async () => {
     setCreating(true);
     setCreateError(null);
@@ -232,6 +280,19 @@ const AddRecipeScreen: React.FC = () => {
         );
         setCreating(false);
         return;
+      }
+
+      // Validate secondary photos URLs
+      for (let i = 0; i < fotosSecundarias.length; i++) {
+        if (fotosSecundarias[i].url.length > MAX_LENGTH) {
+          setCreateError(
+            `La URL de la foto secundaria ${
+              i + 1
+            } no puede superar los ${MAX_LENGTH} caracteres.`
+          );
+          setCreating(false);
+          return;
+        }
       }
 
       const idUsuario = useUserStore.getState().idUsuario;
@@ -285,10 +346,16 @@ const AddRecipeScreen: React.FC = () => {
           observaciones: u.observaciones ?? null,
         })),
         fotos: [
+          // Foto principal
           {
             urlFoto: safeFotoUrl,
             extension: "jpg",
           },
+          // Fotos secundarias
+          ...fotosSecundarias.map((foto) => ({
+            urlFoto: foto.url,
+            extension: foto.extension,
+          })),
         ],
       };
 
@@ -330,7 +397,17 @@ const AddRecipeScreen: React.FC = () => {
           "http://localhost:8080/api/recetas/create",
           recetaRequest
         );
-        setCreateSuccess("Receta creada y subida exitosamente!");
+
+        console.log("Backend response:", response.data);
+
+        // Check if response is successful
+        if (response.status === 200 || response.status === 201) {
+          setCreateSuccess("Receta creada y subida exitosamente!");
+        } else {
+          setCreateError(
+            "La receta se creó pero hubo un problema con la respuesta del servidor."
+          );
+        }
       } else {
         // Save locally for later upload
         await savePendingRecipe({
@@ -352,6 +429,8 @@ const AddRecipeScreen: React.FC = () => {
       setTipoReceta("");
       setPasos([]);
       setFotoUrl("https://placehold.co/600x400");
+      setFotosSecundarias([]);
+      setNuevaFotoSecundaria("");
       setExistingRecipeId(null);
       setIsReplacing(false);
       setFotos([
@@ -363,7 +442,22 @@ const AddRecipeScreen: React.FC = () => {
         },
       ]);
     } catch (err: any) {
-      setCreateError("Error al procesar la receta. Intenta de nuevo.");
+      console.error("Error in handleCreateRecipe:", err);
+      console.error("Error response:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+
+      // Check if it's actually a successful response that's being caught
+      if (err.response?.status === 200 || err.response?.status === 201) {
+        setCreateSuccess("Receta creada exitosamente!");
+      } else if (err.response?.status >= 400) {
+        setCreateError(
+          `Error del servidor: ${err.response?.data?.message || err.message}`
+        );
+      } else {
+        setCreateError(
+          `Error al procesar la receta: ${err.message || "Error desconocido"}`
+        );
+      }
     } finally {
       setCreating(false);
     }
@@ -547,46 +641,142 @@ const AddRecipeScreen: React.FC = () => {
 
   return (
     <ScrollView
-      style={{ flex: 1, marginBottom: 32 }}
-      contentContainerStyle={{ flexGrow: 1 }}
+      style={{ flex: 1, backgroundColor: "#f8f9fa" }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
     >
       <Column
         style={{
           flex: 1,
-          gap: 32,
+          gap: 24,
           justifyContent: "flex-start",
-          marginTop: 32,
+          marginTop: 20,
+          paddingHorizontal: 8,
         }}
       >
-        <Title>Creá tu receta</Title>
-        <Column style={{ gap: 16 }}>
-          <SubTitle>Nombre de la receta</SubTitle>
+        {/* Header */}
+        <View
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: 20,
+            padding: 24,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            elevation: 5,
+            marginBottom: 8,
+            width: "95%",
+            alignSelf: "center",
+          }}
+        >
+          <Title
+            style={{ textAlign: "center", color: "#2c3e50", fontSize: 28 }}
+          >
+            👨‍🍳 Creá tu receta
+          </Title>
+          <SmallText
+            style={{ textAlign: "center", color: "#7f8c8d", marginTop: 8 }}
+          >
+            Compartí tu creatividad culinaria con el mundo
+          </SmallText>
+        </View>
+
+        {/* Recipe Name Section */}
+        <View
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: 18,
+            padding: 22,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.12,
+            shadowRadius: 6,
+            elevation: 4,
+            borderLeftWidth: 4,
+            borderLeftColor: primary,
+            width: "95%",
+            alignSelf: "center",
+          }}
+        >
+          <SubTitle
+            style={{ color: "#34495e", marginBottom: 16, fontSize: 18 }}
+          >
+            📝 Nombre de la receta
+          </SubTitle>
           <Input
             Icon={FileQuestion}
-            placeholder="Nombre de la receta"
+            placeholder="Ej: Milanesas de pollo al horno"
             value={recipeName}
             onChangeText={setRecipeName}
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderRadius: 14,
+              marginBottom: 16,
+              borderWidth: 2,
+              borderColor: nameVerified ? "#27ae60" : "#e0e6ed",
+            }}
           />
           {nameVerified || verifying || creating ? (
-            <Button onPress={() => {}}>
-              {verifying ? "Verificando..." : "Verificar nombre"}
+            <Button
+              onPress={() => {}}
+              style={{
+                backgroundColor: "#95a5a6",
+                borderRadius: 12,
+                opacity: 0.7,
+              }}
+            >
+              {verifying ? "Verificando..." : "✓ Nombre verificado"}
             </Button>
           ) : (
-            <Button onPress={handleVerifyName}>
+            <Button
+              onPress={handleVerifyName}
+              style={{
+                backgroundColor: primary,
+                borderRadius: 12,
+              }}
+            >
               {verifying ? "Verificando..." : "Verificar nombre"}
             </Button>
           )}
           {verifyError && (
-            <SmallText style={{ color: "red" }}>{verifyError}</SmallText>
+            <SmallText style={{ color: "#e74c3c", marginTop: 8 }}>
+              {verifyError}
+            </SmallText>
           )}
-        </Column>
+        </View>
 
         {nameVerified && (
           <>
-            <Column style={{ gap: 16 }}>
-              <SubTitle>Tipo de receta</SubTitle>
+            {/* Recipe Type Section */}
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 18,
+                padding: 22,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 4,
+                borderLeftWidth: 4,
+                borderLeftColor: primary,
+                width: "95%",
+                alignSelf: "center",
+              }}
+            >
+              <SubTitle
+                style={{ color: "#34495e", marginBottom: 16, fontSize: 18 }}
+              >
+                🍽️ Tipo de receta
+              </SubTitle>
               <View
-                style={{ width: 250, alignSelf: "center", marginBottom: 8 }}
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: 14,
+                  overflow: "hidden",
+                  borderWidth: 1,
+                  borderColor: "#e0e6ed",
+                }}
               >
                 <RNPickerSelect
                   onValueChange={setTipoReceta}
@@ -595,133 +785,264 @@ const AddRecipeScreen: React.FC = () => {
                   placeholder={{ label: "Selecciona un tipo", value: "" }}
                   style={{
                     inputIOS: {
-                      padding: 12,
+                      padding: 16,
                       fontSize: 16,
-                      color: "#000",
-                      width: "100%",
+                      color: "#2c3e50",
+                      backgroundColor: "#f8f9fa",
                     },
-                    viewContainer: { width: "100%" },
-                    placeholder: { color: "#808080" },
+                    placeholder: { color: "#7f8c8d" },
                     iconContainer: {
                       top: 0,
-                      right: 0,
+                      right: 15,
                       height: "100%",
                       justifyContent: "center",
                       alignItems: "center",
-                      position: "absolute",
-                      width: 32,
                     },
                   }}
                   doneText="Listo"
-                  Icon={() => <Pipette size={20} color="#808080" />}
+                  Icon={() => <Pipette size={20} color="#7f8c8d" />}
                 />
               </View>
-              <Column style={{ gap: 16 }}>
-                <SubTitle>Pasos</SubTitle>
-                {pasos.map((paso, idx) => (
-                  <Column key={idx} style={{ gap: 4, marginBottom: 8 }}>
+            </View>
+
+            {/* Basic Info Section */}
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 18,
+                padding: 22,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 4,
+                borderLeftWidth: 4,
+                borderLeftColor: primary,
+                width: "95%",
+                alignSelf: "center",
+              }}
+            >
+              <SubTitle
+                style={{ color: "#34495e", marginBottom: 18, fontSize: 18 }}
+              >
+                ℹ️ Información básica
+              </SubTitle>
+              <Column style={{ gap: 12, marginBottom: 12 }}>
+                <Input
+                  Icon={Hourglass}
+                  placeholder="Tiempo (min)"
+                  value={estimatedTime}
+                  onChangeText={setEstimatedTime}
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: 12,
+                    width: "100%",
+                  }}
+                />
+                <Input
+                  Icon={PersonStanding}
+                  placeholder="Personas"
+                  value={servings}
+                  onChangeText={setServings}
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: 12,
+                    width: "100%",
+                  }}
+                />
+              </Column>
+              <Input
+                placeholder="Descripción de la receta"
+                value={recipeDescription}
+                onChangeText={setRecipeDescription}
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: 12,
+                  marginBottom: 12,
+                }}
+                multiline
+                numberOfLines={3}
+              />
+              <Input
+                placeholder="URL de la foto principal"
+                value={fotoUrl}
+                onChangeText={setFotoUrl}
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: 12,
+                }}
+              />
+            </View>
+
+            {/* Secondary Photos Section */}
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 18,
+                padding: 22,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 4,
+                width: "95%",
+                alignSelf: "center",
+                borderWidth: 2,
+                borderColor: primary,
+                marginBottom: 20,
+              }}
+            >
+              <SubTitle style={{ marginBottom: 16, textAlign: "center" }}>
+                📸 Fotos Secundarias
+              </SubTitle>
+
+              {/* Add new secondary photo */}
+              <Row
+                style={{ marginBottom: 16, gap: 12, alignItems: "flex-end" }}
+              >
+                <Input
+                  placeholder="URL de foto secundaria"
+                  value={nuevaFotoSecundaria}
+                  onChangeText={setNuevaFotoSecundaria}
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: 12,
+                    flex: 1,
+                  }}
+                />
+                <TouchableOpacity
+                  onPress={agregarFotoSecundaria}
+                  disabled={!nuevaFotoSecundaria.trim()}
+                  style={{
+                    backgroundColor: nuevaFotoSecundaria.trim()
+                      ? primary
+                      : "#ccc",
+                    borderRadius: 12,
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <SmallText
+                    style={{
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: 14,
+                    }}
+                  >
+                    Agregar
+                  </SmallText>
+                </TouchableOpacity>
+              </Row>
+
+              {/* List of secondary photos */}
+              {fotosSecundarias.length > 0 && (
+                <Column style={{ gap: 8 }}>
+                  <SmallText style={{ fontWeight: "bold", marginBottom: 8 }}>
+                    Fotos agregadas ({fotosSecundarias.length}):
+                  </SmallText>
+                  {fotosSecundarias.map((foto, index) => (
                     <Row
+                      key={index}
                       style={{
-                        gap: 8,
+                        backgroundColor: "#f8f9fa",
+                        borderRadius: 8,
+                        padding: 12,
                         justifyContent: "space-between",
                         alignItems: "center",
+                        gap: 12,
                       }}
                     >
-                      <Row style={{ gap: 8, flex: 1 }}>
-                        <SmallText>Paso {paso.nroPaso}:</SmallText>
-                        <SmallText>{paso.texto}</SmallText>
-                      </Row>
-                      <TouchableOpacity
-                        onPress={() => handleRemovePaso(idx)}
+                      <SmallText
                         style={{
-                          backgroundColor: "#ff4444",
-                          borderRadius: 4,
-                          padding: 4,
+                          flex: 1,
+                          fontSize: 12,
+                          color: "#666",
                         }}
                       >
-                        <SmallText style={{ color: "white", fontSize: 12 }}>
+                        {foto.url.length > 40
+                          ? foto.url.substring(0, 40) + "..."
+                          : foto.url}
+                      </SmallText>
+                      <TouchableOpacity
+                        onPress={() => eliminarFotoSecundaria(index)}
+                        style={{
+                          backgroundColor: "#ff6b6b",
+                          borderRadius: 6,
+                          paddingHorizontal: 10,
+                          paddingVertical: 6,
+                        }}
+                      >
+                        <SmallText
+                          style={{
+                            color: "white",
+                            fontWeight: "bold",
+                            fontSize: 12,
+                          }}
+                        >
                           Eliminar
                         </SmallText>
                       </TouchableOpacity>
                     </Row>
-                    {/* List multimedia for this paso */}
-                    {Array.isArray(paso.multimedia) &&
-                      paso.multimedia.length > 0 && (
-                        <Column style={{ marginLeft: 16, gap: 2 }}>
-                          {paso.multimedia.map((m: any, mIdx: number) => (
-                            <SmallText key={mIdx}>
-                              {m.tipoContenido === "imagen" ? "🖼️" : "🎬"}{" "}
-                              {m.urlContenido} ({m.extension})
-                            </SmallText>
-                          ))}
-                        </Column>
-                      )}
-                    {/* Add multimedia UI */}
-                    {selectedPasoIdx === idx ? (
-                      <Column style={{ gap: 8, marginTop: 4 }}>
-                        <Input
-                          placeholder="URL de imagen o video"
-                          value={mediaUrl}
-                          onChangeText={setMediaUrl}
-                        />
-                        <RNPickerSelect
-                          onValueChange={(v) => {
-                            setMediaType(v);
-                            setMediaExtension(v === "imagen" ? "jpg" : "mp4");
-                          }}
-                          items={[
-                            { label: "Imagen", value: "imagen" },
-                            { label: "Video", value: "video" },
-                          ]}
-                          value={mediaType}
-                          style={{
-                            inputIOS: {
-                              padding: 8,
-                              fontSize: 14,
-                              color: "#000",
-                            },
-                          }}
-                        />
-                        <Input
-                          placeholder="Extensión"
-                          value={mediaExtension}
-                          onChangeText={setMediaExtension}
-                        />
-                        <Button onPress={() => handleAddMediaToPaso(idx)}>
-                          Agregar
-                        </Button>
-                        <Button
-                          onPress={() => setSelectedPasoIdx(null)}
-                          style={{ backgroundColor: "#eee" }}
-                        >
-                          Cancelar
-                        </Button>
-                      </Column>
-                    ) : (
-                      <Button
-                        onPress={() => setSelectedPasoIdx(idx)}
-                        style={{ width: 120 }}
-                      >
-                        + Multimedia
-                      </Button>
-                    )}
-                  </Column>
-                ))}
-                <Input
-                  placeholder="Describe el siguiente paso"
-                  value={pasoTexto}
-                  onChangeText={setPasoTexto}
-                />
-                <Button onPress={handleAddPaso}>Agregar paso</Button>
-                <Button
-                  onPress={() => handleRemovePaso(pasos.length - 1)}
-                  style={{ backgroundColor: "#dc3545", marginTop: 8 }}
-                >
-                  Eliminar último paso
-                </Button>
-                <SubTitle>Agregá ingredientes a tu receta</SubTitle>
+                  ))}
+                </Column>
+              )}
+
+              <SmallText
+                style={{
+                  textAlign: "center",
+                  color: "#666",
+                  fontSize: 12,
+                  marginTop: 12,
+                  lineHeight: 16,
+                }}
+              >
+                Las fotos secundarias aparecerán en la galería de la receta.
+                Puedes agregar varias fotos para mostrar diferentes ángulos o
+                pasos del proceso.
+              </SmallText>
+            </View>
+
+            {/* Ingredients Section */}
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 18,
+                padding: 22,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 4,
+                borderLeftWidth: 4,
+                borderLeftColor: primary,
+                width: "95%",
+                alignSelf: "center",
+              }}
+            >
+              <SubTitle
+                style={{ color: "#34495e", marginBottom: 18, fontSize: 18 }}
+              >
+                🥘 Ingredientes utilizados
+              </SubTitle>
+
+              {/* Add Ingredient Form */}
+              <View
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 16,
+                }}
+              >
                 <View
-                  style={{ width: 250, alignSelf: "center", marginBottom: 8 }}
+                  style={{
+                    backgroundColor: "#fff",
+                    borderRadius: 12,
+                    marginBottom: 12,
+                    overflow: "hidden",
+                  }}
                 >
                   <RNPickerSelect
                     onValueChange={setIngredientName}
@@ -736,185 +1057,542 @@ const AddRecipeScreen: React.FC = () => {
                     }}
                     style={{
                       inputIOS: {
-                        padding: 12,
+                        padding: 16,
                         fontSize: 16,
-                        color: "#000",
-                        width: "100%",
+                        color: "#2c3e50",
                       },
-                      viewContainer: { width: "100%" },
-                      placeholder: { color: "#808080" },
+                      placeholder: { color: "#7f8c8d" },
                       iconContainer: {
                         top: 0,
-                        right: 0,
+                        right: 15,
                         height: "100%",
                         justifyContent: "center",
                         alignItems: "center",
-                        position: "absolute",
-                        width: 32,
                       },
                     }}
                     doneText="Listo"
-                    Icon={() => <Pizza size={20} color="#808080" />}
+                    Icon={() => <Pizza size={20} color="#7f8c8d" />}
                   />
                 </View>
-                <Input
-                  Icon={Hash}
-                  placeholder="Cantidad"
-                  value={ingredientQuantity}
-                  onChangeText={setIngredientQuantity}
-                />
-                <View
-                  style={{ width: 250, alignSelf: "center", marginBottom: 8 }}
-                >
-                  <RNPickerSelect
-                    onValueChange={setIngredientUnit}
-                    items={unidadesBackend.map((unidad) => ({
-                      label: unidad.descripcion,
-                      value: unidad.descripcion,
-                    }))}
-                    value={ingredientUnit}
-                    placeholder={{ label: "Selecciona una unidad", value: "" }}
+                <Column style={{ gap: 12, marginBottom: 12 }}>
+                  <Input
+                    Icon={Hash}
+                    placeholder="Cantidad"
+                    value={ingredientQuantity}
+                    onChangeText={setIngredientQuantity}
                     style={{
-                      inputIOS: {
-                        padding: 12,
-                        fontSize: 16,
-                        color: "#000",
-                        width: "100%",
-                      },
-                      viewContainer: { width: "100%" },
-                      placeholder: { color: "#808080" },
-                      iconContainer: {
-                        top: 0,
-                        right: 0,
-                        height: "100%",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        position: "absolute",
-                        width: 32,
-                      },
+                      backgroundColor: "#fff",
+                      borderRadius: 12,
+                      width: "100%",
                     }}
-                    doneText="Listo"
-                    Icon={() => <Hash size={20} color="#808080" />}
                   />
-                </View>
+                  <View
+                    style={{
+                      backgroundColor: "#fff",
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      width: "100%",
+                    }}
+                  >
+                    <RNPickerSelect
+                      onValueChange={setIngredientUnit}
+                      items={unidadesBackend.map((unidad) => ({
+                        label: unidad.descripcion,
+                        value: unidad.descripcion,
+                      }))}
+                      value={ingredientUnit}
+                      placeholder={{ label: "Unidad", value: "" }}
+                      style={{
+                        inputIOS: {
+                          padding: 16,
+                          fontSize: 16,
+                          color: "#2c3e50",
+                        },
+                        placeholder: { color: "#7f8c8d" },
+                        iconContainer: {
+                          top: 0,
+                          right: 15,
+                          height: "100%",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        },
+                      }}
+                      doneText="Listo"
+                      Icon={() => <Hash size={20} color="#7f8c8d" />}
+                    />
+                  </View>
+                </Column>
+
                 <Input
                   placeholder="Observaciones (opcional)"
                   value={ingredientObservaciones}
                   onChangeText={setIngredientObservaciones}
+                  style={{
+                    backgroundColor: "#fff",
+                    borderRadius: 12,
+                    marginBottom: 12,
+                  }}
                 />
-                <Button onPress={handleAddIngredient}>Agregar</Button>
-              </Column>
 
-              <Column>
-                <SubTitle>Lista de ingredientes</SubTitle>
+                <Button
+                  onPress={handleAddIngredient}
+                  style={{
+                    backgroundColor: primary,
+                    borderRadius: 12,
+                  }}
+                >
+                  ➕ Agregar ingrediente
+                </Button>
+              </View>
+
+              {/* Ingredients List */}
+              <View>
+                <SmallText style={{ color: "#7f8c8d", marginBottom: 8 }}>
+                  Ingredientes agregados ({ingredients.length})
+                </SmallText>
                 {ingredients.length > 0 ? (
-                  ingredients.map((ingredient, index) => (
-                    <Row key={index} style={{ flexDirection: "row", gap: 8 }}>
-                      <SmallText>{ingredient.name}</SmallText>
-                      <SmallText>{ingredient.quantity}</SmallText>
-                      <SmallText>{ingredient.unit}</SmallText>
-                      <Button
-                        onPress={() => handleRemoveIngredient(index)}
+                  <View style={{ gap: 8 }}>
+                    {ingredients.map((ingredient, index) => (
+                      <View
+                        key={index}
                         style={{
-                          backgroundColor: "#dc3545",
-                          paddingVertical: 4,
-                          paddingHorizontal: 8,
-                          borderRadius: 4,
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: 12,
+                          padding: 12,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         }}
                       >
-                        <SmallText style={{ color: "#fff" }}>
-                          Eliminar
-                        </SmallText>
-                      </Button>
-                    </Row>
-                  ))
+                        <View style={{ flex: 1 }}>
+                          <SmallText
+                            style={{ fontWeight: "600", color: "#2c3e50" }}
+                          >
+                            {ingredient.name}
+                          </SmallText>
+                          <SmallText style={{ color: "#7f8c8d" }}>
+                            {ingredient.quantity} {ingredient.unit}
+                            {ingredient.observaciones &&
+                              ` • ${ingredient.observaciones}`}
+                          </SmallText>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => handleRemoveIngredient(index)}
+                          style={{
+                            backgroundColor: "#e74c3c",
+                            borderRadius: 8,
+                            padding: 8,
+                          }}
+                        >
+                          <SmallText style={{ color: "#fff", fontSize: 12 }}>
+                            ✕
+                          </SmallText>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
                 ) : (
-                  <SmallText>No hay ingredientes agregados</SmallText>
-                )}
-              </Column>
-
-              <Column style={{ gap: 16 }}>
-                <SubTitle>Foto principal</SubTitle>
-                <Input
-                  placeholder="URL de la foto principal"
-                  value={fotoUrl}
-                  onChangeText={setFotoUrl}
-                />
-                <SubTitle>Información de la receta</SubTitle>
-                <Input
-                  Icon={Hourglass}
-                  placeholder="Tiempo estimado en minutos"
-                  value={estimatedTime}
-                  onChangeText={setEstimatedTime}
-                />
-                <Input
-                  Icon={PersonStanding}
-                  placeholder="Cantidad de personas"
-                  value={servings}
-                  onChangeText={setServings}
-                />
-                <Input
-                  placeholder="Descripción de la receta"
-                  value={recipeDescription}
-                  onChangeText={setRecipeDescription}
-                />
-
-                {/* Network Status Indicator */}
-                {networkInfo && (
-                  <Row
+                  <View
                     style={{
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: 12,
+                      padding: 16,
                       alignItems: "center",
-                      gap: 8,
-                      padding: 12,
-                      backgroundColor: networkInfo.isWifiConnection
-                        ? "#e8f5e8"
-                        : networkInfo.isCellularConnection
-                        ? "#fff3cd"
-                        : "#f8d7da",
-                      borderRadius: 8,
-                      marginVertical: 8,
                     }}
                   >
-                    {!networkInfo.isConnected ? (
-                      <WifiOff size={16} color="#dc3545" />
-                    ) : networkInfo.isWifiConnection ? (
-                      <Wifi size={16} color="#28a745" />
-                    ) : (
-                      <Signal size={16} color="#ffc107" />
-                    )}
-                    <SmallText
+                    <SmallText style={{ color: "#7f8c8d" }}>
+                      No hay ingredientes agregados
+                    </SmallText>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Steps Section */}
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 18,
+                padding: 22,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 4,
+                borderLeftWidth: 4,
+                borderLeftColor: primary,
+                width: "95%",
+                alignSelf: "center",
+              }}
+            >
+              <SubTitle
+                style={{ color: "#34495e", marginBottom: 18, fontSize: 18 }}
+              >
+                📋 Pasos de preparación
+              </SubTitle>
+
+              {/* Steps List */}
+              {pasos.map((paso, idx) => (
+                <View
+                  key={idx}
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: 12,
+                    padding: 20,
+                    marginBottom: 16,
+                    width: "100%",
+                    alignSelf: "center",
+                  }}
+                >
+                  <Row
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <View style={{ flex: 1, paddingRight: 16 }}>
+                      <SmallText
+                        style={{
+                          fontWeight: "700",
+                          color: primary,
+                          marginBottom: 6,
+                          fontSize: 14,
+                        }}
+                      >
+                        📝 Paso {paso.nroPaso}
+                      </SmallText>
+                      <SmallText
+                        style={{
+                          color: "#34495e",
+                          lineHeight: 22,
+                          fontSize: 15,
+                        }}
+                      >
+                        {paso.texto}
+                      </SmallText>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => handleRemovePaso(idx)}
                       style={{
-                        color: !networkInfo.isConnected
-                          ? "#dc3545"
-                          : networkInfo.isWifiConnection
-                          ? "#28a745"
-                          : "#856404",
-                        fontSize: 12,
-                        flex: 1,
+                        backgroundColor: "#e74c3c",
+                        borderRadius: 10,
+                        padding: 8,
                       }}
                     >
-                      {!networkInfo.isConnected
-                        ? "Sin conexión - Las recetas se guardarán localmente"
-                        : networkInfo.isWifiConnection
-                        ? "WiFi conectado - Las recetas se subirán automáticamente"
-                        : "Datos móviles - Se te preguntará antes de subir"}
-                    </SmallText>
+                      <SmallText
+                        style={{
+                          color: "#fff",
+                          fontSize: 12,
+                          fontWeight: "600",
+                        }}
+                      >
+                        ✕
+                      </SmallText>
+                    </TouchableOpacity>
                   </Row>
-                )}
 
-                <Button onPress={handleCreateRecipe}>
-                  {creating ? "Creando..." : "Crear receta"}
+                  {/* Multimedia */}
+                  {Array.isArray(paso.multimedia) &&
+                    paso.multimedia.length > 0 && (
+                      <View style={{ marginTop: 8, gap: 4 }}>
+                        {paso.multimedia.map((m: any, mIdx: number) => (
+                          <SmallText key={mIdx} style={{ color: "#7f8c8d" }}>
+                            {m.tipoContenido === "imagen" ? "🖼️" : "🎬"}{" "}
+                            {m.urlContenido}
+                          </SmallText>
+                        ))}
+                      </View>
+                    )}
+
+                  {/* Add multimedia UI */}
+                  {selectedPasoIdx === idx ? (
+                    <View
+                      style={{
+                        marginTop: 16,
+                        gap: 12,
+                        backgroundColor: "#fff",
+                        padding: 16,
+                        borderRadius: 12,
+                        width: "100%",
+                      }}
+                    >
+                      <SmallText
+                        style={{
+                          color: primary,
+                          fontWeight: "600",
+                          textAlign: "center",
+                        }}
+                      >
+                        📎 Agregar Multimedia al Paso
+                      </SmallText>
+                      <Input
+                        placeholder="URL de imagen o video"
+                        value={mediaUrl}
+                        onChangeText={setMediaUrl}
+                        style={{
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: 12,
+                          width: "100%",
+                        }}
+                      />
+                      <View
+                        style={{
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: 12,
+                          overflow: "hidden",
+                          width: "100%",
+                        }}
+                      >
+                        <RNPickerSelect
+                          onValueChange={(v) => {
+                            setMediaType(v);
+                            setMediaExtension(v === "imagen" ? "jpg" : "mp4");
+                          }}
+                          items={[
+                            { label: "Imagen", value: "imagen" },
+                            { label: "Video", value: "video" },
+                          ]}
+                          value={mediaType}
+                          style={{
+                            inputIOS: {
+                              padding: 16,
+                              fontSize: 14,
+                              color: "#2c3e50",
+                            },
+                          }}
+                        />
+                      </View>
+                      <Input
+                        placeholder="Extensión (ej: jpg, mp4)"
+                        value={mediaExtension}
+                        onChangeText={setMediaExtension}
+                        style={{
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: 12,
+                          width: "100%",
+                        }}
+                      />
+                      <Row
+                        style={{
+                          gap: 8,
+                          justifyContent: "center",
+                          marginTop: 12,
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => handleAddMediaToPaso(idx)}
+                          style={{
+                            backgroundColor: primary,
+                            borderRadius: 8,
+                            paddingVertical: 8,
+                            paddingHorizontal: 16,
+                            flex: 1,
+                            maxWidth: 120,
+                          }}
+                        >
+                          <SmallText
+                            style={{
+                              color: "#fff",
+                              fontSize: 12,
+                              fontWeight: "600",
+                              textAlign: "center",
+                            }}
+                          >
+                            ✅ Agregar
+                          </SmallText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => setSelectedPasoIdx(null)}
+                          style={{
+                            backgroundColor: "#95a5a6",
+                            borderRadius: 8,
+                            paddingVertical: 8,
+                            paddingHorizontal: 16,
+                            flex: 1,
+                            maxWidth: 120,
+                          }}
+                        >
+                          <SmallText
+                            style={{
+                              color: "#fff",
+                              fontSize: 12,
+                              fontWeight: "600",
+                              textAlign: "center",
+                            }}
+                          >
+                            ❌ Cancelar
+                          </SmallText>
+                        </TouchableOpacity>
+                      </Row>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => setSelectedPasoIdx(idx)}
+                      style={{
+                        backgroundColor: primary,
+                        borderRadius: 12,
+                        padding: 12,
+                        marginTop: 8,
+                        alignSelf: "center",
+                      }}
+                    >
+                      <SmallText
+                        style={{
+                          color: "#fff",
+                          fontSize: 12,
+                          fontWeight: "600",
+                        }}
+                      >
+                        📎 Agregar Multimedia
+                      </SmallText>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))}
+
+              {/* Add Step Form */}
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: 12,
+                  padding: 20,
+                  marginTop: 16,
+                  width: "100%",
+                  alignSelf: "center",
+                }}
+              >
+                <SmallText
+                  style={{
+                    color: primary,
+                    fontWeight: "600",
+                    textAlign: "center",
+                    marginBottom: 12,
+                  }}
+                >
+                  ➕ Agregar Nuevo Paso
+                </SmallText>
+                <Input
+                  placeholder="Describe el siguiente paso de la receta..."
+                  value={pasoTexto}
+                  onChangeText={setPasoTexto}
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: 12,
+                    marginBottom: 16,
+                    width: "100%",
+                  }}
+                  multiline
+                  numberOfLines={3}
+                />
+                <Button
+                  onPress={handleAddPaso}
+                  style={{
+                    backgroundColor: primary,
+                    borderRadius: 12,
+                  }}
+                >
+                  ➕ Agregar paso
                 </Button>
-                {createError && (
-                  <SmallText style={{ color: "red" }}>{createError}</SmallText>
-                )}
-                {createSuccess && (
-                  <SmallText style={{ color: "green" }}>
-                    {createSuccess}
+              </View>
+            </View>
+
+            {/* Network Status and Submit */}
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 18,
+                padding: 22,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 4,
+                borderLeftWidth: 4,
+                borderLeftColor: primary,
+                width: "95%",
+                alignSelf: "center",
+              }}
+            >
+              {/* Network Status Indicator */}
+              {networkInfo && (
+                <View
+                  style={{
+                    backgroundColor: networkInfo.isWifiConnection
+                      ? "#d4edda"
+                      : networkInfo.isCellularConnection
+                      ? "#fff3cd"
+                      : "#f8d7da",
+                    borderRadius: 12,
+                    padding: 12,
+                    marginBottom: 16,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  {!networkInfo.isConnected ? (
+                    <WifiOff size={16} color="#721c24" />
+                  ) : networkInfo.isWifiConnection ? (
+                    <Wifi size={16} color="#155724" />
+                  ) : (
+                    <Signal size={16} color="#856404" />
+                  )}
+                  <SmallText
+                    style={{
+                      color: !networkInfo.isConnected
+                        ? "#721c24"
+                        : networkInfo.isWifiConnection
+                        ? "#155724"
+                        : "#856404",
+                      fontSize: 12,
+                      flex: 1,
+                    }}
+                  >
+                    {!networkInfo.isConnected
+                      ? "Sin conexión - Las recetas se guardarán localmente"
+                      : networkInfo.isWifiConnection
+                      ? "WiFi conectado - Las recetas se subirán automáticamente"
+                      : "Datos móviles - Se te preguntará antes de subir"}
                   </SmallText>
-                )}
-              </Column>
-            </Column>
+                </View>
+              )}
+
+              <Button
+                onPress={handleCreateRecipe}
+                style={{
+                  backgroundColor: creating ? "#95a5a6" : primary,
+                  borderRadius: 12,
+                  paddingVertical: 16,
+                }}
+                disabled={creating}
+              >
+                {creating ? "🔄 Creando..." : "🚀 Crear receta"}
+              </Button>
+
+              {createError && (
+                <SmallText
+                  style={{
+                    color: "#e74c3c",
+                    marginTop: 12,
+                    textAlign: "center",
+                  }}
+                >
+                  {createError}
+                </SmallText>
+              )}
+              {createSuccess && (
+                <SmallText
+                  style={{
+                    color: "#27ae60",
+                    marginTop: 12,
+                    textAlign: "center",
+                  }}
+                >
+                  {createSuccess}
+                </SmallText>
+              )}
+            </View>
           </>
         )}
       </Column>

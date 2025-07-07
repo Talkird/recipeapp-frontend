@@ -6,7 +6,6 @@ import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
-import { Image } from "expo-image";
 import { StyleSheet } from "react-native";
 import { BadgeEuro, Clock, Phone } from "lucide-react-native";
 import Label from "@/components/ui/Label";
@@ -14,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { useUserStore } from "@/stores/user";
 import { useCursoStore, CursoDetalleDTO } from "@/stores/courses";
 import { API_URLS } from "@/lib/constants";
+import { Image } from "expo-image";
 
 export default function CursoDetail() {
   const { id } = useLocalSearchParams();
@@ -267,9 +267,7 @@ ${inscripcionResponse.mensaje}`;
   return (
     <ScrollView style={{ marginBottom: 32 }}>
       <Image
-        source={
-          "https://images.unsplash.com/photo-1551028150-64b9f398f678?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bWVhdHxlbnwwfHwwfHx8MA%3D%3D"
-        }
+        source="https://images.unsplash.com/photo-1653233797467-1a528819fd4f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
         style={{ width: "100%", height: 250 }}
       />
 

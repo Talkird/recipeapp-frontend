@@ -84,7 +84,8 @@ interface PasoDTO {
 
 interface FotoDTO {
   id: number;
-  url: string;
+  urlFoto: string;
+  extension: string;
 }
 
 interface RecetaDTO {
@@ -215,6 +216,10 @@ export default function RecipeDetail() {
       .catch(() => setComments([]))
       .finally(() => setLoadingComments(false));
   }, [receta?.id]);
+
+  // Photo gallery state
+  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
   // Proportion adjustment state
   const [portionMultiplier, setPortionMultiplier] = useState(1);
@@ -583,6 +588,82 @@ export default function RecipeDetail() {
             </Column>
           ))}
         </Column>
+
+        {/* Galería de Fotos Secundarias */}
+        {receta.fotos && receta.fotos.length > 1 && (
+          <Column style={{ alignItems: "flex-start", gap: 16, width: "100%" }}>
+            <SubTitle>📸 Galería de Fotos</SubTitle>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ width: "100%" }}
+              contentContainerStyle={{ paddingHorizontal: 8 }}
+            >
+              {receta.fotos.map((foto, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  onPress={() => {
+                    setSelectedPhotoIndex(idx);
+                    setShowPhotoGallery(true);
+                  }}
+                  style={{
+                    marginRight: 12,
+                    borderRadius: 12,
+                    overflow: "hidden",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 4,
+                    elevation: 4,
+                  }}
+                >
+                  <Image
+                    source={foto.urlFoto}
+                    style={{
+                      width: 150,
+                      height: 110,
+                      borderRadius: 12,
+                    }}
+                    contentFit="cover"
+                  />
+                  {idx === 0 && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        left: 8,
+                        backgroundColor: primary,
+                        borderRadius: 6,
+                        paddingHorizontal: 8,
+                        paddingVertical: 4,
+                      }}
+                    >
+                      <SmallText
+                        style={{
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: 10,
+                        }}
+                      >
+                        Principal
+                      </SmallText>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <SmallText
+              style={{
+                textAlign: "center",
+                color: "#666",
+                fontSize: 12,
+                width: "100%",
+              }}
+            >
+              Toca una foto para verla en pantalla completa
+            </SmallText>
+          </Column>
+        )}
 
         {/* Comentario y calificación debajo de procedimiento - Solo para recetas originales y usuarios autenticados */}
         {!isViewingAdjustedRecipe && !isGuest && (
@@ -968,6 +1049,84 @@ export default function RecipeDetail() {
           </View>
         </View>
       </Modal>
+
+      {/* Photo Gallery Modal */}
+      <Modal
+        visible={showPhotoGallery}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowPhotoGallery(false)}
+      >
+        <View style={styles.photoGalleryOverlay}>
+          <TouchableOpacity
+            style={styles.closePhotoButton}
+            onPress={() => setShowPhotoGallery(false)}
+          >
+            <SmallText style={styles.closePhotoButtonText}>✕</SmallText>
+          </TouchableOpacity>
+
+          {receta?.fotos && receta.fotos.length > 0 && (
+            <>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={(event) => {
+                  const index = Math.round(
+                    event.nativeEvent.contentOffset.x /
+                      event.nativeEvent.layoutMeasurement.width
+                  );
+                  setSelectedPhotoIndex(index);
+                }}
+                contentOffset={{ x: selectedPhotoIndex * 350, y: 0 }}
+                style={{ width: "100%" }}
+              >
+                {receta.fotos.map((foto, idx) => (
+                  <View
+                    key={idx}
+                    style={{
+                      width: 350,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      source={foto.urlFoto}
+                      style={{
+                        width: "95%",
+                        height: "60%",
+                        borderRadius: 12,
+                      }}
+                      contentFit="contain"
+                    />
+                  </View>
+                ))}
+              </ScrollView>
+
+              {/* Photo indicators */}
+              <View style={styles.photoIndicators}>
+                {receta.fotos.map((_, idx) => (
+                  <View
+                    key={idx}
+                    style={[
+                      styles.photoIndicator,
+                      idx === selectedPhotoIndex && styles.photoIndicatorActive,
+                    ]}
+                  />
+                ))}
+              </View>
+
+              {/* Photo counter */}
+              <View style={styles.photoCounter}>
+                <SmallText style={styles.photoCounterText}>
+                  {selectedPhotoIndex + 1} de {receta.fotos.length}
+                  {selectedPhotoIndex === 0 && " (Principal)"}
+                </SmallText>
+              </View>
+            </>
+          )}
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -1172,5 +1331,64 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     fontWeight: "500",
+  },
+  photoGalleryOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closePhotoButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  closePhotoButtonText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  photoIndicators: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    bottom: 100,
+    width: "100%",
+    gap: 8,
+  },
+  photoIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+  },
+  photoIndicatorActive: {
+    backgroundColor: primary,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  photoCounter: {
+    position: "absolute",
+    bottom: 50,
+    width: "100%",
+    alignItems: "center",
+  },
+  photoCounterText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
 });
