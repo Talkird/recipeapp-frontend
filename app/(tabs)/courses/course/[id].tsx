@@ -22,6 +22,7 @@ export default function CursoDetail() {
   const [inscribiendose, setInscribiendose] = useState(false);
   const [yaInscripto, setYaInscripto] = useState(false);
   const getAlumnoId = useUserStore((state) => state.getAlumnoId);
+  const esAlumno = useUserStore((state) => state.esAlumno);
   const isGuest = useUserStore((state) => state.isGuest);
   const { fetchCursoDetalle, crearInscripcion } = useCursoStore();
 
@@ -50,9 +51,33 @@ export default function CursoDetail() {
     }
   }, [isGuest]);
 
+  // Redirect non-students to become student page
+  useEffect(() => {
+    if (!isGuest && !esAlumno) {
+      Alert.alert(
+        "Únete como Alumno",
+        "Para acceder a los detalles de los cursos e inscribirte, necesás convertirte en alumno.",
+        [
+          {
+            text: "Hacerse Alumno",
+            onPress: () => {
+              router.replace("/becomestudent");
+            },
+          },
+          {
+            text: "Volver",
+            onPress: () => router.back(),
+            style: "cancel",
+          },
+        ]
+      );
+      return;
+    }
+  }, [isGuest]);
+
   useEffect(() => {
     async function fetchData() {
-      if (!id || isGuest) return; // Don't fetch data for guests
+      if (!id || isGuest || !esAlumno) return; // Don't fetch data for guests or non-students
       setLoading(true);
       try {
         // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
@@ -86,13 +111,13 @@ export default function CursoDetail() {
     }
 
     fetchData();
-  }, [id, fetchCursoDetalle, getAlumnoId, isGuest]);
+  }, [id, fetchCursoDetalle, getAlumnoId, isGuest, esAlumno]);
 
   // Actualizar datos cada vez que el usuario regresa a esta pantalla
   useFocusEffect(
     useCallback(() => {
       async function fetchData() {
-        if (!id || isGuest) return; // Don't fetch data for guests
+        if (!id || isGuest || !esAlumno) return; // Don't fetch data for guests or non-students
         setLoading(true);
         try {
           // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
@@ -127,7 +152,7 @@ export default function CursoDetail() {
       }
 
       fetchData();
-    }, [id, fetchCursoDetalle, getAlumnoId, isGuest])
+    }, [id, fetchCursoDetalle, getAlumnoId, isGuest, esAlumno])
   );
 
   const handleInscribirse = async () => {

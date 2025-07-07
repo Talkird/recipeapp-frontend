@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
-import SearchBar from "@/components/RecipeSearchBar";
 import Course from "@/components/Course";
 import CursoInscrito from "@/components/CursoInscrito";
 import { useCursoStore } from "@/stores/courses";
@@ -9,7 +8,6 @@ import { Row } from "@/components/ui/Row";
 import { useUserStore } from "@/stores/user";
 import { Button, View } from "react-native";
 import { primary } from "@/utils/colors";
-import CoursesSearchBar from "@/components/ui/CoursesSearchBar";
 import { useFocusEffect } from "@react-navigation/native";
 import { logApiConfig } from "@/lib/constants";
 
@@ -169,7 +167,6 @@ export default function Index() {
           />
         )}
       </Row>
-      <CoursesSearchBar />
       {tab === "available" &&
         cursosDisponibles.map((curso) => (
           <Course

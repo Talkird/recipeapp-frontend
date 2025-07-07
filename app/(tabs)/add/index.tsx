@@ -201,9 +201,34 @@ const AddRecipeScreen: React.FC = () => {
     setCreateSuccess(null);
 
     try {
+      // Validate string lengths for DB constraints
+      const MAX_LENGTH = 255;
       if (!recipeName || !nickname || !tipoRecetaId) {
         setCreateError(
           "Debes ingresar un nombre, tipo de receta y estar logueado."
+        );
+        setCreating(false);
+        return;
+      }
+
+      // Check field lengths before proceeding
+      if (recipeName.length > MAX_LENGTH) {
+        setCreateError(
+          `El nombre de la receta no puede superar los ${MAX_LENGTH} caracteres.`
+        );
+        setCreating(false);
+        return;
+      }
+      if (recipeDescription && recipeDescription.length > MAX_LENGTH) {
+        setCreateError(
+          `La descripción no puede superar los ${MAX_LENGTH} caracteres.`
+        );
+        setCreating(false);
+        return;
+      }
+      if (fotoUrl && fotoUrl.length > MAX_LENGTH) {
+        setCreateError(
+          `La URL de la foto principal no puede superar los ${MAX_LENGTH} caracteres.`
         );
         setCreating(false);
         return;
@@ -224,11 +249,20 @@ const AddRecipeScreen: React.FC = () => {
         return;
       }
 
+      // Truncate fields to 255 chars as a last resort (shouldn't be needed if above checks pass)
+      const safeRecipeName = recipeName.slice(0, MAX_LENGTH);
+      const safeRecipeDescription = recipeDescription
+        ? recipeDescription.slice(0, MAX_LENGTH)
+        : "";
+      const safeFotoUrl = fotoUrl
+        ? fotoUrl.slice(0, MAX_LENGTH)
+        : "https://placehold.co/600x400";
+
       const recetaRequest = {
         idUsuario: idUsuario,
-        nombreReceta: recipeName,
-        descripcionReceta: recipeDescription,
-        fotoPrincipal: fotoUrl || "https://placehold.co/600x400",
+        nombreReceta: safeRecipeName,
+        descripcionReceta: safeRecipeDescription,
+        fotoPrincipal: safeFotoUrl,
         porciones: servings ? parseInt(servings) : 1,
         cantidadPersonas: servings ? parseInt(servings) : 1,
         duracion: estimatedTime ? parseInt(estimatedTime) : 1,
@@ -252,7 +286,7 @@ const AddRecipeScreen: React.FC = () => {
         })),
         fotos: [
           {
-            urlFoto: fotoUrl || "https://placehold.co/600x400",
+            urlFoto: safeFotoUrl,
             extension: "jpg",
           },
         ],
