@@ -30,6 +30,7 @@ import { Timer, Users } from "lucide-react-native";
 import { Star, StarHalf } from "lucide-react-native";
 import { Row } from "@/components/ui/Row";
 import { StyleSheet } from "react-native";
+import { API_URLS } from "@/lib/constants";
 import Comment from "@/components/Comment";
 import { useUserStore } from "@/stores/user";
 import AsyncStorage from "@react-native-async-storage/async-storage";

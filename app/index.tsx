@@ -12,6 +12,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { Pressable, StyleSheet } from "react-native";
 import { useUserStore } from "@/stores/user";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URLS } from "@/lib/constants";
 
 export default function Index() {
   const [ultimasRecetas, setUltimasRecetas] = useState<
@@ -34,7 +35,7 @@ export default function Index() {
     });
     // Fetch last three recipes on mount
     axios
-      .get("http://localhost:8080/api/recetas/ultimas-tres")
+      .get(`${API_URLS.RECETAS}/ultimas-tres`)
       .then((res) => {
         setUltimasRecetas(res.data);
       })

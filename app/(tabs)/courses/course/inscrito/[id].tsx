@@ -21,11 +21,23 @@ export default function CursoInscritoDetail() {
   const [loading, setLoading] = useState(true);
   const [dandoDeBaja, setDandoDeBaja] = useState(false);
   const getAlumnoId = useUserStore((state) => state.getAlumnoId);
+  const { isAlumno } = useUserStore();
   const { cursosInscritos, fetchCursosInscritosParaAlumno, cancelarInscripcion } = useCursoStore();
 
   useEffect(() => {
     async function fetchData() {
       if (!id) return;
+      
+      // VERIFICAR SI EL USUARIO ES ALUMNO ANTES DE MOSTRAR EL CURSO INSCRITO
+      // Si no es alumno, redirigir a la página de registro de alumno
+      const esAlumno = await isAlumno();
+      
+      if (!esAlumno) {
+        console.log("Usuario no es alumno, redirigiendo a registro de alumno");
+        router.replace("/becomestudent");
+        return;
+      }
+      
       setLoading(true);
       try {
         // Buscar el curso en la lista de cursos inscritos
@@ -122,8 +134,8 @@ ${response.mensaje}`;
   };
 
   const handleEscanearQR = () => {
-    // Navegar a la página de escaneo QR
-    router.push("/QR");
+    // Navegar a la página de escaneo QR pasando el ID del curso
+    router.push(`/QR?courseId=${curso?.idCurso}`);
   };
 
   if (loading || !curso) {

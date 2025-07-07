@@ -1,8 +1,9 @@
 import axios from "axios";
+import { API_URLS } from "@/lib/constants";
 
 export async function fetchTipoRecetaOptions(): Promise<string[]> {
   try {
-    const res = await axios.post("http://localhost:8080/api/tiporeceta/getAll");
+    const res = await axios.post(`${API_URLS.TIPOS_RECETA}/getAll`);
     if (Array.isArray(res.data)) {
       return res.data.map((tipo: any) => tipo.descripcion);
     }
@@ -14,7 +15,7 @@ export async function fetchTipoRecetaOptions(): Promise<string[]> {
 
 export async function fetchIngredienteOptions(): Promise<string[]> {
   try {
-    const res = await axios.get("http://localhost:8080/ingredientes/get/All");
+    const res = await axios.get(`${API_URLS.INGREDIENTES}/get/All`);
     if (Array.isArray(res.data)) {
       return res.data.map((ing: any) => ing.nombre);
     }

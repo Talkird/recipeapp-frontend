@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import axios from "axios";
+import { API_URLS } from "@/lib/constants";
 
-const API_URL = "http://localhost:8080/api/recetas";
+const API_URL = API_URLS.RECETAS;
 
 interface Receta {
   idReceta: number;
