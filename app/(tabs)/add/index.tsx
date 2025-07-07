@@ -274,26 +274,6 @@ const AddRecipeScreen: React.FC = () => {
         setCreating(false);
         return;
       }
-      if (fotoUrl && fotoUrl.length > MAX_LENGTH) {
-        setCreateError(
-          `La URL de la foto principal no puede superar los ${MAX_LENGTH} caracteres.`
-        );
-        setCreating(false);
-        return;
-      }
-
-      // Validate secondary photos URLs
-      for (let i = 0; i < fotosSecundarias.length; i++) {
-        if (fotosSecundarias[i].url.length > MAX_LENGTH) {
-          setCreateError(
-            `La URL de la foto secundaria ${
-              i + 1
-            } no puede superar los ${MAX_LENGTH} caracteres.`
-          );
-          setCreating(false);
-          return;
-        }
-      }
 
       const idUsuario = useUserStore.getState().idUsuario;
 
@@ -315,9 +295,7 @@ const AddRecipeScreen: React.FC = () => {
       const safeRecipeDescription = recipeDescription
         ? recipeDescription.slice(0, MAX_LENGTH)
         : "";
-      const safeFotoUrl = fotoUrl
-        ? fotoUrl.slice(0, MAX_LENGTH)
-        : "https://placehold.co/600x400";
+      const safeFotoUrl = fotoUrl || "https://placehold.co/600x400";
 
       const recetaRequest = {
         idUsuario: idUsuario,
@@ -993,8 +971,8 @@ const AddRecipeScreen: React.FC = () => {
                           color: "#666",
                         }}
                       >
-                        {foto.url.length > 40
-                          ? foto.url.substring(0, 40) + "..."
+                        {foto.url.length > 50
+                          ? foto.url.substring(0, 50) + "..."
                           : foto.url}
                       </SmallText>
                       <TouchableOpacity

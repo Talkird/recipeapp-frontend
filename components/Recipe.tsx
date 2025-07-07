@@ -70,7 +70,9 @@ const Recipe = ({
               justifyContent: "flex-start",
             }}
           >
-            <SubTitle style={{ fontSize: 18 }}>{title}</SubTitle>
+            <SubTitle style={{ fontSize: 18 }}>
+              {title.length > 15 ? title.substring(0, 15) + "..." : title}
+            </SubTitle>
 
             {renderStars(rating)}
             {author ? <SmallText>Por: {author}</SmallText> : null}

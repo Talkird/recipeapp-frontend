@@ -76,9 +76,20 @@ export default function Index() {
               } - Rating: ${receta.calificacion.toFixed(1)}`}
               image={receta.fotoPrincipal}
               onPress={() => {
-                // When clicking a recipe from welcome screen, set guest mode (only in memory)
+                console.log("WelcomeRecipe clicked - Recipe ID:", receta.id);
+                // Set guest mode first
                 useUserStore.getState().setGuestMode(true);
-                router.push(`/home/recipe/${receta.id}`);
+                console.log("Guest mode set to true");
+                // Navigate to home first, then to the specific recipe
+                router.push("/home");
+                // Small delay to ensure the guest mode is set and home is loaded
+                setTimeout(() => {
+                  console.log(
+                    "Navigating to recipe:",
+                    `/home/recipe/${receta.id}`
+                  );
+                  router.push(`/home/recipe/${receta.id}`);
+                }, 100);
               }}
             />
           ))}

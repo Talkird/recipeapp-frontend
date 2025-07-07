@@ -6,7 +6,7 @@ import CursoInscrito from "@/components/CursoInscrito";
 import { useCursoStore } from "@/stores/courses";
 import { Row } from "@/components/ui/Row";
 import { useUserStore } from "@/stores/user";
-import { Button, View } from "react-native";
+import { Button, View, ScrollView } from "react-native";
 import { primary } from "@/utils/colors";
 import { useFocusEffect } from "@react-navigation/native";
 import { logApiConfig } from "@/lib/constants";
@@ -143,13 +143,15 @@ export default function Index() {
   }, [tab, alumnoId]);
 
   return (
-    <Column
-      style={{
-        flex: 1,
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingTop: 32,
+        paddingBottom: 20,
         gap: 32,
-        justifyContent: "flex-start",
-        marginTop: 32,
       }}
+      showsVerticalScrollIndicator={false}
     >
       <Title>Cursos</Title>
       <Row style={{ gap: 12, marginBottom: 8 }}>
@@ -167,26 +169,29 @@ export default function Index() {
           />
         )}
       </Row>
-      {tab === "available" &&
-        cursosDisponibles.map((curso) => (
-          <Course
-            key={curso.idCurso}
-            id={curso.idCurso}
-            title={curso.descripcion}
-            state={curso.tieneVacantes ? "active" : "inactive"}
-          />
-        ))}
 
-      {tab === "mine" &&
-        (loading ? (
-          <Title>Cargando tus cursos...</Title>
-        ) : cursosInscritos.length > 0 ? (
-          cursosInscritos.map((curso) => (
-            <CursoInscrito key={curso.idInscripcion} curso={curso} />
-          ))
-        ) : (
-          <Title>No estás inscripto en ningún curso.</Title>
-        ))}
-    </Column>
+      <Column style={{ gap: 16 }}>
+        {tab === "available" &&
+          cursosDisponibles.map((curso) => (
+            <Course
+              key={curso.idCurso}
+              id={curso.idCurso}
+              title={curso.descripcion}
+              state={curso.tieneVacantes ? "active" : "inactive"}
+            />
+          ))}
+
+        {tab === "mine" &&
+          (loading ? (
+            <Title>Cargando tus cursos...</Title>
+          ) : cursosInscritos.length > 0 ? (
+            cursosInscritos.map((curso) => (
+              <CursoInscrito key={curso.idInscripcion} curso={curso} />
+            ))
+          ) : (
+            <Title>No estás inscripto en ningún curso.</Title>
+          ))}
+      </Column>
+    </ScrollView>
   );
 }

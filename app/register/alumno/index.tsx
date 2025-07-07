@@ -10,7 +10,13 @@ import { CreditCard, Hash } from "lucide-react-native";
 import CamaraUpload from "@/components/CamaraUpload";
 import { useUserStore } from "@/stores/user";
 import { useState } from "react";
-import { ScrollView, SafeAreaView, Alert, View } from "react-native";
+import {
+  ScrollView,
+  SafeAreaView,
+  Alert,
+  View,
+  StyleSheet,
+} from "react-native";
 
 const index = () => {
   const { createAlumno } = useUserStore();
@@ -56,41 +62,33 @@ const index = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 20,
-          paddingBottom: 40,
-        }}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
-        <Column
-          style={{
-            gap: 24,
-            alignItems: "center",
-            maxWidth: 400,
-            alignSelf: "center",
-            width: "100%",
-          }}
-        >
-          {/* Header Section */}
-          <Column style={{ alignItems: "center", marginTop: 20 }}>
-            <Title>Convertite en alumno</Title>
-            <SubTitle>Y empezá a cocinar</SubTitle>
-          </Column>
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <Title style={styles.title}>Convertite en alumno</Title>
+          <SubTitle style={styles.subtitle}>Y empezá a cocinar</SubTitle>
+        </View>
 
-          {/* Illustration */}
-          <PersonalInfo width={180} height={120} />
+        {/* Illustration */}
+        <View style={styles.illustrationContainer}>
+          <PersonalInfo width={160} height={110} />
+        </View>
 
-          {/* Form Fields */}
-          <Column style={{ gap: 20, width: "100%" }}>
+        {/* Form Container */}
+        <View style={styles.formContainer}>
+          {/* Inputs */}
+          <View style={styles.inputsContainer}>
             <Input
               onChangeText={setNumeroTarjeta}
               value={numeroTarjeta}
               Icon={CreditCard}
               placeholder="Número de tarjeta"
-              style={{ width: "100%" }}
             />
 
             <Input
@@ -98,40 +96,101 @@ const index = () => {
               value={tramite}
               Icon={Hash}
               placeholder="Número de trámite"
-              style={{ width: "100%" }}
             />
-          </Column>
+          </View>
 
-          {/* DNI Images Section */}
-          <Column style={{ gap: 12, width: "100%" }}>
-            <SmallText style={{ fontWeight: "bold", fontSize: 16 }}>
-              📷 Imágenes del DNI
-            </SmallText>
-            <SmallText style={{ color: "#666", fontSize: 14, lineHeight: 20 }}>
+          {/* DNI Section */}
+          <View style={styles.dniContainer}>
+            <SmallText style={styles.dniTitle}>📷 Imágenes del DNI</SmallText>
+            <SmallText style={styles.dniDescription}>
               Necesitamos una foto del frente y dorso de tu DNI para verificar
               tu identidad. Asegurate de que se vea claramente toda la
               información.
             </SmallText>
 
-            <CamaraUpload onImagesChange={handleImagesChange} maxImages={2} />
+            <View style={styles.cameraContainer}>
+              <CamaraUpload onImagesChange={handleImagesChange} maxImages={2} />
+            </View>
 
             {selectedImages.length > 0 && (
-              <SmallText
-                style={{ color: "green", fontSize: 12, textAlign: "center" }}
-              >
+              <SmallText style={styles.progressText}>
                 ✅ {selectedImages.length} de 2 imágenes agregadas
               </SmallText>
             )}
-          </Column>
+          </View>
 
-          {/* Submit Button */}
-          <View style={{ marginTop: 20, width: "100%" }}>
+          {/* Button */}
+          <View style={styles.buttonContainer}>
             <Button onPress={handleFinalizar}>Finalizar</Button>
           </View>
-        </Column>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 40,
+  },
+  headerContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+    paddingTop: 10,
+  },
+  title: {
+    textAlign: "center",
+  },
+  subtitle: {
+    textAlign: "center",
+  },
+  illustrationContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  formContainer: {
+    width: "100%",
+    maxWidth: 400,
+    alignSelf: "center",
+  },
+  inputsContainer: {
+    gap: 16,
+    marginBottom: 24,
+  },
+  dniContainer: {
+    marginBottom: 32,
+  },
+  dniTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  dniDescription: {
+    color: "#666",
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  cameraContainer: {
+    marginBottom: 12,
+  },
+  progressText: {
+    color: "green",
+    fontSize: 12,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    marginTop: 8,
+  },
+});
 
 export default index;
