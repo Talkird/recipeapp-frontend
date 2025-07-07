@@ -1,18 +1,19 @@
 import { ScrollView, Alert } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLocalSearchParams, useFocusEffect, router } from "expo-router";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Column } from "@/components/ui/Column";
 import { Title } from "@/components/ui/Title";
 import { SubTitle } from "@/components/ui/SubTitle";
 import { SmallText } from "@/components/ui/SmallText";
-import { Image } from "expo-image";
 import { StyleSheet } from "react-native";
 import { BadgeEuro, Clock, Phone } from "lucide-react-native";
 import Label from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
 import { useUserStore } from "@/stores/user";
 import { useCursoStore, CursoDetalleDTO } from "@/stores/courses";
+import { API_URLS } from "@/lib/constants";
+import { Image } from "expo-image";
 
 export default function CursoDetail() {
   const { id } = useLocalSearchParams();
@@ -21,6 +22,7 @@ export default function CursoDetail() {
   const [inscribiendose, setInscribiendose] = useState(false);
   const [yaInscripto, setYaInscripto] = useState(false);
   const getAlumnoId = useUserStore((state) => state.getAlumnoId);
+  const esAlumno = useUserStore((state) => state.esAlumno);
   const isGuest = useUserStore((state) => state.isGuest);
   const { fetchCursoDetalle, crearInscripcion } = useCursoStore();
 
@@ -49,9 +51,33 @@ export default function CursoDetail() {
     }
   }, [isGuest]);
 
+  // Redirect non-students to become student page
+  useEffect(() => {
+    if (!isGuest && !esAlumno) {
+      Alert.alert(
+        "Únete como Alumno",
+        "Para acceder a los detalles de los cursos e inscribirte, necesás convertirte en alumno.",
+        [
+          {
+            text: "Hacerse Alumno",
+            onPress: () => {
+              router.replace("/becomestudent");
+            },
+          },
+          {
+            text: "Volver",
+            onPress: () => router.back(),
+            style: "cancel",
+          },
+        ]
+      );
+      return;
+    }
+  }, [isGuest]);
+
   useEffect(() => {
     async function fetchData() {
-      if (!id || isGuest) return; // Don't fetch data for guests
+      if (!id || isGuest || !esAlumno) return; // Don't fetch data for guests or non-students
       setLoading(true);
       try {
         // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
@@ -83,8 +109,51 @@ export default function CursoDetail() {
         setLoading(false);
       }
     }
+
     fetchData();
-  }, [id]);
+  }, [id, fetchCursoDetalle, getAlumnoId, isGuest, esAlumno]);
+
+  // Actualizar datos cada vez que el usuario regresa a esta pantalla
+  useFocusEffect(
+    useCallback(() => {
+      async function fetchData() {
+        if (!id || isGuest || !esAlumno) return; // Don't fetch data for guests or non-students
+        setLoading(true);
+        try {
+          // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
+          const cursoDetalle = await fetchCursoDetalle(parseInt(id as string));
+          if (cursoDetalle) {
+            setCurso(cursoDetalle);
+          }
+
+          // Verificar si el alumno ya está inscrito en este curso
+          const alumnoId = await getAlumnoId();
+          if (alumnoId) {
+            try {
+              const inscripcionesRes = await axios.get(
+                `http://localhost:8080/api/inscripciones/alumno/${alumnoId}`
+              );
+              const inscripciones = inscripcionesRes.data;
+              const yaEstaInscrito = inscripciones.some(
+                (inscripcion: any) =>
+                  inscripcion.cronograma.curso.idCurso ===
+                  parseInt(id as string)
+              );
+              setYaInscripto(yaEstaInscrito);
+            } catch (error) {
+              console.error("Error al verificar inscripción:", error);
+            }
+          }
+        } catch (e) {
+          console.error("Error al obtener detalle del curso:", e);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      fetchData();
+    }, [id, fetchCursoDetalle, getAlumnoId, isGuest, esAlumno])
+  );
 
   const handleInscribirse = async () => {
     try {
@@ -198,9 +267,7 @@ ${inscripcionResponse.mensaje}`;
   return (
     <ScrollView style={{ marginBottom: 32 }}>
       <Image
-        source={
-          "https://images.unsplash.com/photo-1551028150-64b9f398f678?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bWVhdHxlbnwwfHwwfHx8MA%3D%3D"
-        }
+        source="https://images.unsplash.com/photo-1653233797467-1a528819fd4f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
         style={{ width: "100%", height: 250 }}
       />
 

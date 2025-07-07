@@ -30,9 +30,11 @@ import { Timer, Users } from "lucide-react-native";
 import { Star, StarHalf } from "lucide-react-native";
 import { Row } from "@/components/ui/Row";
 import { StyleSheet } from "react-native";
+import { API_URLS } from "@/lib/constants";
 import Comment from "@/components/Comment";
 import { useUserStore } from "@/stores/user";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNPickerSelect from "react-native-picker-select";
 
 interface Comment {
   rating: number;
@@ -83,7 +85,8 @@ interface PasoDTO {
 
 interface FotoDTO {
   id: number;
-  url: string;
+  urlFoto: string;
+  extension: string;
 }
 
 interface RecetaDTO {
@@ -215,6 +218,10 @@ export default function RecipeDetail() {
       .finally(() => setLoadingComments(false));
   }, [receta?.id]);
 
+  // Photo gallery state
+  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+
   // Proportion adjustment state
   const [portionMultiplier, setPortionMultiplier] = useState(1);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
@@ -225,7 +232,6 @@ export default function RecipeDetail() {
   const [hasAdjustments, setHasAdjustments] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<number>(-1);
   const [ingredientAmount, setIngredientAmount] = useState("");
-  const [showIngredientModal, setShowIngredientModal] = useState(false);
   const [isViewingAdjustedRecipe, setIsViewingAdjustedRecipe] = useState(false);
   const [adjustedRecipeData, setAdjustedRecipeData] =
     useState<SavedAdjustedRecipe | null>(null);
@@ -267,9 +273,18 @@ export default function RecipeDetail() {
       const originalAmount = receta.utilizados[selectedIngredient].cantidad;
       const multiplier = newAmount / originalAmount;
       setPortionMultiplier(multiplier);
+
+      // Show a brief success feedback
+      Alert.alert(
+        "¡Ajuste aplicado!",
+        `Todas las cantidades han sido ajustadas proporcionalmente (x${multiplier.toFixed(
+          2
+        )})`,
+        [{ text: "OK" }]
+      );
+
       setIngredientAmount("");
-      setSelectedIngredient(-1);
-      setShowAdjustModal(false);
+      // Keep ingredient selected so user can make further adjustments
     }
   };
 
@@ -583,6 +598,82 @@ export default function RecipeDetail() {
           ))}
         </Column>
 
+        {/* Galería de Fotos Secundarias */}
+        {receta.fotos && receta.fotos.length > 1 && (
+          <Column style={{ alignItems: "flex-start", gap: 16, width: "100%" }}>
+            <SubTitle>📸 Galería de Fotos</SubTitle>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ width: "100%" }}
+              contentContainerStyle={{ paddingHorizontal: 8 }}
+            >
+              {receta.fotos.map((foto, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  onPress={() => {
+                    setSelectedPhotoIndex(idx);
+                    setShowPhotoGallery(true);
+                  }}
+                  style={{
+                    marginRight: 12,
+                    borderRadius: 12,
+                    overflow: "hidden",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 4,
+                    elevation: 4,
+                  }}
+                >
+                  <Image
+                    source={foto.urlFoto}
+                    style={{
+                      width: 150,
+                      height: 110,
+                      borderRadius: 12,
+                    }}
+                    contentFit="cover"
+                  />
+                  {idx === 0 && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        left: 8,
+                        backgroundColor: primary,
+                        borderRadius: 6,
+                        paddingHorizontal: 8,
+                        paddingVertical: 4,
+                      }}
+                    >
+                      <SmallText
+                        style={{
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: 10,
+                        }}
+                      >
+                        Principal
+                      </SmallText>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <SmallText
+              style={{
+                textAlign: "center",
+                color: "#666",
+                fontSize: 12,
+                width: "100%",
+              }}
+            >
+              Toca una foto para verla en pantalla completa
+            </SmallText>
+          </Column>
+        )}
+
         {/* Comentario y calificación debajo de procedimiento - Solo para recetas originales y usuarios autenticados */}
         {!isViewingAdjustedRecipe && !isGuest && (
           <>
@@ -821,58 +912,187 @@ export default function RecipeDetail() {
 
                 {/* Individual ingredient adjustment */}
                 <Column style={{ gap: 8, width: "100%" }}>
-                  <SmallText style={{ fontWeight: "bold" }}>
-                    Ajustar por ingrediente:
-                  </SmallText>
-                  <TouchableOpacity
-                    style={styles.ingredientSelector}
-                    onPress={() => setShowIngredientModal(true)}
+                  <Row
+                    style={{
+                      justifyContent: "space-between",
+                      width: "100%",
+                      alignItems: "center",
+                    }}
                   >
-                    <SmallText style={styles.ingredientSelectorText}>
-                      {selectedIngredient >= 0 && receta
-                        ? `${
-                            receta.utilizados[selectedIngredient].ingrediente
-                              ?.nombre
-                          } (${
-                            receta.utilizados[selectedIngredient].cantidad
-                          } ${
-                            receta.utilizados[selectedIngredient].unidad
-                              ?.descripcion || ""
-                          })`
-                        : "Selecciona ingrediente..."}
+                    <SmallText style={{ fontWeight: "bold" }}>
+                      Ajustar por ingrediente:
                     </SmallText>
-                    <ChevronDown color="#666" size={16} />
-                  </TouchableOpacity>
-                  {selectedIngredient >= 0 && (
-                    <Row
-                      style={{
-                        gap: 6,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <TextInput
-                        style={styles.customInputSmall}
-                        placeholder="Cantidad"
-                        value={ingredientAmount}
-                        onChangeText={setIngredientAmount}
-                        keyboardType="numeric"
-                      />
-                      <SmallText style={{ fontSize: 12 }}>
-                        {receta?.utilizados[selectedIngredient]?.unidad
-                          ?.descripcion || ""}
-                      </SmallText>
+                    {selectedIngredient >= 0 && (
                       <TouchableOpacity
-                        style={styles.smallButton}
-                        onPress={handleIngredientAdjustment}
-                        disabled={!ingredientAmount}
+                        onPress={() => {
+                          setSelectedIngredient(-1);
+                          setIngredientAmount("");
+                        }}
                       >
-                        <SmallText style={styles.smallButtonText}>
-                          Ajustar
+                        <SmallText
+                          style={{
+                            color: primary,
+                            fontSize: 12,
+                            textDecorationLine: "underline",
+                          }}
+                        >
+                          Cambiar ingrediente
                         </SmallText>
                       </TouchableOpacity>
-                    </Row>
+                    )}
+                  </Row>
+
+                  {/* Picker para seleccionar ingrediente */}
+                  <View
+                    style={{
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: "#e0e6ed",
+                      width: "100%",
+                    }}
+                  >
+                    <RNPickerSelect
+                      onValueChange={(value) => {
+                        setSelectedIngredient(value);
+                        setIngredientAmount("");
+                      }}
+                      items={
+                        receta?.utilizados?.map((ing, idx) => ({
+                          label: `${ing.ingrediente?.nombre} (${ing.cantidad} ${
+                            ing.unidad?.descripcion || ""
+                          })`,
+                          value: idx,
+                        })) || []
+                      }
+                      value={
+                        selectedIngredient >= 0 ? selectedIngredient : null
+                      }
+                      placeholder={{
+                        label: "Selecciona un ingrediente...",
+                        value: -1,
+                      }}
+                      style={{
+                        inputIOS: {
+                          padding: 12,
+                          fontSize: 14,
+                          color: "#2c3e50",
+                          backgroundColor: "#f8f9fa",
+                        },
+                        inputAndroid: {
+                          padding: 12,
+                          fontSize: 14,
+                          color: "#2c3e50",
+                          backgroundColor: "#f8f9fa",
+                        },
+                        placeholder: { color: "#7f8c8d" },
+                        iconContainer: {
+                          top: 0,
+                          right: 15,
+                          height: "100%",
+                          justifyContent: "center",
+                        },
+                      }}
+                      Icon={() => <ChevronDown color="#666" size={16} />}
+                    />
+                  </View>
+
+                  {selectedIngredient >= 0 && receta && (
+                    <Column style={{ gap: 8, width: "100%" }}>
+                      <View
+                        style={{
+                          backgroundColor: "#e8f4fd",
+                          borderRadius: 8,
+                          padding: 12,
+                          borderLeftWidth: 4,
+                          borderLeftColor: primary,
+                        }}
+                      >
+                        <SmallText
+                          style={{
+                            fontSize: 12,
+                            color: "#333",
+                            fontStyle: "italic",
+                            lineHeight: 16,
+                          }}
+                        >
+                          💡 Seleccionaste:{" "}
+                          <SmallText style={{ fontWeight: "bold" }}>
+                            {
+                              receta.utilizados[selectedIngredient].ingrediente
+                                ?.nombre
+                            }
+                          </SmallText>
+                          . Cambia su cantidad y todos los demás ingredientes se
+                          ajustarán automáticamente.
+                        </SmallText>
+                      </View>
+
+                      <SmallText
+                        style={{
+                          textAlign: "center",
+                          fontSize: 12,
+                          color: "#666",
+                        }}
+                      >
+                        Cantidad original:{" "}
+                        <SmallText style={{ fontWeight: "bold" }}>
+                          {receta?.utilizados[selectedIngredient]?.cantidad}{" "}
+                          {receta?.utilizados[selectedIngredient]?.unidad
+                            ?.descripcion || ""}
+                        </SmallText>
+                      </SmallText>
+                      {hasAdjustments && (
+                        <SmallText
+                          style={{
+                            textAlign: "center",
+                            fontSize: 12,
+                            color: primary,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Cantidad actual:{" "}
+                          {(
+                            receta.utilizados[selectedIngredient].cantidad *
+                            portionMultiplier
+                          ).toFixed(1)}{" "}
+                          {receta?.utilizados[selectedIngredient]?.unidad
+                            ?.descripcion || ""}
+                        </SmallText>
+                      )}
+                      <Row
+                        style={{
+                          gap: 6,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <SmallText style={{ fontSize: 12 }}>
+                          Nueva cantidad:
+                        </SmallText>
+                        <TextInput
+                          style={styles.customInputSmall}
+                          placeholder="Cantidad"
+                          value={ingredientAmount}
+                          onChangeText={setIngredientAmount}
+                          keyboardType="numeric"
+                        />
+                        <SmallText style={{ fontSize: 12 }}>
+                          {receta?.utilizados[selectedIngredient]?.unidad
+                            ?.descripcion || ""}
+                        </SmallText>
+                        <TouchableOpacity
+                          style={styles.smallButton}
+                          onPress={handleIngredientAdjustment}
+                          disabled={!ingredientAmount}
+                        >
+                          <SmallText style={styles.smallButtonText}>
+                            Aplicar
+                          </SmallText>
+                        </TouchableOpacity>
+                      </Row>
+                    </Column>
                   )}
                 </Column>
 
@@ -885,7 +1105,9 @@ export default function RecipeDetail() {
                     lineHeight: 16,
                   }}
                 >
-                  Todos los ingredientes se ajustarán proporcionalmente
+                  {selectedIngredient >= 0
+                    ? "Ingresa la nueva cantidad para este ingrediente y todos los demás se ajustarán proporcionalmente"
+                    : "Todos los ingredientes se ajustarán proporcionalmente"}
                 </SmallText>
 
                 <Button onPress={() => setShowAdjustModal(false)}>
@@ -897,74 +1119,81 @@ export default function RecipeDetail() {
         </View>
       </Modal>
 
-      {/* Ingredient Selection Modal */}
+      {/* Photo Gallery Modal */}
       <Modal
-        visible={showIngredientModal}
+        visible={showPhotoGallery}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setShowIngredientModal(false)}
+        onRequestClose={() => setShowPhotoGallery(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.ingredientModalContent}>
-            <SmallText
-              style={{ fontWeight: "bold", fontSize: 16, marginBottom: 16 }}
-            >
-              Selecciona un ingrediente
-            </SmallText>
-            <ScrollView style={{ maxHeight: 300, width: "100%" }}>
-              {receta?.utilizados && receta.utilizados.length > 0 ? (
-                receta.utilizados.map((ing, idx) => (
-                  <TouchableOpacity
+        <View style={styles.photoGalleryOverlay}>
+          <TouchableOpacity
+            style={styles.closePhotoButton}
+            onPress={() => setShowPhotoGallery(false)}
+          >
+            <SmallText style={styles.closePhotoButtonText}>✕</SmallText>
+          </TouchableOpacity>
+
+          {receta?.fotos && receta.fotos.length > 0 && (
+            <>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={(event) => {
+                  const index = Math.round(
+                    event.nativeEvent.contentOffset.x /
+                      event.nativeEvent.layoutMeasurement.width
+                  );
+                  setSelectedPhotoIndex(index);
+                }}
+                contentOffset={{ x: selectedPhotoIndex * 350, y: 0 }}
+                style={{ width: "100%" }}
+              >
+                {receta.fotos.map((foto, idx) => (
+                  <View
                     key={idx}
-                    style={[
-                      styles.ingredientOption,
-                      selectedIngredient === idx &&
-                        styles.ingredientOptionSelected,
-                    ]}
-                    onPress={() => {
-                      setSelectedIngredient(idx);
-                      setShowIngredientModal(false);
+                    style={{
+                      width: 350,
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
-                    <SmallText
+                    <Image
+                      source={foto.urlFoto}
                       style={{
-                        ...styles.ingredientOptionText,
-                        ...(selectedIngredient === idx &&
-                          styles.ingredientOptionTextSelected),
+                        width: "95%",
+                        height: "60%",
+                        borderRadius: 12,
                       }}
-                    >
-                      {ing.ingrediente?.nombre || "Ingrediente sin nombre"}
-                    </SmallText>
-                    <SmallText
-                      style={{
-                        ...styles.ingredientOptionAmount,
-                        ...(selectedIngredient === idx &&
-                          styles.ingredientOptionAmountSelected),
-                      }}
-                    >
-                      {ing.cantidad} {ing.unidad?.descripcion || "unidad"}
-                    </SmallText>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <SmallText
-                  style={{
-                    textAlign: "center",
-                    color: "#666",
-                    marginVertical: 20,
-                  }}
-                >
-                  No hay ingredientes disponibles para ajustar
+                      contentFit="contain"
+                    />
+                  </View>
+                ))}
+              </ScrollView>
+
+              {/* Photo indicators */}
+              <View style={styles.photoIndicators}>
+                {receta.fotos.map((_, idx) => (
+                  <View
+                    key={idx}
+                    style={[
+                      styles.photoIndicator,
+                      idx === selectedPhotoIndex && styles.photoIndicatorActive,
+                    ]}
+                  />
+                ))}
+              </View>
+
+              {/* Photo counter */}
+              <View style={styles.photoCounter}>
+                <SmallText style={styles.photoCounterText}>
+                  {selectedPhotoIndex + 1} de {receta.fotos.length}
+                  {selectedPhotoIndex === 0 && " (Principal)"}
                 </SmallText>
-              )}
-            </ScrollView>
-            <TouchableOpacity
-              style={styles.closeModalButton}
-              onPress={() => setShowIngredientModal(false)}
-            >
-              <SmallText style={styles.closeModalButtonText}>Cerrar</SmallText>
-            </TouchableOpacity>
-          </View>
+              </View>
+            </>
+          )}
         </View>
       </Modal>
     </ScrollView>
@@ -1117,59 +1346,63 @@ const styles = StyleSheet.create({
     color: "#333",
     flex: 1,
   },
-  ingredientModalContent: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 20,
-    width: "90%",
-    maxWidth: 350,
-    maxHeight: "80%",
-    alignItems: "center",
-  },
-  ingredientOption: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    width: "100%",
-  },
-  ingredientOptionSelected: {
-    backgroundColor: "#fff4e6",
-    borderRadius: 8,
-    borderBottomColor: primary,
-  },
-  ingredientOptionText: {
-    fontSize: 14,
-    color: "#333",
+  photoGalleryOverlay: {
     flex: 1,
-    fontWeight: "500",
-  },
-  ingredientOptionTextSelected: {
-    color: primary,
-    fontWeight: "bold",
-  },
-  ingredientOptionAmount: {
-    fontSize: 12,
-    color: "#666",
-  },
-  ingredientOptionAmountSelected: {
-    color: primary,
-    fontWeight: "bold",
-  },
-  closeModalButton: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
     alignItems: "center",
   },
-  closeModalButtonText: {
+  closePhotoButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  closePhotoButtonText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  photoIndicators: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    bottom: 100,
+    width: "100%",
+    gap: 8,
+  },
+  photoIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+  },
+  photoIndicatorActive: {
+    backgroundColor: primary,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  photoCounter: {
+    position: "absolute",
+    bottom: 50,
+    width: "100%",
+    alignItems: "center",
+  },
+  photoCounterText: {
+    color: "white",
     fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
+    fontWeight: "bold",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
 });

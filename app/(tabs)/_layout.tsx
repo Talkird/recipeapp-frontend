@@ -173,6 +173,21 @@ export default function TabLayout() {
           headerTintColor: primary,
         }}
       />
+      <Tabs.Screen
+        name="courses/course/inscrito/[id]"
+        options={{
+          href: null,
+          headerShown: true,
+          headerTitle: () => <SubTitle>Mi Curso</SubTitle>,
+          headerStyle: {
+            backgroundColor: "#ffffff",
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+          headerLeft: undefined,
+          headerTintColor: primary,
+        }}
+      />
     </Tabs>
   );
 }
