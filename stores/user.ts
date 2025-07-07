@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
- 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const API_URL = "http://localhost:8080/api/usuarios";
 const API_URL_ALUMNO = "http://localhost:8080/api/alumnos";
 
@@ -34,7 +35,7 @@ interface UserStore {
     nuevaClave: string,
     confirmarClave: string
   ) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   login: (mail: string, password: string) => Promise<void>;
   updateUserId: (mail: string) => Promise<void>;
   createAlumno: (
@@ -81,14 +82,14 @@ export const useUserStore = create<UserStore>((set, get) => ({
   getAlumnoId: async () => {
     const { idUsuario, alumnoId } = get();
     if (!idUsuario) return null;
-    
+
     // Si ya tenemos el alumnoId en el estado, lo devolvemos
     if (alumnoId) return alumnoId;
-    
+
     try {
       // Usar getAccountInfo para obtener la información completa
       const accountInfo = await get().getAccountInfo();
-      
+
       // El alumnoId debería haber sido actualizado por getAccountInfo
       const { alumnoId: newAlumnoId } = get();
       return newAlumnoId;
@@ -101,12 +102,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
   isAlumno: async () => {
     const { idUsuario, esAlumno } = get();
     if (!idUsuario) return false;
-    
+
     // Si ya tenemos la información en el store, usarla
     if (esAlumno !== undefined) {
       return esAlumno;
     }
-    
+
     // Solo si no tenemos la información, hacer la llamada al backend
     try {
       const response = await axios.get(
@@ -128,10 +129,10 @@ export const useUserStore = create<UserStore>((set, get) => ({
   setAuthToken: (token) => {
     if (token) {
       // Configurar el token en todas las peticiones de axios
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } else {
       // Remover el token
-      delete axios.defaults.headers.common['Authorization'];
+      delete axios.defaults.headers.common["Authorization"];
     }
   },
 
@@ -151,7 +152,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
         return null;
       } else {
         const { mail, nickname, nombre, direccion } = response.data;
-        
+
         // Extraer alumnoId del JSON string para evitar problemas de referencias circulares
         let alumnoId = null;
         try {
@@ -169,7 +170,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
           console.error("Error al extraer alumnoId:", error);
           set({ alumnoId: null, esAlumno: false });
         }
-        
+
         set({ mail, nickname, nombre, direccion });
         return response.data;
       }
@@ -194,10 +195,17 @@ export const useUserStore = create<UserStore>((set, get) => ({
       throw error;
     }
   },
-  logout: () => {
+  logout: async () => {
     // Limpiar el token de autenticación
     get().setAuthToken(null);
-    
+
+    // Clear stored credentials
+    try {
+      await AsyncStorage.removeItem("userCredentials");
+    } catch (error) {
+      console.error("Error removing stored credentials:", error);
+    }
+
     set({
       mail: null,
       nickname: null,
@@ -218,20 +226,20 @@ export const useUserStore = create<UserStore>((set, get) => ({
         mail,
         password,
       });
-      
+
       // Usar toda la información que devuelve el backend
-      const { 
-        jwt, 
-        idUsuario, 
-        mail: userMail, 
-        nickname, 
-        nombre, 
-        esAlumno, 
-        idAlumno 
+      const {
+        jwt,
+        idUsuario,
+        mail: userMail,
+        nickname,
+        nombre,
+        esAlumno,
+        idAlumno,
       } = response.data;
-      
+
       // Actualizar el store con toda la información
-      set({ 
+      set({
         mail: userMail,
         nickname,
         nombre,
@@ -240,11 +248,16 @@ export const useUserStore = create<UserStore>((set, get) => ({
         esAlumno,
         alumnoId: idAlumno || null, // Solo si es alumno
       });
-      
+
       // Configurar el token para futuras peticiones
       get().setAuthToken(jwt);
-      
-      console.log("Login exitoso. Usuario:", { idUsuario, nickname, esAlumno, idAlumno });
+
+      console.log("Login exitoso. Usuario:", {
+        idUsuario,
+        nickname,
+        esAlumno,
+        idAlumno,
+      });
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       throw error;
@@ -327,7 +340,13 @@ export const useUserStore = create<UserStore>((set, get) => ({
     }
   },
 
-  createAlumno: async (tramite, numeroTarjeta, dniFrente, dniFondo, cuentaCorriente) => {
+  createAlumno: async (
+    tramite,
+    numeroTarjeta,
+    dniFrente,
+    dniFondo,
+    cuentaCorriente
+  ) => {
     try {
       const { idUsuario } = get();
 
@@ -346,20 +365,20 @@ export const useUserStore = create<UserStore>((set, get) => ({
       }
 
       const response = await axios.post(`${API_URL_ALUMNO}/crear`, requestBody);
-      
+
       // Usar toda la información que devuelve el backend
-      const { 
-        idAlumno, 
+      const {
+        idAlumno,
         numeroTarjeta: respNumeroTarjeta,
         dniFrente: respDniFrente,
         dniFondo: respDniFondo,
         tramite: respTramite,
         cuentaCorriente: respCuentaCorriente,
-        usuario 
+        usuario,
       } = response.data;
-      
+
       // Actualizar el store con la información del alumno
-      set({ 
+      set({
         alumnoId: idAlumno,
         esAlumno: true,
       });
@@ -367,20 +386,20 @@ export const useUserStore = create<UserStore>((set, get) => ({
       // Si la respuesta incluye información actualizada del usuario, usarla
       if (usuario) {
         const { mail, nickname, nombre, direccion } = usuario;
-        set({ 
+        set({
           mail: mail || get().mail,
           nickname: nickname || get().nickname,
           nombre: nombre || get().nombre,
           direccion: direccion || get().direccion,
         });
       }
-      
-      console.log("Alumno creado exitosamente:", { 
-        idAlumno, 
+
+      console.log("Alumno creado exitosamente:", {
+        idAlumno,
         numeroTarjeta: respNumeroTarjeta,
-        cuentaCorriente: respCuentaCorriente 
+        cuentaCorriente: respCuentaCorriente,
       });
-      
+
       return response.data;
     } catch (error) {
       console.error("Error al crear alumno:", error);

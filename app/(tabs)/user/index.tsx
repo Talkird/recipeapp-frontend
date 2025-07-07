@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/Button";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { useUserStore } from "@/stores/user";
+import { Alert } from "react-native";
 
 export default function Index() {
-  const { getAccountInfo, mail, nickname, nombre, esAlumno } = useUserStore();
- 
+  const { getAccountInfo, logout, mail, nickname, nombre, esAlumno } =
+    useUserStore();
+
   useEffect(() => {
     getAccountInfo()
       .then((info) => {
@@ -21,6 +23,27 @@ export default function Index() {
       });
   }, []);
 
+  const handleLogout = async () => {
+    Alert.alert(
+      "Cerrar sesión",
+      "¿Estás seguro de que quieres cerrar sesión?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Cerrar sesión",
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+            router.replace("/login");
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <Column
       style={{ flex: 1, gap: 32, justifyContent: "flex-start", marginTop: 32 }}
@@ -30,7 +53,7 @@ export default function Index() {
 
       <Label text={mail ?? ""} Icon={Mail} />
       <Label text={esAlumno ? "Alumno" : "Usuario"} Icon={CircleHelp} />
-      
+
       {/* Solo mostrar el botón si no es alumno */}
       {!esAlumno && (
         <Button
@@ -41,8 +64,8 @@ export default function Index() {
           Convertirse en alumno
         </Button>
       )}
-      
-      <Button onPress={() => router.push("/logout")}>Cerrar sesión</Button>
+
+      <Button onPress={handleLogout}>Cerrar sesión</Button>
     </Column>
   );
 }

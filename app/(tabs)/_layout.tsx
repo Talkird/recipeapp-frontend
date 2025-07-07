@@ -6,8 +6,10 @@ import {
   User,
   CirclePlus,
   Heart,
+  Clock,
 } from "lucide-react-native";
 import { View } from "react-native";
+import { SubTitle } from "@/components/ui/SubTitle";
 
 export default function TabLayout() {
   return (
@@ -27,9 +29,21 @@ export default function TabLayout() {
           borderTopWidth: 0.5,
           borderTopColor: "#eee",
         },
-        headerShown: false,
+        headerShown: true, // Always show header
+        headerTitle: () => <SubTitle>Recipedia</SubTitle>,
+        headerStyle: {
+          backgroundColor: "#ffffff",
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: "600",
+        },
+        headerLeft: () => null, // Remove back button for main tab screens
       }}
     >
+      {/* Main tab screens - only these 5 should show */}
       <Tabs.Screen
         name="home/index"
         options={{
@@ -71,6 +85,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="pending/index"
+        options={{
+          title: "Pendientes",
+          tabBarLabel: "Pendientes",
+          tabBarIcon: ({ color }) => (
+            <View style={{ alignItems: "center", justifyContent: "center" }}>
+              <Clock size={24} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="courses/index"
         options={{
           title: "Cursos",
@@ -92,6 +118,52 @@ export default function TabLayout() {
               <User size={24} color={color} />
             </View>
           ),
+        }}
+      />
+      {/* Hide all nested/dynamic routes from tab bar */}
+      <Tabs.Screen
+        name="home/recipe/[id]"
+        options={{
+          href: null, // This hides the route from the tab bar
+          headerShown: true,
+          headerTitle: () => <SubTitle>Receta</SubTitle>,
+          headerStyle: {
+            backgroundColor: "#ffffff",
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+          headerLeft: undefined, // This allows the back button to show
+          headerTintColor: primary,
+        }}
+      />
+      <Tabs.Screen
+        name="home/placeholder/index"
+        options={{
+          href: null,
+          headerShown: true,
+          headerTitle: () => <SubTitle>Recipedia</SubTitle>,
+          headerStyle: {
+            backgroundColor: "#ffffff",
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+          headerLeft: undefined,
+          headerTintColor: primary,
+        }}
+      />
+      <Tabs.Screen
+        name="courses/course/[id]"
+        options={{
+          href: null,
+          headerShown: true,
+          headerTitle: () => <SubTitle>Curso</SubTitle>,
+          headerStyle: {
+            backgroundColor: "#ffffff",
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+          headerLeft: undefined,
+          headerTintColor: primary,
         }}
       />
     </Tabs>

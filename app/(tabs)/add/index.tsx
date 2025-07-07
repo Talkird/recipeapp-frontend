@@ -16,8 +16,16 @@ import {
   PersonStanding,
   Pipette,
   Pizza,
+  Wifi,
+  WifiOff,
+  Signal,
 } from "lucide-react-native";
 import RNPickerSelect from "react-native-picker-select";
+import {
+  shouldProceedWithUpload,
+  savePendingRecipe,
+  checkNetworkConnection,
+} from "@/utils/networkUtils";
 import { SmallText } from "@/components/ui/SmallText";
 
 const AddRecipeScreen: React.FC = () => {
@@ -26,6 +34,16 @@ const AddRecipeScreen: React.FC = () => {
   const [creating, setCreating] = React.useState(false);
   const [createError, setCreateError] = React.useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = React.useState<string | null>(null);
+  const [networkInfo, setNetworkInfo] = React.useState<any>(null);
+
+  // Check network status on component mount
+  React.useEffect(() => {
+    const checkNetwork = async () => {
+      const info = await checkNetworkConnection();
+      setNetworkInfo(info);
+    };
+    checkNetwork();
+  }, []);
   // Helper to map ingredients to UtilizadoRequest (with IDs)
   // Build utilizados array for UtilizadoRequest DTO
   const buildUtilizados = () => {
@@ -169,6 +187,7 @@ const AddRecipeScreen: React.FC = () => {
     setCreating(true);
     setCreateError(null);
     setCreateSuccess(null);
+
     try {
       if (!recipeName || !nickname || !tipoRecetaId) {
         setCreateError(
@@ -192,6 +211,7 @@ const AddRecipeScreen: React.FC = () => {
         setCreating(false);
         return;
       }
+
       const recetaRequest = {
         idUsuario: idUsuario,
         nombreReceta: recipeName,
@@ -225,40 +245,58 @@ const AddRecipeScreen: React.FC = () => {
           },
         ],
       };
-      // Get token if needed
-      // const token = useUserStore((s) => s.token);
+
       console.log("recetaRequest", JSON.stringify(recetaRequest, null, 2));
 
-      // If replacing an existing recipe, delete it first
-      if (isReplacing && existingRecipeId) {
-        try {
-          await axios.delete(
-            `http://localhost:8080/api/recetas/delete/${existingRecipeId}`
-          );
-          console.log(`Deleted existing recipe with ID: ${existingRecipeId}`);
-        } catch (deleteErr: any) {
-          console.error("Error deleting existing recipe:", deleteErr);
-          if (deleteErr.response && deleteErr.response.status === 500) {
-            setCreateError(
-              "No se puede eliminar la receta anterior porque está siendo utilizada en otras listas. La nueva receta se creará con un nombre diferente."
+      // Check network connection and decide whether to upload or save locally
+      const shouldUpload = await shouldProceedWithUpload();
+
+      // Update network info after checking
+      const currentNetworkInfo = await checkNetworkConnection();
+      setNetworkInfo(currentNetworkInfo);
+
+      if (shouldUpload) {
+        // If replacing an existing recipe, delete it first
+        if (isReplacing && existingRecipeId) {
+          try {
+            await axios.delete(
+              `http://localhost:8080/api/recetas/delete/${existingRecipeId}`
             );
-            // Continue with creation but modify the name to avoid conflict
-            recetaRequest.nombreReceta = `${recipeName} (Nueva versión)`;
-          } else {
-            setCreateError("Error al eliminar la receta anterior.");
-            setCreating(false);
-            return;
+            console.log(`Deleted existing recipe with ID: ${existingRecipeId}`);
+          } catch (deleteErr: any) {
+            console.error("Error deleting existing recipe:", deleteErr);
+            if (deleteErr.response && deleteErr.response.status === 500) {
+              setCreateError(
+                "No se puede eliminar la receta anterior porque está siendo utilizada en otras listas. La nueva receta se creará con un nombre diferente."
+              );
+              // Continue with creation but modify the name to avoid conflict
+              recetaRequest.nombreReceta = `${recipeName} (Nueva versión)`;
+            } else {
+              setCreateError("Error al eliminar la receta anterior.");
+              setCreating(false);
+              return;
+            }
           }
         }
+
+        // Upload to server
+        const response = await axios.post(
+          "http://localhost:8080/api/recetas/create",
+          recetaRequest
+        );
+        setCreateSuccess("Receta creada y subida exitosamente!");
+      } else {
+        // Save locally for later upload
+        await savePendingRecipe({
+          recipeData: recetaRequest,
+          type: isReplacing ? "update" : "create",
+        });
+        setCreateSuccess(
+          "Receta guardada localmente. Se subirá cuando tengas WiFi."
+        );
       }
 
-      const response = await axios.post(
-        "http://localhost:8080/api/recetas/create",
-        recetaRequest
-        // , { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCreateSuccess("Receta creada exitosamente!");
-
+      // Reset form
       setNameVerified(false);
       setRecipeName("");
       setRecipeDescription("");
@@ -279,7 +317,7 @@ const AddRecipeScreen: React.FC = () => {
         },
       ]);
     } catch (err: any) {
-      setCreateError("Error al crear la receta. Intenta de nuevo.");
+      setCreateError("Error al procesar la receta. Intenta de nuevo.");
     } finally {
       setCreating(false);
     }
@@ -731,6 +769,50 @@ const AddRecipeScreen: React.FC = () => {
                   value={recipeDescription}
                   onChangeText={setRecipeDescription}
                 />
+
+                {/* Network Status Indicator */}
+                {networkInfo && (
+                  <Row
+                    style={{
+                      alignItems: "center",
+                      gap: 8,
+                      padding: 12,
+                      backgroundColor: networkInfo.isWifiConnection
+                        ? "#e8f5e8"
+                        : networkInfo.isCellularConnection
+                        ? "#fff3cd"
+                        : "#f8d7da",
+                      borderRadius: 8,
+                      marginVertical: 8,
+                    }}
+                  >
+                    {!networkInfo.isConnected ? (
+                      <WifiOff size={16} color="#dc3545" />
+                    ) : networkInfo.isWifiConnection ? (
+                      <Wifi size={16} color="#28a745" />
+                    ) : (
+                      <Signal size={16} color="#ffc107" />
+                    )}
+                    <SmallText
+                      style={{
+                        color: !networkInfo.isConnected
+                          ? "#dc3545"
+                          : networkInfo.isWifiConnection
+                          ? "#28a745"
+                          : "#856404",
+                        fontSize: 12,
+                        flex: 1,
+                      }}
+                    >
+                      {!networkInfo.isConnected
+                        ? "Sin conexión - Las recetas se guardarán localmente"
+                        : networkInfo.isWifiConnection
+                        ? "WiFi conectado - Las recetas se subirán automáticamente"
+                        : "Datos móviles - Se te preguntará antes de subir"}
+                    </SmallText>
+                  </Row>
+                )}
+
                 <Button onPress={handleCreateRecipe}>
                   {creating ? "Creando..." : "Crear receta"}
                 </Button>
