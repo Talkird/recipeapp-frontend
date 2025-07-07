@@ -28,40 +28,40 @@ export interface AsistenciaAlumnoDTO {
   fechaAsistencia: string;
   porcentajeAsistenciaActual: number;
   estado: string; // "PRESENTE", "AUSENTE", "JUSTIFICADO"
-  
+
   // Información del alumno
   idAlumno: number;
   nombreAlumno: string;
   emailAlumno: string;
-  
+
   // Información del curso
   idCurso: number;
   nombreCurso: string;
   modalidadCurso: string;
   duracionCurso: string;
   precioCurso: number;
-  
+
   // Información del cronograma
   idCronograma: number;
   fechaInicioCronograma: string;
   fechaFinCronograma: string;
-  
+
   // Información de la sede
   idSede: number;
   nombreSede: string;
   direccionSede: string;
-  
+
   // Progreso en el curso
   totalClasesCurso: number;
   clasesAsistidasCurso: number;
   porcentajeCompletacionCurso: number;
   cumpleMinimoAsistencia: boolean; // ≥75%
   cursoCompletado: boolean;
-  
+
   // Estado de la inscripción
   estadoInscripcion: string; // "ACTIVA", "FINALIZADA", "CANCELADA"
   fechaInscripcion: string;
-  
+
   // Información adicional
   observaciones?: string;
   registradoPorQR: boolean;
@@ -74,20 +74,20 @@ export interface AsistenciaCronogramaDTO {
   fechaAsistencia: string;
   estado: string; // "PRESENTE", "AUSENTE", "JUSTIFICADO"
   porcentajeAsistenciaDelAlumno: number;
-  
+
   // Información del alumno
   idAlumno: number;
   nombreAlumno: string;
   emailAlumno: string;
   telefonoAlumno: string;
   dniAlumno: string;
-  
+
   // Información del cronograma
   idCronograma: number;
   fechaInicioCronograma: string;
   fechaFinCronograma: string;
   vacantesDisponibles: number;
-  
+
   // Información del curso
   idCurso: number;
   nombreCurso: string;
@@ -95,13 +95,13 @@ export interface AsistenciaCronogramaDTO {
   duracionCurso: string;
   precioCurso: number;
   contenidosCurso: string;
-  
+
   // Información de la sede
   idSede: number;
   nombreSede: string;
   direccionSede: string;
   telefonoSede: string;
-  
+
   // Progreso del alumno en este cronograma
   totalClasesEsperadas: number;
   clasesAsistidasPorAlumno: number;
@@ -109,18 +109,18 @@ export interface AsistenciaCronogramaDTO {
   cumpleMinimoAsistencia: boolean; // ≥75%
   alumnoCompletoCurso: boolean;
   fechaCompletacion?: string;
-  
+
   // Estado de la inscripción del alumno
   estadoInscripcionAlumno: string; // "ACTIVA", "FINALIZADA", "CANCELADA"
   fechaInscripcionAlumno: string;
   inscripcionActiva: boolean;
-  
+
   // Información de registro de asistencia
   registradoPorQR: boolean;
   fechaRegistroAsistencia: string;
   ubicacionRegistro: string;
   observacionesAsistencia?: string;
-  
+
   // Información adicional para gestión
   estadoGeneralCronograma: string; // "PROXIMO", "ACTIVO", "FINALIZADO"
   totalAlumnosInscriptos: number;
@@ -164,19 +164,19 @@ export interface CursoInscritoDTO {
   modalidad: string;
   duracion: string;
   precio: number;
-  
+
   // Información de la inscripción
   estadoInscripcion: string; // ACTIVA, FINALIZADA, CANCELADA
   fechaInscripcion: string;
   completado: boolean;
   fechaCompletacion?: string;
-  
+
   // Información del cronograma inscrito
   fechaInicio: string;
   fechaFin: string;
   nombreSede: string;
   direccionSede: string;
-  
+
   // Información de progreso
   porcentajeAsistencia: number;
   clasesAsistidas: number;
@@ -212,10 +212,10 @@ export interface CursoDetalleDTO {
   duracion: string;
   precio: number;
   modalidad: string;
-  
+
   // Información de cronogramas disponibles
   cronogramasDisponibles: CronogramaBasicoDTO[];
-  
+
   // Información adicional
   tieneVacantes: boolean;
   tienePromocion: boolean;
@@ -315,22 +315,52 @@ interface CursoStore {
   fetchCursosInscritosParaAlumno: (idAlumno: number) => Promise<void>;
   fetchCursoById: (idCurso: number) => Promise<Curso | null>;
   fetchCursoDetalle: (idCurso: number) => Promise<CursoDetalleDTO | null>;
-  crearInscripcion: (request: InscripcionRequest) => Promise<InscripcionResponse>;
-  cancelarInscripcion: (idInscripcion: number, idAlumno: number) => Promise<BajaInscripcionResponse>;
-  fetchHistorialAsistencia: (idAlumno: number, idCurso: number) => Promise<HistorialAsistenciaDTO | null>;
-  fetchAsistenciasPorAlumno: (idAlumno: number) => Promise<AsistenciaAlumnoDTO[]>;
-  fetchAsistenciasPorCronograma: (idCronograma: number) => Promise<AsistenciaCronogramaDTO[]>;
-  registrarAsistenciaQR: (params: { codigoQR: string; idAlumno: number; ubicacionDispositivo?: string }) => Promise<AsistenciaValidacionResponseDTO | null>;
-  obtenerPorcentajeAsistencia: (idAlumno: number, idCronograma: number) => Promise<PorcentajeAsistenciaResponseDTO | null>;
-  verificarInscripcion: (idAlumno: number, idCronograma: number) => Promise<VerificarInscripcionResponseDTO | null>;
-  validarCodigoQR: (params: { codigoQR: string; idAlumno: number }) => Promise<ValidarCodigoQRResponseDTO | null>;
-  obtenerEstadoAsistencia: (idAlumno: number, idCronograma: number) => Promise<EstadoAsistenciaResponseDTO | null>;
+  crearInscripcion: (
+    request: InscripcionRequest
+  ) => Promise<InscripcionResponse>;
+  cancelarInscripcion: (
+    idInscripcion: number,
+    idAlumno: number
+  ) => Promise<BajaInscripcionResponse>;
+  fetchHistorialAsistencia: (
+    idAlumno: number,
+    idCurso: number
+  ) => Promise<HistorialAsistenciaDTO | null>;
+  fetchAsistenciasPorAlumno: (
+    idAlumno: number
+  ) => Promise<AsistenciaAlumnoDTO[]>;
+  fetchAsistenciasPorCronograma: (
+    idCronograma: number
+  ) => Promise<AsistenciaCronogramaDTO[]>;
+  registrarAsistenciaQR: (params: {
+    codigoQR: string;
+    idAlumno: number;
+    ubicacionDispositivo?: string;
+  }) => Promise<AsistenciaValidacionResponseDTO | null>;
+  obtenerPorcentajeAsistencia: (
+    idAlumno: number,
+    idCronograma: number
+  ) => Promise<PorcentajeAsistenciaResponseDTO | null>;
+  verificarInscripcion: (
+    idAlumno: number,
+    idCronograma: number
+  ) => Promise<VerificarInscripcionResponseDTO | null>;
+  validarCodigoQR: (params: {
+    codigoQR: string;
+    idAlumno: number;
+  }) => Promise<ValidarCodigoQRResponseDTO | null>;
+  obtenerEstadoAsistencia: (
+    idAlumno: number,
+    idCronograma: number
+  ) => Promise<EstadoAsistenciaResponseDTO | null>;
   addCurso: (curso: Omit<Curso, "idCurso">) => Promise<void>;
   updateCurso: (idCurso: number, curso: Partial<Curso>) => Promise<void>;
   deleteCurso: (idCurso: number) => Promise<void>;
-  actualizarAsistenciaCurso: (idCurso: number, idAlumno: number) => Promise<void>;
+  actualizarAsistenciaCurso: (
+    idCurso: number,
+    idAlumno: number
+  ) => Promise<void>;
 }
-
 
 export const useCursoStore = create<CursoStore>((set) => ({
   /**
@@ -357,20 +387,30 @@ export const useCursoStore = create<CursoStore>((set) => ({
     estado: EstadoAsistenciaResponseDTO | null;
   }> => {
     // 1. Validar QR
-    const validacion = await useCursoStore.getState().validarCodigoQR({ codigoQR, idAlumno });
+    const validacion = await useCursoStore
+      .getState()
+      .validarCodigoQR({ codigoQR, idAlumno });
     if (!validacion?.valido) {
       return { validacion, registro: null, estado: null };
     }
     // 2. Registrar asistencia
-    const registro = await useCursoStore.getState().registrarAsistenciaQR({ codigoQR, idAlumno, ubicacionDispositivo });
+    const registro = await useCursoStore
+      .getState()
+      .registrarAsistenciaQR({ codigoQR, idAlumno, ubicacionDispositivo });
     // 3. Consultar estado actualizado
-    const estado = await useCursoStore.getState().obtenerEstadoAsistencia(idAlumno, idCronograma);
+    const estado = await useCursoStore
+      .getState()
+      .obtenerEstadoAsistencia(idAlumno, idCronograma);
     return { validacion, registro, estado };
   },
   obtenerEstadoAsistencia: async (idAlumno: number, idCronograma: number) => {
     try {
-      console.log(`Obteniendo estado de asistencia para alumno ${idAlumno} y cronograma ${idCronograma}`);
-      const response = await axios.get(`${QR_API_URL}/estado-asistencia/${idAlumno}/${idCronograma}`);
+      console.log(
+        `Obteniendo estado de asistencia para alumno ${idAlumno} y cronograma ${idCronograma}`
+      );
+      const response = await axios.get(
+        `${QR_API_URL}/estado-asistencia/${idAlumno}/${idCronograma}`
+      );
       return response.data;
     } catch (error) {
       console.error("Error al obtener estado de asistencia:", error);
@@ -388,7 +428,10 @@ export const useCursoStore = create<CursoStore>((set) => ({
       // Usar el endpoint general de cursos
       const response = await axios.get(`${API_URL}`);
       set({ cursosDisponibles: response.data });
-      console.log("Cursos disponibles obtenidos (público):", response.data.length);
+      console.log(
+        "Cursos disponibles obtenidos (público):",
+        response.data.length
+      );
     } catch (error) {
       console.error("Error al obtener cursos disponibles:", error);
       set({ cursosDisponibles: [] });
@@ -398,7 +441,7 @@ export const useCursoStore = create<CursoStore>((set) => ({
   fetchCursosDisponiblesParaAlumno: async (idAlumno) => {
     try {
       const response = await axios.post(`${API_URL}/disponibles-para-alumno`, {
-        idAlumno
+        idAlumno,
       });
       set({ cursosDisponibles: response.data });
       console.log("Cursos disponibles obtenidos:", response.data.length);
@@ -410,9 +453,18 @@ export const useCursoStore = create<CursoStore>((set) => ({
 
   fetchCursosInscritosParaAlumno: async (idAlumno) => {
     try {
-      const response = await axios.get(`${API_URL}/alumno/${idAlumno}/inscritos`);
-      set({ cursosInscritos: response.data });
-      console.log("Cursos inscritos obtenidos:", response.data.length);
+      const response = await axios.get(
+        `${API_URL}/alumno/${idAlumno}/inscritos`
+      );
+      // Filtrar cursos que no estén cancelados
+      const cursosActivos = response.data.filter(
+        (curso: CursoInscritoDTO) => curso.estadoInscripcion !== "CANCELADA"
+      );
+      set({ cursosInscritos: cursosActivos });
+      console.log(
+        "Cursos inscritos obtenidos (excluyendo cancelados):",
+        cursosActivos.length
+      );
     } catch (error) {
       console.error("Error al obtener cursos inscritos para alumno:", error);
       set({ cursosInscritos: [] });
@@ -504,9 +556,13 @@ export const useCursoStore = create<CursoStore>((set) => ({
 
   fetchHistorialAsistencia: async (idAlumno, idCurso) => {
     try {
-      console.log(`Obteniendo historial de asistencia para alumno ${idAlumno} y curso ${idCurso}`);
-      const response = await axios.get(`${ASISTENCIA_API_URL}/historial/${idAlumno}/curso/${idCurso}`);
-      
+      console.log(
+        `Obteniendo historial de asistencia para alumno ${idAlumno} y curso ${idCurso}`
+      );
+      const response = await axios.get(
+        `${ASISTENCIA_API_URL}/historial/${idAlumno}/curso/${idCurso}`
+      );
+
       console.log("Historial de asistencia obtenido:", response.data);
       return response.data;
     } catch (error) {
@@ -518,8 +574,10 @@ export const useCursoStore = create<CursoStore>((set) => ({
   fetchAsistenciasPorAlumno: async (idAlumno) => {
     try {
       console.log(`Obteniendo todas las asistencias del alumno ${idAlumno}`);
-      const response = await axios.get(`${ASISTENCIA_API_URL}/por-alumno/${idAlumno}`);
-      
+      const response = await axios.get(
+        `${ASISTENCIA_API_URL}/por-alumno/${idAlumno}`
+      );
+
       console.log("Asistencias del alumno obtenidas:", response.data.length);
       return response.data;
     } catch (error) {
@@ -530,10 +588,17 @@ export const useCursoStore = create<CursoStore>((set) => ({
 
   fetchAsistenciasPorCronograma: async (idCronograma) => {
     try {
-      console.log(`Obteniendo todas las asistencias del cronograma ${idCronograma}`);
-      const response = await axios.get(`${ASISTENCIA_API_URL}/por-cronograma/${idCronograma}`);
-      
-      console.log("Asistencias del cronograma obtenidas:", response.data.length);
+      console.log(
+        `Obteniendo todas las asistencias del cronograma ${idCronograma}`
+      );
+      const response = await axios.get(
+        `${ASISTENCIA_API_URL}/por-cronograma/${idCronograma}`
+      );
+
+      console.log(
+        "Asistencias del cronograma obtenidas:",
+        response.data.length
+      );
       return response.data;
     } catch (error) {
       console.error("Error al obtener asistencias por cronograma:", error);
@@ -546,10 +611,17 @@ export const useCursoStore = create<CursoStore>((set) => ({
    * @param params { codigoQR: string, idAlumno: number, ubicacionDispositivo?: string }
    * @returns {AsistenciaValidacionResponseDTO | null}
    */
-  registrarAsistenciaQR: async (params: { codigoQR: string; idAlumno: number; ubicacionDispositivo?: string }) => {
+  registrarAsistenciaQR: async (params: {
+    codigoQR: string;
+    idAlumno: number;
+    ubicacionDispositivo?: string;
+  }) => {
     try {
       console.log("Registrando asistencia por QR:", params);
-      const response = await axios.post(`${QR_API_URL}/validar-asistencia`, params);
+      const response = await axios.post(
+        `${QR_API_URL}/validar-asistencia`,
+        params
+      );
       console.log("Asistencia registrada exitosamente:", response.data);
       return response.data;
     } catch (error) {
@@ -560,9 +632,13 @@ export const useCursoStore = create<CursoStore>((set) => ({
 
   obtenerPorcentajeAsistencia: async (idAlumno, idCronograma) => {
     try {
-      console.log(`Obteniendo porcentaje de asistencia para alumno ${idAlumno} y cronograma ${idCronograma}`);
-      const response = await axios.get(`${QR_API_URL}/porcentaje-asistencia/${idAlumno}/${idCronograma}`);
-      
+      console.log(
+        `Obteniendo porcentaje de asistencia para alumno ${idAlumno} y cronograma ${idCronograma}`
+      );
+      const response = await axios.get(
+        `${QR_API_URL}/porcentaje-asistencia/${idAlumno}/${idCronograma}`
+      );
+
       console.log("Porcentaje de asistencia obtenido:", response.data);
       return response.data;
     } catch (error) {
@@ -573,9 +649,13 @@ export const useCursoStore = create<CursoStore>((set) => ({
 
   verificarInscripcion: async (idAlumno, idCronograma) => {
     try {
-      console.log(`Verificando inscripción para alumno ${idAlumno} y cronograma ${idCronograma}`);
-      const response = await axios.get(`${QR_API_URL}/verificar-inscripcion/${idAlumno}/${idCronograma}`);
-      
+      console.log(
+        `Verificando inscripción para alumno ${idAlumno} y cronograma ${idCronograma}`
+      );
+      const response = await axios.get(
+        `${QR_API_URL}/verificar-inscripcion/${idAlumno}/${idCronograma}`
+      );
+
       console.log("Verificación de inscripción completada:", response.data);
       return response.data;
     } catch (error) {
@@ -603,22 +683,24 @@ export const useCursoStore = create<CursoStore>((set) => ({
 
   actualizarAsistenciaCurso: async (idCurso, idAlumno) => {
     try {
-      console.log(`Actualizando información de asistencia para curso ${idCurso} y alumno ${idAlumno}`);
-      
+      console.log(
+        `Actualizando información de asistencia para curso ${idCurso} y alumno ${idAlumno}`
+      );
+
       // Refrescar el detalle del curso para obtener información actualizada
       const response = await axios.get(`${API_URL}/${idCurso}/detalle`);
       const cursoActualizado = response.data;
-      
+
       if (cursoActualizado) {
         set((state) => ({
-          cursos: state.cursos.map(curso => 
-            curso.idCurso === idCurso 
-              ? { ...curso, ...cursoActualizado } 
+          cursos: state.cursos.map((curso) =>
+            curso.idCurso === idCurso
+              ? { ...curso, ...cursoActualizado }
               : curso
-          )
+          ),
         }));
       }
-      
+
       console.log("Información de asistencia actualizada exitosamente");
     } catch (error) {
       console.error("Error al actualizar información de asistencia:", error);
