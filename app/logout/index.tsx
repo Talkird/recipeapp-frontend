@@ -13,9 +13,9 @@ import { router } from "expo-router";
 const index = () => {
   const { logout } = useUserStore();
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
   };
 
   return (

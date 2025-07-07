@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Title } from "./ui/Title";
 import { SubTitle } from "./ui/SubTitle";
 import { Row } from "./ui/Row";
@@ -8,28 +8,28 @@ import { primary } from "@/utils/colors";
 import { Image } from "expo-image";
 
 interface WelcomeRecipeProps {
-  title?: string;
-  description?: string;
-  source?: string;
+  title: string;
+  description: string;
+  image: string;
+  onPress?: () => void;
 }
 
 export function WelcomeRecipe({
   title,
   description,
   image,
-}: {
-  title: string;
-  description: string;
-  image: string;
-}) {
+  onPress,
+}: WelcomeRecipeProps) {
   return (
-    <Row style={{ gap: 16 }}>
-      <Image source={image} style={styles.image} />
-      <Column>
-        <Title style={{ fontSize: 18, color: primary }}>{title}</Title>
-        <SubTitle>{description}</SubTitle>
-      </Column>
-    </Row>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      <Row style={{ gap: 16, width: "50%" }}>
+        <Image source={image} style={styles.image} />
+        <Column>
+          <Title style={{ fontSize: 18, color: primary }}>{title}</Title>
+          <SubTitle>{description}</SubTitle>
+        </Column>
+      </Row>
+    </TouchableOpacity>
   );
 }
 

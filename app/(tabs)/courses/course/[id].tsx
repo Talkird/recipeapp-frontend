@@ -1,5 +1,5 @@
 import { ScrollView, Alert } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Column } from "@/components/ui/Column";
@@ -21,11 +21,37 @@ export default function CursoDetail() {
   const [inscribiendose, setInscribiendose] = useState(false);
   const [yaInscripto, setYaInscripto] = useState(false);
   const getAlumnoId = useUserStore((state) => state.getAlumnoId);
+  const isGuest = useUserStore((state) => state.isGuest);
   const { fetchCursoDetalle, crearInscripcion } = useCursoStore();
+
+  // Redirect guests to login
+  useEffect(() => {
+    if (isGuest) {
+      Alert.alert(
+        "Acceso Restringido",
+        "Para acceder a los cursos necesás iniciar sesión o crear una cuenta.",
+        [
+          {
+            text: "Iniciar Sesión",
+            onPress: () => {
+              useUserStore.getState().setGuestMode(false);
+              router.replace("/login");
+            },
+          },
+          {
+            text: "Volver",
+            onPress: () => router.back(),
+            style: "cancel",
+          },
+        ]
+      );
+      return;
+    }
+  }, [isGuest]);
 
   useEffect(() => {
     async function fetchData() {
-      if (!id) return;
+      if (!id || isGuest) return; // Don't fetch data for guests
       setLoading(true);
       try {
         // Usar el nuevo método fetchCursoDetalle que trae toda la información en una sola llamada
@@ -43,7 +69,8 @@ export default function CursoDetail() {
             );
             const inscripciones = inscripcionesRes.data;
             const yaEstaInscrito = inscripciones.some(
-              (inscripcion: any) => inscripcion.cronograma.curso.idCurso === parseInt(id as string)
+              (inscripcion: any) =>
+                inscripcion.cronograma.curso.idCurso === parseInt(id as string)
             );
             setYaInscripto(yaEstaInscrito);
           } catch (error) {
@@ -62,7 +89,7 @@ export default function CursoDetail() {
   const handleInscribirse = async () => {
     try {
       setInscribiendose(true);
-      
+
       // Obtener el ID del alumno
       const alumnoId = await getAlumnoId();
       if (!alumnoId) {
@@ -71,7 +98,11 @@ export default function CursoDetail() {
       }
 
       // Obtener el ID del cronograma (usar el primer cronograma disponible)
-      if (!curso || !curso.cronogramasDisponibles || curso.cronogramasDisponibles.length === 0) {
+      if (
+        !curso ||
+        !curso.cronogramasDisponibles ||
+        curso.cronogramasDisponibles.length === 0
+      ) {
         Alert.alert("Error", "No hay cronogramas disponibles para este curso");
         return;
       }
@@ -86,15 +117,17 @@ export default function CursoDetail() {
 
       if (inscripcionResponse.exitosa) {
         // Mostrar información detallada del pago
-        let metodoPagoDetalle = '';
+        let metodoPagoDetalle = "";
         switch (inscripcionResponse.metodoPago) {
-          case 'CUENTA_CORRIENTE':
+          case "CUENTA_CORRIENTE":
             metodoPagoDetalle = `Saldo utilizado: $${inscripcionResponse.saldoUtilizado}`;
             break;
-          case 'TARJETA':
-            metodoPagoDetalle = `Tarjeta: ****${inscripcionResponse.numeroTarjeta || 'XXXX'}`;
+          case "TARJETA":
+            metodoPagoDetalle = `Tarjeta: ****${
+              inscripcionResponse.numeroTarjeta || "XXXX"
+            }`;
             break;
-          case 'MIXTO':
+          case "MIXTO":
             metodoPagoDetalle = `Saldo: $${inscripcionResponse.saldoUtilizado} + Tarjeta: $${inscripcionResponse.montoTarjeta}`;
             break;
           default:
@@ -112,30 +145,46 @@ ${inscripcionResponse.mensaje}`;
 
         Alert.alert("¡Éxito!", mensaje);
         setYaInscripto(true);
-        
+
         // Actualizar los cupos disponibles
-        setCurso(prev => 
-          prev ? {
-            ...prev,
-            cronogramasDisponibles: prev.cronogramasDisponibles.map(cronograma =>
-              cronograma.idCronograma === idCronograma 
-                ? { ...cronograma, vacantesDisponibles: cronograma.vacantesDisponibles - 1 }
-                : cronograma
-            )
-          } : prev
+        setCurso((prev) =>
+          prev
+            ? {
+                ...prev,
+                cronogramasDisponibles: prev.cronogramasDisponibles.map(
+                  (cronograma) =>
+                    cronograma.idCronograma === idCronograma
+                      ? {
+                          ...cronograma,
+                          vacantesDisponibles:
+                            cronograma.vacantesDisponibles - 1,
+                        }
+                      : cronograma
+                ),
+              }
+            : prev
         );
       } else {
-        Alert.alert("Error", inscripcionResponse.mensaje || "La inscripción no pudo completarse");
+        Alert.alert(
+          "Error",
+          inscripcionResponse.mensaje || "La inscripción no pudo completarse"
+        );
       }
     } catch (error: any) {
       console.error("Error al inscribirse:", error);
-      
+
       if (error.response?.status === 400) {
-        Alert.alert("Error", "Ya estás inscripto en este curso o no hay cupos disponibles");
+        Alert.alert(
+          "Error",
+          "Ya estás inscripto en este curso o no hay cupos disponibles"
+        );
       } else if (error.response?.status === 404) {
         Alert.alert("Error", "El curso o cronograma no existe");
       } else {
-        Alert.alert("Error", "Ocurrió un error al inscribirse. Por favor, intenta nuevamente");
+        Alert.alert(
+          "Error",
+          "Ocurrió un error al inscribirse. Por favor, intenta nuevamente"
+        );
       }
     } finally {
       setInscribiendose(false);
@@ -169,46 +218,58 @@ ${inscripcionResponse.mensaje}`;
             <SmallText>Requerimientos: {curso.requerimientos}</SmallText>
           )}
           {curso.tienePromocion && curso.promocionDescripcion && (
-            <SmallText style={{ color: 'red', fontWeight: 'bold' }}>
+            <SmallText style={{ color: "red", fontWeight: "bold" }}>
               🔥 {curso.promocionDescripcion}
             </SmallText>
           )}
         </Column>
 
         {/* Información de cronogramas */}
-        {curso.cronogramasDisponibles && curso.cronogramasDisponibles.length > 0 && (
-          <Column
-            style={{
-              gap: 12,
-              alignItems: "center",
-              width: "100%",
-            }}
-          >
-            <SubTitle>
-              Cupos restantes: {curso.cronogramasDisponibles[0].vacantesDisponibles}
-            </SubTitle>
-            <Label
-              Icon={Clock}
-              text={`Inicio: ${curso.cronogramasDisponibles[0].fechaInicio}`}
-            />
-            <Label Icon={Clock} text={`Fin: ${curso.cronogramasDisponibles[0].fechaFin}`} />
-            <SmallText>Sede: {curso.cronogramasDisponibles[0].nombreSede}</SmallText>
-            <SmallText>Dirección: {curso.cronogramasDisponibles[0].direccionSede}</SmallText>
-            <Button 
-              onPress={handleInscribirse}
-              disabled={inscribiendose || yaInscripto || curso.cronogramasDisponibles[0].vacantesDisponibles <= 0}
+        {curso.cronogramasDisponibles &&
+          curso.cronogramasDisponibles.length > 0 && (
+            <Column
+              style={{
+                gap: 12,
+                alignItems: "center",
+                width: "100%",
+              }}
             >
-              {inscribiendose 
-                ? "Inscribiendo..." 
-                : yaInscripto 
-                ? "Ya inscripto" 
-                : curso.cronogramasDisponibles[0].vacantesDisponibles <= 0 
-                ? "Sin cupos" 
-                : "Inscribirse"
-              }
-            </Button>
-          </Column>
-        )}
+              <SubTitle>
+                Cupos restantes:{" "}
+                {curso.cronogramasDisponibles[0].vacantesDisponibles}
+              </SubTitle>
+              <Label
+                Icon={Clock}
+                text={`Inicio: ${curso.cronogramasDisponibles[0].fechaInicio}`}
+              />
+              <Label
+                Icon={Clock}
+                text={`Fin: ${curso.cronogramasDisponibles[0].fechaFin}`}
+              />
+              <SmallText>
+                Sede: {curso.cronogramasDisponibles[0].nombreSede}
+              </SmallText>
+              <SmallText>
+                Dirección: {curso.cronogramasDisponibles[0].direccionSede}
+              </SmallText>
+              <Button
+                onPress={handleInscribirse}
+                disabled={
+                  inscribiendose ||
+                  yaInscripto ||
+                  curso.cronogramasDisponibles[0].vacantesDisponibles <= 0
+                }
+              >
+                {inscribiendose
+                  ? "Inscribiendo..."
+                  : yaInscripto
+                  ? "Ya inscripto"
+                  : curso.cronogramasDisponibles[0].vacantesDisponibles <= 0
+                  ? "Sin cupos"
+                  : "Inscribirse"}
+              </Button>
+            </Column>
+          )}
       </Column>
     </ScrollView>
   );

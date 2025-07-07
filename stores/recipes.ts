@@ -16,10 +16,26 @@ interface Receta {
 interface RecetaStore {
   recetas: Receta[];
   fetchRecetas: () => Promise<void>;
-  fetchByNombre: (nombre: string) => Promise<void>;
-  fetchByTipo: (tipo: string) => Promise<void>;
-  fetchByIngrediente: (ingrediente: string) => Promise<void>;
-  fetchSinIngrediente: (ingrediente: string) => Promise<void>;
+  fetchByNombre: (
+    nombre: string,
+    criterio?: string,
+    orden?: string
+  ) => Promise<void>;
+  fetchByTipo: (
+    tipo: string,
+    criterio?: string,
+    orden?: string
+  ) => Promise<void>;
+  fetchByIngrediente: (
+    ingrediente: string,
+    criterio?: string,
+    orden?: string
+  ) => Promise<void>;
+  fetchSinIngrediente: (
+    ingrediente: string,
+    criterio?: string,
+    orden?: string
+  ) => Promise<void>;
   addReceta: (receta: Receta) => Promise<void>;
   updateReceta: (receta: Receta) => Promise<void>;
   deleteReceta: (idReceta: number) => Promise<void>;
@@ -41,11 +57,13 @@ export const useRecetaStore = create<RecetaStore>((set, get) => ({
     }
   },
 
-  fetchByNombre: async (nombre: string) => {
+  fetchByNombre: async (nombre: string, criterio?: string, orden?: string) => {
     try {
-      const response = await axios.get(
-        `${API_URL}/search/nombre/${encodeURIComponent(nombre)}`
-      );
+      let url = `${API_URL}/search/nombre/${encodeURIComponent(nombre)}`;
+      const params: any = {};
+      if (criterio) params.criterio = criterio;
+      if (orden) params.orden = orden;
+      const response = await axios.get(url, { params });
       const recetas = response.data.map((receta: any) => ({
         ...receta,
         idReceta: receta.id,
@@ -56,11 +74,13 @@ export const useRecetaStore = create<RecetaStore>((set, get) => ({
     }
   },
 
-  fetchByTipo: async (tipo: string) => {
+  fetchByTipo: async (tipo: string, criterio?: string, orden?: string) => {
     try {
-      const response = await axios.get(
-        `${API_URL}/search/Tipo/${encodeURIComponent(tipo)}`
-      );
+      let url = `${API_URL}/search/Tipo/${encodeURIComponent(tipo)}`;
+      const params: any = {};
+      if (criterio) params.criterio = criterio;
+      if (orden) params.orden = orden;
+      const response = await axios.get(url, { params });
       const recetas = response.data.map((receta: any) => ({
         ...receta,
         idReceta: receta.id,
@@ -71,11 +91,19 @@ export const useRecetaStore = create<RecetaStore>((set, get) => ({
     }
   },
 
-  fetchByIngrediente: async (ingrediente: string) => {
+  fetchByIngrediente: async (
+    ingrediente: string,
+    criterio?: string,
+    orden?: string
+  ) => {
     try {
-      const response = await axios.get(
-        `${API_URL}/search/ingrediente/${encodeURIComponent(ingrediente)}`
-      );
+      let url = `${API_URL}/search/ingrediente/${encodeURIComponent(
+        ingrediente
+      )}`;
+      const params: any = {};
+      if (criterio) params.criterio = criterio;
+      if (orden) params.orden = orden;
+      const response = await axios.get(url, { params });
       const recetas = response.data.map((receta: any) => ({
         ...receta,
         idReceta: receta.id,
@@ -86,11 +114,19 @@ export const useRecetaStore = create<RecetaStore>((set, get) => ({
     }
   },
 
-  fetchSinIngrediente: async (ingrediente: string) => {
+  fetchSinIngrediente: async (
+    ingrediente: string,
+    criterio?: string,
+    orden?: string
+  ) => {
     try {
-      const response = await axios.get(
-        `${API_URL}/search/sin-ingrediente/${encodeURIComponent(ingrediente)}`
-      );
+      let url = `${API_URL}/search/sin-ingrediente/${encodeURIComponent(
+        ingrediente
+      )}`;
+      const params: any = {};
+      if (criterio) params.criterio = criterio;
+      if (orden) params.orden = orden;
+      const response = await axios.get(url, { params });
       const recetas = response.data.map((receta: any) => ({
         ...receta,
         idReceta: receta.id,

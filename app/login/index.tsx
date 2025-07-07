@@ -11,32 +11,68 @@ import { Mail, Lock } from "lucide-react-native";
 import CheckBox from "@/components/ui/CheckBox";
 import { useState, useEffect } from "react";
 import { useUserStore } from "@/stores/user";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Alert } from "react-native";
 
 export default function Index() {
   const [rememberPassword, setRememberPassword] = useState(false);
   const [mail, setMail] = useState("");
   const [clave, setClave] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login, logout } = useUserStore();
 
   useEffect(() => {
     logout();
+    loadStoredCredentials();
   }, []);
 
-  const handleLogin = () => {
+  const loadStoredCredentials = async () => {
+    try {
+      const storedCredentials = await AsyncStorage.getItem("userCredentials");
+      if (storedCredentials) {
+        const { mail: storedMail, password } = JSON.parse(storedCredentials);
+        setMail(storedMail);
+        setClave(password);
+        setRememberPassword(true);
+      }
+    } catch (error) {
+      console.error("Error loading stored credentials:", error);
+    }
+  };
+
+  const handleLogin = async () => {
     if (!mail || !clave) {
-      alert("Por favor, completa ambos campos.");
+      Alert.alert("Error", "Por favor, completa ambos campos.");
       return;
     }
 
+    setLoading(true);
     try {
-      login(mail, clave);
+      await login(mail, clave);
+
       if (rememberPassword) {
-        //santi lo hace
+        // Save credentials to device storage
+        await AsyncStorage.setItem(
+          "userCredentials",
+          JSON.stringify({
+            mail,
+            password: clave,
+          })
+        );
+      } else {
+        // Remove stored credentials if user doesn't want to remember
+        await AsyncStorage.removeItem("userCredentials");
       }
-      router.push("/home");
+
+      router.replace("/home");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
-      alert("Credenciales inválidas. Por favor, inténtalo de nuevo.");
+      Alert.alert(
+        "Error",
+        "Credenciales inválidas. Por favor, inténtalo de nuevo."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,8 +117,12 @@ export default function Index() {
 
       <LoginIllustration height={135} width={135} />
       <Column>
-        <Button style={{ marginBottom: 10 }} onPress={handleLogin}>
-          Iniciar sesión
+        <Button
+          style={{ marginBottom: 10 }}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? "Iniciando sesión..." : "Iniciar sesión"}
         </Button>
         <SmallText>¿No tenés cuenta?</SmallText>
         <Link href="/register/choice">
@@ -90,6 +130,13 @@ export default function Index() {
             style={{ color: primary, textDecorationLine: "underline" }}
           >
             Registrate
+          </SmallText>
+        </Link>
+        <Link href="/">
+          <SmallText
+            style={{ color: primary, textDecorationLine: "underline" }}
+          >
+            Volver al inicio
           </SmallText>
         </Link>
       </Column>

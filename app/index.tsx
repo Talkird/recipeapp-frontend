@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import NetInfo from "@react-native-community/netinfo";
 import { Pressable, StyleSheet } from "react-native";
+import { useUserStore } from "@/stores/user";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
   const [ultimasRecetas, setUltimasRecetas] = useState<
@@ -42,7 +44,9 @@ export default function Index() {
     return () => unsubscribe();
   }, []);
 
-  const handleLaterPress = () => {
+  const handleLaterPress = async () => {
+    // Set guest mode (only in memory, not in storage)
+    useUserStore.getState().setGuestMode(true);
     router.push("/home");
   };
 
@@ -70,6 +74,11 @@ export default function Index() {
                 receta.usuario
               } - Rating: ${receta.calificacion.toFixed(1)}`}
               image={receta.fotoPrincipal}
+              onPress={() => {
+                // When clicking a recipe from welcome screen, set guest mode (only in memory)
+                useUserStore.getState().setGuestMode(true);
+                router.push(`/home/recipe/${receta.id}`);
+              }}
             />
           ))}
         </Column>
@@ -99,7 +108,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   laterButton: {
     position: "absolute",
-    top: 30,
+    top: 80, // Increased from 30 to center it better
     right: 20,
     zIndex: 10,
   },
