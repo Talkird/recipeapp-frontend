@@ -223,10 +223,8 @@ export const useUserStore = create<UserStore>((set, get) => ({
     }
   },
   logout: async () => {
-    // Limpiar el token de autenticación
     get().setAuthToken(null);
 
-    // Clear stored credentials only (not guest mode since it's not stored)
     try {
       await AsyncStorage.removeItem("userCredentials");
     } catch (error) {

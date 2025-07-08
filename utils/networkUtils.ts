@@ -138,9 +138,8 @@ export const uploadPendingRecipes = async () => {
   for (const recipe of pendingRecipes) {
     try {
       if (recipe.type === "create") {
-        // Upload new recipe
         const response = await axios.post(
-          "http://localhost:8080/api/recetas/create",
+          "https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/create",
           recipe.recipeData
         );
 
@@ -150,12 +149,10 @@ export const uploadPendingRecipes = async () => {
         );
         await removePendingRecipe(recipe.id);
       } else if (recipe.type === "update") {
-        // Handle recipe updates if needed
-        // First delete the old recipe if it exists
         if (recipe.recipeData.existingRecipeId) {
           try {
             await axios.delete(
-              `http://localhost:8080/api/recetas/delete/${recipe.recipeData.existingRecipeId}`
+              `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/delete/${recipe.recipeData.existingRecipeId}`
             );
           } catch (deleteErr) {
             console.warn(
@@ -165,9 +162,8 @@ export const uploadPendingRecipes = async () => {
           }
         }
 
-        // Create the updated recipe
         const response = await axios.post(
-          "http://localhost:8080/api/recetas/create",
+          "https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/create",
           recipe.recipeData
         );
 

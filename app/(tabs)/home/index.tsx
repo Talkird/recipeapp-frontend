@@ -64,7 +64,6 @@ export default function Index() {
     }
   };
 
-  // Reset search value when filter type changes
   React.useEffect(() => {
     setSearchValue("");
   }, [filterType]);

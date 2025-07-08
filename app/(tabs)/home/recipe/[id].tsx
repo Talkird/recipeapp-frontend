@@ -144,24 +144,22 @@ export default function RecipeDetail() {
 
   useEffect(() => {
     if (id) {
-      // Check if this is an adjusted recipe ID (format: originalId_timestamp)
       const idString = Array.isArray(id) ? id[0] : id;
       if (idString?.includes("_")) {
-        // This is an adjusted recipe
         loadAdjustedRecipe(idString);
       } else {
-        // This is a regular recipe
         setIsViewingAdjustedRecipe(false);
         setAdjustedRecipeData(null);
         axios
-          .get(`http://localhost:8080/api/recetas/${id}`)
+          .get(
+            `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/${id}`
+          )
           .then((res) => setReceta(res.data))
           .finally(() => setLoading(false));
       }
     }
   }, [id]);
 
-  // Load adjusted recipe from local storage
   const loadAdjustedRecipe = async (adjustedId: string) => {
     try {
       const savedRecipes = await AsyncStorage.getItem("savedAdjustedRecipes");
@@ -176,18 +174,18 @@ export default function RecipeDetail() {
           setAdjustedIngredients(adjustedRecipe.adjustedIngredients);
           setHasAdjustments(true);
 
-          // Load the original recipe data
           axios
             .get(
-              `http://localhost:8080/api/recetas/${adjustedRecipe.originalId}`
+              `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/${adjustedRecipe.originalId}`
             )
             .then((res) => setReceta(res.data))
             .finally(() => setLoading(false));
         } else {
-          // Adjusted recipe not found, redirect to original
           const originalId = adjustedId.split("_")[0];
           axios
-            .get(`http://localhost:8080/api/recetas/${originalId}`)
+            .get(
+              `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/${originalId}`
+            )
             .then((res) => setReceta(res.data))
             .finally(() => setLoading(false));
         }
@@ -199,30 +197,26 @@ export default function RecipeDetail() {
   };
 
   const [addingFavorite, setAddingFavorite] = useState(false);
-  // Rating state
   const [userRating, setUserRating] = useState<number>(0);
   const [userComment, setUserComment] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
   const [comments, setComments] = useState<CalificacionDTO[]>([]);
   const [loadingComments, setLoadingComments] = useState(true);
-  // Fetch comments for this recipe
   useEffect(() => {
     if (!receta?.id) return;
     setLoadingComments(true);
     axios
       .get(
-        `http://localhost:8080/calificaciones/receta/autorizados/${receta.id}`
+        `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/calificaciones/receta/autorizados/${receta.id}`
       )
       .then((res) => setComments(res.data || []))
       .catch(() => setComments([]))
       .finally(() => setLoadingComments(false));
   }, [receta?.id]);
 
-  // Photo gallery state
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
-  // Proportion adjustment state
   const [portionMultiplier, setPortionMultiplier] = useState(1);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [customPortions, setCustomPortions] = useState("");
@@ -236,7 +230,6 @@ export default function RecipeDetail() {
   const [adjustedRecipeData, setAdjustedRecipeData] =
     useState<SavedAdjustedRecipe | null>(null);
 
-  // Update adjusted ingredients when multiplier changes
   useEffect(() => {
     if (receta && portionMultiplier !== 1) {
       const adjusted = receta.utilizados.map((ing) => ({
@@ -293,7 +286,6 @@ export default function RecipeDetail() {
     setHasAdjustments(false);
   };
 
-  // Save adjusted recipe locally
   const saveAdjustedRecipe = async () => {
     if (!receta || !hasAdjustments) return;
 
@@ -303,7 +295,6 @@ export default function RecipeDetail() {
         ? JSON.parse(savedRecipes)
         : [];
 
-      // Remove oldest if we have 10 already
       if (recipes.length >= 10) {
         recipes.shift();
       }
@@ -344,7 +335,7 @@ export default function RecipeDetail() {
         comentarios: userComment,
       };
       const res = await axios.post(
-        `http://localhost:8080/calificaciones/actualizar-calificacion`,
+        `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/calificaciones/actualizar-calificacion`,
         req,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -352,10 +343,9 @@ export default function RecipeDetail() {
       setReceta((prev) => (prev ? { ...prev, calificacion: res.data } : prev));
       setUserComment("");
       setUserRating(0);
-      // Refetch comments
       axios
         .get(
-          `http://localhost:8080/calificaciones/receta/autorizados/${receta.id}`
+          `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/calificaciones/receta/autorizados/${receta.id}`
         )
         .then((res) => setComments(res.data || []));
       Alert.alert("¡Gracias!", "Tu calificación fue enviada.");
@@ -371,7 +361,7 @@ export default function RecipeDetail() {
     try {
       console.log("Sending recetaId as raw number:", receta.id);
       await axios.post(
-        `http://localhost:8080/api/recetas-favoritas/${idUsuario}/agregar`,
+        `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas-favoritas/${idUsuario}/agregar`,
         receta.id,
         { headers: { "Content-Type": "application/json" } }
       );

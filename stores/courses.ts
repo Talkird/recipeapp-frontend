@@ -17,7 +17,6 @@ export interface EstadoAsistenciaResponseDTO {
 import { create } from "zustand";
 import axios from "axios";
 import { API_URLS } from "@/lib/constants";
-
 const API_URL = API_URLS.CURSOS;
 const ASISTENCIA_API_URL = API_URLS.ASISTENCIAS;
 const QR_API_URL = API_URLS.QR;
@@ -292,11 +291,6 @@ export interface Curso {
 }
 
 interface CursoStore {
-  /**
-   * Flujo completo de registro de asistencia por QR.
-   * @param params - { codigoQR, idAlumno, idCronograma, ubicacionDispositivo? }
-   * @returns Promise<{ validacion, registro, estado }>
-   */
   flujoQRAsistencia: (params: {
     codigoQR: string;
     idAlumno: number;
@@ -363,14 +357,6 @@ interface CursoStore {
 }
 
 export const useCursoStore = create<CursoStore>((set) => ({
-  /**
-   * Flujo completo de registro de asistencia por QR:
-   * 1. Valida el código QR para el alumno.
-   * 2. Si es válido, registra la asistencia.
-   * 3. Devuelve el resultado de la validación, registro y el estado actualizado de asistencia.
-   * @param params { codigoQR: string, idAlumno: number, idCronograma: number, ubicacionDispositivo?: string }
-   * @returns {Promise<{ validacion: ValidarCodigoQRResponseDTO | null, registro: AsistenciaValidacionResponseDTO | null, estado: EstadoAsistenciaResponseDTO | null }>}
-   */
   flujoQRAsistencia: async ({
     codigoQR,
     idAlumno,
@@ -606,11 +592,6 @@ export const useCursoStore = create<CursoStore>((set) => ({
     }
   },
 
-  /**
-   * Registra la asistencia de un alumno usando un código QR.
-   * @param params { codigoQR: string, idAlumno: number, ubicacionDispositivo?: string }
-   * @returns {AsistenciaValidacionResponseDTO | null}
-   */
   registrarAsistenciaQR: async (params: {
     codigoQR: string;
     idAlumno: number;

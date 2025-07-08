@@ -13,7 +13,6 @@ export const useNetworkMonitor = () => {
       }
     });
 
-    // Check initial state
     NetInfo.fetch().then((state) => {
       if (state.isConnected && state.type === "wifi") {
         uploadPendingRecipes().catch((error) => {

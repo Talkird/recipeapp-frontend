@@ -39,7 +39,6 @@ export default function Index() {
     SavedAdjustedRecipe[]
   >([]);
 
-  // Fetch locally saved adjusted recipes
   const fetchLocalAdjustedRecipes = async () => {
     try {
       const saved = await AsyncStorage.getItem("savedAdjustedRecipes");
@@ -53,7 +52,6 @@ export default function Index() {
     }
   };
 
-  // Remove locally saved adjusted recipe
   const removeLocalAdjustedRecipe = async (recipeId: string) => {
     try {
       const saved = await AsyncStorage.getItem("savedAdjustedRecipes");
@@ -71,17 +69,17 @@ export default function Index() {
     }
   };
 
-  // Fetch local adjusted recipes when tab changes to "guardadas"
   useEffect(() => {
     if (tab === "guardadas") {
       fetchLocalAdjustedRecipes();
     }
   }, [tab]);
-  // Fetch saved recipes for "Guardadas" tab
   useEffect(() => {
     if (!idUsuario) return;
     axios
-      .get(`http://localhost:8080/api/recetas-guardadas/${idUsuario}`)
+      .get(
+        `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas-guardadas/${idUsuario}`
+      )
       .then((res) => {
         setSavedRecipes(res.data.recetas || res.data || []);
       })
@@ -92,7 +90,7 @@ export default function Index() {
     if (!idUsuario) return;
     try {
       await axios.delete(
-        `http://localhost:8080/api/recetas-favoritas/${idUsuario}/eliminar`,
+        `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas-favoritas/${idUsuario}/eliminar`,
         {
           data: recetaId,
           headers: { "Content-Type": "application/json" },
@@ -106,12 +104,13 @@ export default function Index() {
     }
   };
 
-  // Fetch user's favorite recipes
   useEffect(() => {
     if (!idUsuario) return;
     setLoading(true);
     axios
-      .get(`http://localhost:8080/api/recetas-favoritas/${idUsuario}`)
+      .get(
+        `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas-favoritas/${idUsuario}`
+      )
       .then((res) => {
         setFavoritas(res.data.recetas || []);
       })
@@ -119,11 +118,12 @@ export default function Index() {
       .finally(() => setLoading(false));
   }, [idUsuario]);
 
-  // Fetch user's own created recipes for "Mis Recetas" tab using getRecetasByUsuarioId
   useEffect(() => {
     if (!idUsuario) return;
     axios
-      .get(`http://localhost:8080/api/recetas/usuario/${idUsuario}`)
+      .get(
+        `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/usuario/${idUsuario}`
+      )
       .then((res) => {
         setOwnRecipes(res.data || []);
       })

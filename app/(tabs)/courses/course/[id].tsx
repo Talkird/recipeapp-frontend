@@ -91,7 +91,7 @@ export default function CursoDetail() {
         if (alumnoId) {
           try {
             const inscripcionesRes = await axios.get(
-              `http://localhost:8080/api/inscripciones/alumno/${alumnoId}`
+              `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/inscripciones/alumno/${alumnoId}`
             );
             const inscripciones = inscripcionesRes.data;
             const yaEstaInscrito = inscripciones.some(
@@ -131,7 +131,7 @@ export default function CursoDetail() {
           if (alumnoId) {
             try {
               const inscripcionesRes = await axios.get(
-                `http://localhost:8080/api/inscripciones/alumno/${alumnoId}`
+                `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/inscripciones/alumno/${alumnoId}`
               );
               const inscripciones = inscripcionesRes.data;
               const yaEstaInscrito = inscripciones.some(

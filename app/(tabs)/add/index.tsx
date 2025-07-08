@@ -38,7 +38,6 @@ const AddRecipeScreen: React.FC = () => {
   const [createSuccess, setCreateSuccess] = React.useState<string | null>(null);
   const [networkInfo, setNetworkInfo] = React.useState<any>(null);
 
-  // Check network status on component mount
   React.useEffect(() => {
     const checkNetwork = async () => {
       const info = await checkNetworkConnection();
@@ -46,8 +45,6 @@ const AddRecipeScreen: React.FC = () => {
     };
     checkNetwork();
   }, []);
-  // Helper to map ingredients to UtilizadoRequest (with IDs)
-  // Build utilizados array for UtilizadoRequest DTO
   const buildUtilizados = () => {
     return ingredients
       .filter(
@@ -160,7 +157,6 @@ const AddRecipeScreen: React.FC = () => {
     );
   };
 
-  // Add multimedia to a specific paso
   const handleAddMediaToPaso = (idx: number) => {
     if (!mediaUrl.trim()) return;
     setPasos((prev) =>
@@ -218,7 +214,6 @@ const AddRecipeScreen: React.FC = () => {
         return;
       }
 
-      // Check if URL already exists
       if (fotosSecundarias.some((foto) => foto.url === url)) {
         Alert.alert("Foto duplicada", "Esta URL ya fue agregada");
         return;
@@ -259,7 +254,6 @@ const AddRecipeScreen: React.FC = () => {
         return;
       }
 
-      // Check field lengths before proceeding
       if (recipeName.length > MAX_LENGTH) {
         setCreateError(
           `El nombre de la receta no puede superar los ${MAX_LENGTH} caracteres.`
@@ -339,10 +333,8 @@ const AddRecipeScreen: React.FC = () => {
 
       console.log("recetaRequest", JSON.stringify(recetaRequest, null, 2));
 
-      // Check network connection and decide whether to upload or save locally
       const shouldUpload = await shouldProceedWithUpload();
 
-      // Update network info after checking
       const currentNetworkInfo = await checkNetworkConnection();
       setNetworkInfo(currentNetworkInfo);
 
@@ -351,7 +343,7 @@ const AddRecipeScreen: React.FC = () => {
         if (isReplacing && existingRecipeId) {
           try {
             await axios.delete(
-              `http://localhost:8080/api/recetas/delete/${existingRecipeId}`
+              `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/delete/${existingRecipeId}`
             );
             console.log(`Deleted existing recipe with ID: ${existingRecipeId}`);
           } catch (deleteErr: any) {
@@ -370,15 +362,13 @@ const AddRecipeScreen: React.FC = () => {
           }
         }
 
-        // Upload to server
         const response = await axios.post(
-          "http://localhost:8080/api/recetas/create",
+          "https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/create",
           recetaRequest
         );
 
         console.log("Backend response:", response.data);
 
-        // Check if response is successful
         if (response.status === 200 || response.status === 201) {
           setCreateSuccess("Receta creada y subida exitosamente!");
         } else {
@@ -387,7 +377,6 @@ const AddRecipeScreen: React.FC = () => {
           );
         }
       } else {
-        // Save locally for later upload
         await savePendingRecipe({
           recipeData: recetaRequest,
           type: isReplacing ? "update" : "create",
@@ -397,7 +386,6 @@ const AddRecipeScreen: React.FC = () => {
         );
       }
 
-      // Reset form
       setNameVerified(false);
       setRecipeName("");
       setRecipeDescription("");
@@ -433,7 +421,6 @@ const AddRecipeScreen: React.FC = () => {
           "Receta creada exitosamente! (Se detectó un problema menor en la respuesta del servidor, pero la receta se guardó correctamente)"
         );
 
-        // Clear the form for any 500 error since the recipe was likely created
         setNameVerified(false);
         setRecipeName("");
         setRecipeDescription("");
@@ -455,9 +442,7 @@ const AddRecipeScreen: React.FC = () => {
             extension: "jpg",
           },
         ]);
-      }
-      // Check if it's actually a successful response that's being caught
-      else if (err.response?.status === 200 || err.response?.status === 201) {
+      } else if (err.response?.status === 200 || err.response?.status === 201) {
         setCreateSuccess("Receta creada exitosamente!");
       } else if (err.response?.status >= 400) {
         setCreateError(
@@ -508,7 +493,7 @@ const AddRecipeScreen: React.FC = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/recetas/usuario/id/${uid}`,
+          `https://legendary-carnival-49gj4755q7gfj95-8080.app.github.dev/api/recetas/usuario/id/${uid}`,
           { params: { nombreReceta: recipeName } }
         );
 

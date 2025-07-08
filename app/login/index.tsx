@@ -51,7 +51,6 @@ export default function Index() {
       await login(mail, clave);
 
       if (rememberPassword) {
-        // Save credentials to device storage
         await AsyncStorage.setItem(
           "userCredentials",
           JSON.stringify({
@@ -60,7 +59,6 @@ export default function Index() {
           })
         );
       } else {
-        // Remove stored credentials if user doesn't want to remember
         await AsyncStorage.removeItem("userCredentials");
       }
 

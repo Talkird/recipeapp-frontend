@@ -33,7 +33,6 @@ export default function Index() {
         router.replace("/nointernet");
       }
     });
-    // Fetch last three recipes on mount
     axios
       .get(`${API_URLS.RECETAS}/ultimas-tres`)
       .then((res) => {
@@ -46,7 +45,6 @@ export default function Index() {
   }, []);
 
   const handleLaterPress = async () => {
-    // Set guest mode (only in memory, not in storage)
     useUserStore.getState().setGuestMode(true);
     router.push("/home");
   };
@@ -77,12 +75,9 @@ export default function Index() {
               image={receta.fotoPrincipal}
               onPress={() => {
                 console.log("WelcomeRecipe clicked - Recipe ID:", receta.id);
-                // Set guest mode first
                 useUserStore.getState().setGuestMode(true);
                 console.log("Guest mode set to true");
-                // Navigate to home first, then to the specific recipe
                 router.push("/home");
-                // Small delay to ensure the guest mode is set and home is loaded
                 setTimeout(() => {
                   console.log(
                     "Navigating to recipe:",
